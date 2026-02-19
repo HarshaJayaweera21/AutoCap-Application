@@ -1,0 +1,20 @@
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Java
+backend/target/
+*.log
+
+# Python
+ai-service/venv/
+__pycache__/
+*.pyc
+
+# IDE
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
