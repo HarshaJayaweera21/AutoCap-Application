@@ -1,0 +1,15 @@
+-- ============================================================
+-- V1__baseline.sql
+--
+-- This is a Flyway BASELINE migration.
+-- The actual database schema already exists in Supabase and
+-- was created outside of the application. This file serves as
+-- the anchor point (version 1) so that Flyway does not attempt
+-- to re-apply any historical migrations.
+--
+-- DO NOT add any DDL here. To make schema changes in the future,
+-- create new versioned migration files (V2__..., V3__..., etc.)
+-- and coordinate with the team before applying them.
+-- ============================================================
+
+-- (intentionally empty – schema managed directly in Supabase)
