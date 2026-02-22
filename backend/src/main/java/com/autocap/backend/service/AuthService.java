@@ -1,5 +1,6 @@
 package com.autocap.backend.service;
 
+import com.autocap.backend.dto.AuthResponse;
 import com.autocap.backend.dto.LoginRequest;
 import com.autocap.backend.dto.RegisterRequest;
 import com.autocap.backend.entity.Role;
@@ -8,8 +9,12 @@ import com.autocap.backend.repository.RoleRepository;
 import com.autocap.backend.repository.UserRepository;
 import com.autocap.backend.entity.EmailVerificationToken;
 import com.autocap.backend.repository.EmailVerificationTokenRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
 import java.time.Instant;
@@ -24,31 +29,36 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationTokenRepository emailTokenRepository;
     private final JwtService jwtService;
+    private final TokenBlacklistService tokenBlacklistService;
 
     public AuthService(UserRepository userRepository,
-                       RoleRepository roleRepository,
-                       PasswordEncoder passwordEncoder,
-                       EmailVerificationTokenRepository emailTokenRepository,
-                       JwtService jwtService) {
+            RoleRepository roleRepository,
+            PasswordEncoder passwordEncoder,
+            EmailVerificationTokenRepository emailTokenRepository,
+            JwtService jwtService,
+            TokenBlacklistService tokenBlacklistService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailTokenRepository = emailTokenRepository;
         this.jwtService = jwtService;
+        this.tokenBlacklistService = tokenBlacklistService;
     }
 
-    public String register(RegisterRequest request) {
+    @Transactional
+    public ResponseEntity<String> register(RegisterRequest request) {
 
         if (userRepository.existsByEmail(request.getEmail())) {
-            return "Email already exists";
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Email already exists");
         }
 
         if (userRepository.existsByUsername(request.getUsername())) {
-            return "Username already exists";
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Username already exists");
         }
 
         Role role = roleRepository.findByName("USER")
-                .orElseThrow(() -> new RuntimeException("Default role not found"));
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Default role not found"));
 
         User user = new User();
         user.setUsername(request.getUsername());
@@ -77,20 +87,22 @@ public class AuthService {
 
         emailTokenRepository.save(token);
 
-        return "User registered successfully. Verify using token: " + tokenValue;
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body("User registered successfully. Verify using token: " + tokenValue);
     }
 
-    public String verifyEmail(String tokenValue) {
+    @Transactional
+    public ResponseEntity<String> verifyEmail(String tokenValue) {
 
         EmailVerificationToken token = emailTokenRepository.findByToken(tokenValue)
-                .orElseThrow(() -> new RuntimeException("Invalid token"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid token"));
 
         if (token.getVerified()) {
-            return "Email already verified";
+            return ResponseEntity.status(HttpStatus.OK).body("Email already verified");
         }
 
         if (token.getExpiresAt().isBefore(Instant.now())) {
-            return "Token expired";
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token expired");
         }
 
         User user = token.getUser();
@@ -102,26 +114,41 @@ public class AuthService {
         userRepository.save(user);
         emailTokenRepository.save(token);
 
-        return "Email verified successfully";
+        return ResponseEntity.status(HttpStatus.OK).body("Email verified successfully");
     }
 
-    public String login(LoginRequest request) {
+    public AuthResponse login(LoginRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
 
         if (!user.getIsActive()) {
-            return "Account is inactive";
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Account is inactive");
         }
 
         if (!user.getIsEmailVerified()) {
-            return "Email not verified";
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Email not verified");
         }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-            return "Invalid email or password";
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
         }
 
-        return jwtService.generateToken(user.getEmail());
+        String token = jwtService.generateToken(user.getEmail());
+
+        return new AuthResponse(
+                token,
+                user.getRole().getName());
+    }
+
+    public ResponseEntity<String> logout(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Authorization header");
+        }
+
+        String token = authHeader.substring(7);
+        tokenBlacklistService.blacklist(token);
+
+        return ResponseEntity.ok("Logged out successfully");
     }
 }

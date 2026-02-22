@@ -1,8 +1,10 @@
 package com.autocap.backend.controller;
 
+import com.autocap.backend.dto.AuthResponse;
 import com.autocap.backend.dto.LoginRequest;
 import com.autocap.backend.dto.RegisterRequest;
 import com.autocap.backend.service.AuthService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,17 +18,28 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
         return authService.register(request);
     }
 
     @GetMapping("/verify")
-    public String verifyEmail(@RequestParam String token) {
+    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
         return authService.verifyEmail(token);
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody LoginRequest request) {
-        return authService.login(request);
+    public ResponseEntity<AuthResponse> login(
+            @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
+    }
+
+    @GetMapping("/me")
+    public String test() {
+        return "You are authenticated!";
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(@RequestHeader("Authorization") String authHeader) {
+        return authService.logout(authHeader);
     }
 }
