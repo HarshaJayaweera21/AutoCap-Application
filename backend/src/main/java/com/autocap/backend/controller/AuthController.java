@@ -1,5 +1,6 @@
 package com.autocap.backend.controller;
 
+import com.autocap.backend.dto.LoginRequest;
 import com.autocap.backend.dto.RegisterRequest;
 import com.autocap.backend.service.AuthService;
 import org.springframework.web.bind.annotation.*;
@@ -22,5 +23,10 @@ public class AuthController {
     @GetMapping("/verify")
     public String verifyEmail(@RequestParam String token) {
         return authService.verifyEmail(token);
+    }
+
+    @PostMapping("/login")
+    public String login(@RequestBody LoginRequest request) {
+        return authService.login(request);
     }
 }
