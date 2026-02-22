@@ -1,14 +1,18 @@
 package com.autocap.backend.service;
 
 import com.autocap.backend.dto.AuthResponse;
+import com.autocap.backend.dto.ForgotPasswordRequest;
 import com.autocap.backend.dto.LoginRequest;
 import com.autocap.backend.dto.RegisterRequest;
+import com.autocap.backend.dto.ResetPasswordRequest;
 import com.autocap.backend.entity.Role;
 import com.autocap.backend.entity.User;
+import com.autocap.backend.entity.PasswordResetToken;
 import com.autocap.backend.repository.RoleRepository;
 import com.autocap.backend.repository.UserRepository;
 import com.autocap.backend.entity.EmailVerificationToken;
 import com.autocap.backend.repository.EmailVerificationTokenRepository;
+import com.autocap.backend.repository.PasswordResetTokenRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,6 +32,7 @@ public class AuthService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationTokenRepository emailTokenRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final JwtService jwtService;
     private final TokenBlacklistService tokenBlacklistService;
 
@@ -35,12 +40,14 @@ public class AuthService {
             RoleRepository roleRepository,
             PasswordEncoder passwordEncoder,
             EmailVerificationTokenRepository emailTokenRepository,
+            PasswordResetTokenRepository passwordResetTokenRepository,
             JwtService jwtService,
             TokenBlacklistService tokenBlacklistService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailTokenRepository = emailTokenRepository;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
         this.jwtService = jwtService;
         this.tokenBlacklistService = tokenBlacklistService;
     }
@@ -150,5 +157,55 @@ public class AuthService {
         tokenBlacklistService.blacklist(token);
 
         return ResponseEntity.ok("Logged out successfully");
+    }
+
+    @Transactional
+    public ResponseEntity<String> forgotPassword(ForgotPasswordRequest request) {
+
+        User user = userRepository.findByEmail(request.getEmail()).orElse(null);
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email not found");
+        }
+
+        // Generate password reset token
+        String tokenValue = UUID.randomUUID().toString();
+
+        PasswordResetToken token = new PasswordResetToken();
+        token.setUser(user);
+        token.setToken(tokenValue);
+        token.setCreatedAt(Instant.now());
+        token.setExpiresAt(Instant.now().plus(1, ChronoUnit.HOURS));
+        token.setUsed(false);
+
+        passwordResetTokenRepository.save(token);
+
+        return ResponseEntity.ok("Password reset token generated. Reset using token: " + tokenValue);
+    }
+
+    @Transactional
+    public ResponseEntity<String> resetPassword(ResetPasswordRequest request) {
+
+        PasswordResetToken token = passwordResetTokenRepository.findByToken(request.getToken())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid token"));
+
+        if (token.getUsed()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token has already been used");
+        }
+
+        if (token.getExpiresAt().isBefore(Instant.now())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token has expired");
+        }
+
+        User user = token.getUser();
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        user.setUpdatedAt(Instant.now());
+
+        token.setUsed(true);
+
+        userRepository.save(user);
+        passwordResetTokenRepository.save(token);
+
+        return ResponseEntity.ok("Password reset successfully");
     }
 }
