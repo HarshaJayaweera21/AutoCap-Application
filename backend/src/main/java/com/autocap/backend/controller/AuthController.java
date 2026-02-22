@@ -1,8 +1,10 @@
 package com.autocap.backend.controller;
 
 import com.autocap.backend.dto.AuthResponse;
+import com.autocap.backend.dto.ForgotPasswordRequest;
 import com.autocap.backend.dto.LoginRequest;
 import com.autocap.backend.dto.RegisterRequest;
+import com.autocap.backend.dto.ResetPasswordRequest;
 import com.autocap.backend.service.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,5 +43,15 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<String> logout(@RequestHeader("Authorization") String authHeader) {
         return authService.logout(authHeader);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        return authService.forgotPassword(request);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest request) {
+        return authService.resetPassword(request);
     }
 }
