@@ -87,6 +87,14 @@
     text-align: center;
 }
 
+/* --- Forgot Password Link --- */
+
+.forgot-link {
+    text-align: right;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+}
+
 /* --- Login Button --- */
 
 .login-btn {

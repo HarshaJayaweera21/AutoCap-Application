@@ -39,8 +39,12 @@ function Login() {
             setCookie('token', data.token, 7);
             setCookie('role', data.role, 7);
 
-            // TODO: Navigate to dashboard or home page after login
-            console.log('Login successful:', data);
+            // Redirect based on role
+            if (data.role === 'ADMIN') {
+                navigate('/admin-dashboard');
+            } else {
+                navigate('/dashboard');
+            }
         } catch (err: unknown) {
             if (err instanceof Error) {
                 setError(err.message);
@@ -96,6 +100,13 @@ function Login() {
 
                     {/* Error Message */}
                     {error && <p className="error-message">{error}</p>}
+
+                    {/* Forgot Password Link */}
+                    <p className="forgot-link">
+                        <a href="/forgot-password" onClick={(e) => { e.preventDefault(); navigate('/forgot-password'); }}>
+                            Forgot Password?
+                        </a>
+                    </p>
 
                     {/* Submit Button */}
                     <button type="submit" className="login-btn" disabled={loading}>
