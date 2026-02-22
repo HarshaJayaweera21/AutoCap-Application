@@ -1,0 +1,43 @@
+/* ===== Verify Email Page ===== */
+
+.verify-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.verify-card {
+    width: 100%;
+    max-width: 420px;
+    padding: 2.5rem;
+    border: 1px solid #333;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.verify-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.verify-card h2 {
+    margin-bottom: 0.75rem;
+    font-size: 1.6rem;
+}
+
+.verify-card p {
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    opacity: 0.85;
+}
+
+.verify-btn {
+    width: 100%;
+    padding: 0.7rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+}
