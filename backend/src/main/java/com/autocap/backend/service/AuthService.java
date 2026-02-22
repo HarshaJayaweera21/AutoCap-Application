@@ -1,5 +1,6 @@
 package com.autocap.backend.service;
 
+import com.autocap.backend.dto.LoginRequest;
 import com.autocap.backend.dto.RegisterRequest;
 import com.autocap.backend.entity.Role;
 import com.autocap.backend.entity.User;
@@ -22,15 +23,18 @@ public class AuthService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationTokenRepository emailTokenRepository;
+    private final JwtService jwtService;
 
     public AuthService(UserRepository userRepository,
                        RoleRepository roleRepository,
                        PasswordEncoder passwordEncoder,
-                       EmailVerificationTokenRepository emailTokenRepository) {
+                       EmailVerificationTokenRepository emailTokenRepository,
+                       JwtService jwtService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailTokenRepository = emailTokenRepository;
+        this.jwtService = jwtService;
     }
 
     public String register(RegisterRequest request) {
@@ -99,5 +103,25 @@ public class AuthService {
         emailTokenRepository.save(token);
 
         return "Email verified successfully";
+    }
+
+    public String login(LoginRequest request) {
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+
+        if (!user.getIsActive()) {
+            return "Account is inactive";
+        }
+
+        if (!user.getIsEmailVerified()) {
+            return "Email not verified";
+        }
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+            return "Invalid email or password";
+        }
+
+        return jwtService.generateToken(user.getEmail());
     }
 }
