@@ -11,7 +11,7 @@ import { GenerateButton } from '../../components/dashboard/GenerateButton/Genera
 import { JobProgressTracker } from '../../components/dashboard/JobProgressTracker/JobProgressTracker';
 import { StatsCard } from '../../components/dashboard/StatsCard/StatsCard';
 import { uploadImages } from '../../api/uploadApi';
-import { getRecentDatasets } from '../../api/datasetApi';
+import { getRecentDatasets, downloadDataset } from '../../api/datasetApi';
 import styles from './Dashboard.module.css';
 
 const initialState: DashboardFormState = {
@@ -66,6 +66,7 @@ export const Dashboard: React.FC = () => {
   const [state, dispatch] = useReducer(dashboardReducer, initialState);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [downloadingId, setDownloadingId] = useState<number | null>(null);
   const navigate = useNavigate();
 
   const hasActiveJob = state.activeJobId !== null;
@@ -126,6 +127,17 @@ export const Dashboard: React.FC = () => {
   const handleJobComplete = useCallback(() => {
     refetchDatasets();
   }, [refetchDatasets]);
+
+  const handleDownload = useCallback(async (ds: { id: number; name: string }) => {
+    setDownloadingId(ds.id);
+    try {
+      await downloadDataset(ds.id, ds.name);
+    } catch (err: any) {
+      console.error('Download failed', err);
+    } finally {
+      setDownloadingId(null);
+    }
+  }, []);
 
   const handleReset = useCallback(() => {
     dispatch({ type: 'RESET' });
@@ -324,7 +336,13 @@ export const Dashboard: React.FC = () => {
                           )}
                         </div>
                         <div className={styles.datasetActions}>
-                          <button className={styles.actionBtn}>Download</button>
+                          <button
+                            className={styles.actionBtn}
+                            onClick={() => handleDownload({ id: Number(ds.id), name: ds.name })}
+                            disabled={downloadingId === Number(ds.id)}
+                          >
+                            {downloadingId === Number(ds.id) ? 'Downloading…' : 'Download'}
+                          </button>
                           <button
                             className={styles.actionBtn}
                             onClick={() => navigate(`/datasets/${ds.id}`)}

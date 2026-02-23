@@ -16,6 +16,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 @Service
@@ -56,12 +61,39 @@ public class ImageUploadService {
         dataset = datasetRepository.save(dataset);
         log.info("Created dataset {} for user {}", dataset.getId(), user.getId());
 
-        // 3. Create Image rows for each file
+        // Prepare physical upload directory
+        Path uploadDir = Paths.get("uploads", user.getId().toString());
+        try {
+            Files.createDirectories(uploadDir);
+        } catch (IOException e) {
+            log.error("Failed to create upload directory {}", uploadDir, e);
+            throw new RuntimeException("Could not initialize storage for user " + user.getId(), e);
+        }
+
+        // 3. Create Image rows for each file and save physically
         for (MultipartFile file : files) {
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null) {
+                originalFilename = "unnamed_file_" + System.currentTimeMillis();
+            }
+            String filename = System.currentTimeMillis() + "_" + originalFilename;
+            Path destinationFile = uploadDir.resolve(filename).normalize().toAbsolutePath();
+
+            try {
+                // Security check to ensure file is inside the directory
+                if (!destinationFile.getParent().equals(uploadDir.toAbsolutePath())) {
+                    throw new RuntimeException("Cannot store file outside current directory.");
+                }
+                Files.copy(file.getInputStream(), destinationFile, StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                log.error("Failed to store file {}", filename, e);
+                throw new RuntimeException("Failed to store file " + filename, e);
+            }
+
             Image image = new Image();
             image.setUser(user);
-            image.setFilePath("images/" + user.getId() + "/" + file.getOriginalFilename());
-            image.setOriginalName(file.getOriginalFilename());
+            image.setFilePath("uploads/" + user.getId() + "/" + filename);
+            image.setOriginalName(originalFilename);
             image.setFileSize(file.getSize());
             image.setMimeType(file.getContentType());
             image.setStatus(ImageStatus.uploaded);

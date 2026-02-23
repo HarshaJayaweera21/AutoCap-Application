@@ -6,11 +6,16 @@ import com.autocap.backend.repository.UserRepository;
 import com.autocap.backend.service.DatasetService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/datasets")
@@ -25,7 +30,6 @@ public class DatasetController {
     public ResponseEntity<List<RecentDatasetDto>> getRecentDatasets(
             @RequestParam(value = "limit", defaultValue = "10") int limit) {
         // For now, use the first available user (JWT auth is deferred)
-        // User user = userRepository.findAll().stream().findFirst()
         User user = userRepository.findById(5L)
                 .orElseThrow(() -> new RuntimeException("No users found in the database."));
 
@@ -34,8 +38,24 @@ public class DatasetController {
     }
 
     @GetMapping("/{datasetId}/download")
-    public ResponseEntity<Map<String, String>> downloadDataset(@PathVariable Long datasetId) {
-        // Stub response
-        return ResponseEntity.ok(Map.of("message", "Download coming soon"));
+    public ResponseEntity<Resource> downloadDataset(@PathVariable Long datasetId) {
+        try {
+            byte[] zipBytes = datasetService.downloadDataset(datasetId);
+            ByteArrayResource resource = new ByteArrayResource(zipBytes);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType("application/zip"));
+            headers.setContentDispositionFormData("attachment", "dataset-" + datasetId + ".zip");
+            headers.setContentLength(zipBytes.length);
+
+            return new ResponseEntity<>(resource, headers, HttpStatus.OK);
+
+        } catch (DatasetService.DatasetNotFoundException e) {
+            log.warn("Download requested for non-existent dataset {}", datasetId);
+            return ResponseEntity.notFound().build();
+        } catch (IOException e) {
+            log.error("Failed to build ZIP for dataset {}", datasetId, e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }
