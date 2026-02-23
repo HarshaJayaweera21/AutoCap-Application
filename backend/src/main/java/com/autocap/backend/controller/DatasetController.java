@@ -25,7 +25,8 @@ public class DatasetController {
     public ResponseEntity<List<RecentDatasetDto>> getRecentDatasets(
             @RequestParam(value = "limit", defaultValue = "10") int limit) {
         // For now, use the first available user (JWT auth is deferred)
-        User user = userRepository.findAll().stream().findFirst()
+        // User user = userRepository.findAll().stream().findFirst()
+        User user = userRepository.findById(5L)
                 .orElseThrow(() -> new RuntimeException("No users found in the database."));
 
         List<RecentDatasetDto> datasets = datasetService.getRecentDatasets(user, limit);

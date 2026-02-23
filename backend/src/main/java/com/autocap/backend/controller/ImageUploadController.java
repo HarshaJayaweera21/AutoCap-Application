@@ -17,35 +17,34 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 public class ImageUploadController {
 
-    private final ImageUploadService imageUploadService;
-    private final UserRepository userRepository;
+        private final ImageUploadService imageUploadService;
+        private final UserRepository userRepository;
 
-    @PostMapping("/upload")
-    public ResponseEntity<UploadResponseDto> uploadImages(
-            @RequestParam("files[]") MultipartFile[] files,
-            @RequestParam("datasetName") String datasetName,
-            @RequestParam(value = "datasetDescription", required = false, defaultValue = "") String datasetDescription,
-            @RequestParam(value = "modelVariant", required = false, defaultValue = "blip-base") String modelVariant,
-            @RequestParam(value = "temperature", required = false, defaultValue = "1.0") double temperature,
-            @RequestParam(value = "maxLength", required = false, defaultValue = "50") int maxLength,
-            @RequestParam(value = "minLength", required = false, defaultValue = "5") int minLength,
-            @RequestParam(value = "numBeams", required = false, defaultValue = "4") int numBeams,
-            @RequestParam(value = "repetitionPenalty", required = false, defaultValue = "1.0") double repetitionPenalty,
-            @RequestParam(value = "topP", required = false, defaultValue = "0.9") double topP
-    ) {
-        // Build BlipConfigDto from flat params (avoids ObjectMapper injection issue)
-        BlipConfigDto blipConfig = new BlipConfigDto(
-                modelVariant, temperature, maxLength, minLength, numBeams, repetitionPenalty, topP
-        );
+        @PostMapping("/upload")
+        public ResponseEntity<UploadResponseDto> uploadImages(
+                        @RequestParam("files[]") MultipartFile[] files,
+                        @RequestParam("datasetName") String datasetName,
+                        @RequestParam(value = "datasetDescription", required = false, defaultValue = "") String datasetDescription,
+                        @RequestParam(value = "modelVariant", required = false, defaultValue = "blip-base") String modelVariant,
+                        @RequestParam(value = "temperature", required = false, defaultValue = "1.0") double temperature,
+                        @RequestParam(value = "maxLength", required = false, defaultValue = "50") int maxLength,
+                        @RequestParam(value = "minLength", required = false, defaultValue = "5") int minLength,
+                        @RequestParam(value = "numBeams", required = false, defaultValue = "4") int numBeams,
+                        @RequestParam(value = "repetitionPenalty", required = false, defaultValue = "1.0") double repetitionPenalty,
+                        @RequestParam(value = "topP", required = false, defaultValue = "0.9") double topP) {
+                // Build BlipConfigDto from flat params (avoids ObjectMapper injection issue)
+                BlipConfigDto blipConfig = new BlipConfigDto(
+                                modelVariant, temperature, maxLength, minLength, numBeams, repetitionPenalty, topP);
 
-        // For now, use the first available user (JWT auth is deferred)
-        User user = userRepository.findAll().stream().findFirst()
-                .orElseThrow(() -> new RuntimeException("No users found in the database. Please create a user first."));
+                // For now, use the first available user (JWT auth is deferred)
+                // User user = userRepository.findAll().stream().findFirst()
+                User user = userRepository.findById(5L)
+                                .orElseThrow(() -> new RuntimeException(
+                                                "No users found in the database. Please create a user first."));
 
-        UploadResponseDto response = imageUploadService.processUpload(
-                files, datasetName, datasetDescription, blipConfig, user
-        );
+                UploadResponseDto response = imageUploadService.processUpload(
+                                files, datasetName, datasetDescription, blipConfig, user);
 
-        return ResponseEntity.ok(response);
-    }
+                return ResponseEntity.ok(response);
+        }
 }
