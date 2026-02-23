@@ -54,13 +54,6 @@ const ActivityIcon = () => (
   </svg>
 );
 
-const UploadIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-    <polyline points="17 8 12 3 7 8" />
-    <line x1="12" y1="3" x2="12" y2="15" />
-  </svg>
-);
 
 const FolderIcon = () => (
   <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -200,117 +193,12 @@ export const Dashboard: React.FC = () => {
         {/* ── Main Two-Column Grid ──────────────────────────────────── */}
         <div className={styles.mainGrid}>
 
-          {/* LEFT — Recent Datasets Table */}
+          {/* LEFT — Quick Generate Form (main focus) */}
           <div className={styles.leftPanel}>
-
-            {hasActiveJob && (
-              <div className={styles.panel}>
-                <div className={styles.panelHeader}>
-                  <span className={styles.panelTitle}>Pipeline Progress</span>
-                </div>
-                <div className={styles.panelBody}>
-                  <JobProgressTracker
-                    jobId={state.activeJobId!}
-                    onComplete={handleJobComplete}
-                    onReset={handleReset}
-                    navigate={navigate}
-                  />
-                </div>
-              </div>
-            )}
-
-            <div className={styles.panel}>
-              <div className={styles.panelHeader}>
-                <span className={styles.panelTitle}>Recent Datasets</span>
-                {!datasetsLoading && (
-                  <span className={styles.panelCount}>
-                    {recentDatasets.length} {recentDatasets.length === 1 ? 'dataset' : 'datasets'}
-                  </span>
-                )}
-              </div>
-
-              {/* Column headers */}
-              {!datasetsLoading && recentDatasets.length > 0 && (
-                <div className={`${styles.datasetRow} ${styles.datasetRowHeader}`}>
-                  <span className={styles.colLabel}>Name</span>
-                  <span className={styles.colLabel}>Model</span>
-                  <span className={styles.colLabel}>Images</span>
-                  <span className={styles.colLabel}>Avg Score</span>
-                  <span className={styles.colLabel}></span>
-                </div>
-              )}
-
-              {/* Loading skeletons */}
-              {datasetsLoading && (
-                <div className={styles.skeletonList}>
-                  {[1, 2, 3].map((n) => (
-                    <div key={n} className={styles.skeletonRow} />
-                  ))}
-                </div>
-              )}
-
-              {/* Empty state */}
-              {!datasetsLoading && recentDatasets.length === 0 && (
-                <div className={styles.emptyState}>
-                  <FolderIcon />
-                  <p>No datasets yet — upload some images to get started!</p>
-                </div>
-              )}
-
-              {/* Dataset rows */}
-              {!datasetsLoading && recentDatasets.length > 0 && (
-                <div className={styles.datasetList}>
-                  {recentDatasets.map((ds) => {
-                    const scorePercent =
-                      ds.averageSimilarity != null
-                        ? Math.round(ds.averageSimilarity * 100)
-                        : null;
-                    const formattedDate = new Date(ds.createdAt).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    });
-                    return (
-                      <div key={ds.id} className={styles.datasetRow}>
-                        <span className={styles.datasetName} title={ds.name}>{ds.name}</span>
-                        <span className={styles.datasetMeta}>{ds.modelName || '—'}</span>
-                        <span className={styles.datasetMeta}>{ds.totalItems ?? 0}</span>
-                        <div className={styles.scoreWrap}>
-                          <div className={styles.scoreBar}>
-                            <div
-                              className={styles.scoreFill}
-                              style={{ width: scorePercent != null ? `${scorePercent}%` : '0%' }}
-                            />
-                          </div>
-                          {scorePercent != null ? (
-                            <span className={styles.scoreLabel}>{scorePercent}%</span>
-                          ) : (
-                            <span className={styles.scoreLabelMuted}>—</span>
-                          )}
-                        </div>
-                        <div className={styles.datasetActions}>
-                          <button className={styles.actionBtn}>Download</button>
-                          <button
-                            className={styles.actionBtn}
-                            onClick={() => navigate(`/datasets/${ds.id}`)}
-                          >
-                            View
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* RIGHT — Sidebar Form */}
-          <aside className={styles.sidebar}>
             <div className={styles.sidebarPanel}>
               <div className={styles.sidebarPanelHeader}>
                 <span className={styles.sidebarPanelTitle}>
-                  {hasActiveJob ? 'New Batch' : 'Quick Generate'}
+                  {hasActiveJob ? 'Job Running' : 'Quick Generate'}
                 </span>
                 <span className={styles.sidebarBadge}>
                   {state.selectedFiles.length} {state.selectedFiles.length === 1 ? 'image' : 'images'}
@@ -358,17 +246,97 @@ export const Dashboard: React.FC = () => {
                     />
                   </>
                 ) : (
-                  <div style={{ textAlign: 'center', padding: 'var(--space-6) 0', color: 'var(--text-muted)', fontSize: 'var(--text-sm)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-3)' }}>
-                      <UploadIcon />
-                      <span>A job is currently running.</span>
-                    </div>
-                    <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-placeholder)' }}>
-                      Wait for it to complete, then upload a new batch.
-                    </p>
-                  </div>
+                  <JobProgressTracker
+                    jobId={state.activeJobId!}
+                    onComplete={handleJobComplete}
+                    onReset={handleReset}
+                    navigate={navigate}
+                  />
                 )}
               </div>
+            </div>
+          </div>
+
+          {/* RIGHT — Recent Datasets */}
+          <aside className={styles.sidebar}>
+            <div className={styles.panel}>
+              <div className={styles.panelHeader}>
+                <span className={styles.panelTitle}>Recent Datasets</span>
+                {!datasetsLoading && (
+                  <span className={styles.panelCount}>
+                    {recentDatasets.length} {recentDatasets.length === 1 ? 'dataset' : 'datasets'}
+                  </span>
+                )}
+              </div>
+
+              {/* Column headers */}
+              {!datasetsLoading && recentDatasets.length > 0 && (
+                <div className={`${styles.datasetRow} ${styles.datasetRowHeader}`}>
+                  <span className={styles.colLabel}>Name</span>
+                  <span className={styles.colLabel}>Model</span>
+                  <span className={styles.colLabel}>Images</span>
+                  <span className={styles.colLabel}>Avg Score</span>
+                  <span className={styles.colLabel}></span>
+                </div>
+              )}
+
+              {/* Loading skeletons */}
+              {datasetsLoading && (
+                <div className={styles.skeletonList}>
+                  {[1, 2, 3].map((n) => (
+                    <div key={n} className={styles.skeletonRow} />
+                  ))}
+                </div>
+              )}
+
+              {/* Empty state */}
+              {!datasetsLoading && recentDatasets.length === 0 && (
+                <div className={styles.emptyState}>
+                  <FolderIcon />
+                  <p>No datasets yet — upload some images to get started!</p>
+                </div>
+              )}
+
+              {/* Dataset rows */}
+              {!datasetsLoading && recentDatasets.length > 0 && (
+                <div className={styles.datasetList}>
+                  {recentDatasets.map((ds) => {
+                    const scorePercent =
+                      ds.averageSimilarity != null
+                        ? Math.round(ds.averageSimilarity * 100)
+                        : null;
+                    return (
+                      <div key={ds.id} className={styles.datasetRow}>
+                        <span className={styles.datasetName} title={ds.name}>{ds.name}</span>
+                        <span className={styles.datasetMeta}>{ds.modelName || '—'}</span>
+                        <span className={styles.datasetMeta}>{ds.totalItems ?? 0}</span>
+                        <div className={styles.scoreWrap}>
+                          <div className={styles.scoreBar}>
+                            <div
+                              className={styles.scoreFill}
+                              style={{ width: scorePercent != null ? `${scorePercent}%` : '0%' }}
+                            />
+                          </div>
+                          {scorePercent != null ? (
+                            <span className={styles.scoreLabel}>{scorePercent}%</span>
+                          ) : (
+                            <span className={styles.scoreLabelMuted}>—</span>
+                          )}
+                        </div>
+                        <div className={styles.datasetActions}>
+                          <button className={styles.actionBtn}>Download</button>
+                          <button
+                            className={styles.actionBtn}
+                            onClick={() => navigate(`/datasets/${ds.id}`)}
+                          >
+                            View
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </aside>
         </div>
