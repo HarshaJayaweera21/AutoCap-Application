@@ -18,3 +18,7 @@ __pycache__/
 # OS
 .DS_Store
 Thumbs.db
+VisionCaption_Dashboard_Module_Spec.pdf
+ui-guidelines.md
+dashboard_module_spec.md
+frontend/.env
