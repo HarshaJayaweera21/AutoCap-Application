@@ -27,6 +27,9 @@ public class Dataset {
     @Column(columnDefinition = "text")
     private String description;
 
+    @Column(name = "file_path", nullable = false)
+    private String filePath;
+
     @Column(name = "model_name", length = 100)
     private String modelName;
 
