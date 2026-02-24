@@ -1,14 +1,19 @@
 import axios from 'axios';
-import { supabase } from '../lib/supabaseClient';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_SPRING_BOOT_URL || 'http://localhost:8080',
 });
 
-api.interceptors.request.use(async (config) => {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session?.access_token) {
-    config.headers.Authorization = `Bearer ${session.access_token}`;
+// Helper to get a cookie value
+const getCookie = (name: string): string | null => {
+  const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
+  return match ? decodeURIComponent(match[2]) : null;
+};
+
+api.interceptors.request.use((config) => {
+  const token = getCookie('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
