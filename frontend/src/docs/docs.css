@@ -1,0 +1,179 @@
+/* ===== Docs Page Styling ===== */
+
+.docs-container {
+  display: flex;
+  height: 100vh;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #ffffff;
+}
+
+/* ---------- Sidebar ---------- */
+.sidebar {
+  width: 260px;
+  min-width: 260px;
+  background: #f8f9fb;
+  border-right: 1px solid #e2e5ea;
+  padding: 28px 20px;
+  overflow-y: auto;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: #ccd0d5;
+  border-radius: 10px;
+}
+
+.sidebar-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0 0 24px 0;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e2e5ea;
+}
+
+/* ---------- Categories ---------- */
+.category-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  margin-bottom: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: #6b7280;
+  cursor: pointer;
+  user-select: none;
+  padding: 6px 8px;
+  border-radius: 6px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.category:first-child .category-header {
+  margin-top: 0;
+}
+
+.category-header:hover {
+  background: #e8ecf2;
+  color: #374151;
+}
+
+/* Chevron */
+.chevron {
+  font-size: 0.55rem;
+  transition: transform 0.2s ease;
+  display: inline-block;
+  color: #9ca3af;
+}
+
+.chevron.expanded {
+  transform: rotate(90deg);
+}
+
+/* ---------- Doc list ---------- */
+.category ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.category li {
+  cursor: pointer;
+  margin: 2px 0;
+  padding: 8px 14px 8px 26px;
+  border-radius: 8px;
+  color: #4a5568;
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.category li:hover {
+  background: #e8ecf2;
+  color: #1a202c;
+}
+
+.category li.active {
+  background: #dbeafe;
+  color: #1e40af;
+  font-weight: 600;
+}
+
+/* ---------- Doc Viewer ---------- */
+.doc-viewer {
+  flex: 1;
+  padding: 48px 56px;
+  overflow-y: auto;
+  background: #ffffff;
+  color: #1a202c;
+}
+
+.doc-viewer::-webkit-scrollbar {
+  width: 6px;
+}
+
+.doc-viewer::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 10px;
+}
+
+.doc-viewer h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #111827;
+  letter-spacing: -0.02em;
+}
+
+.doc-viewer p {
+  font-size: 1rem;
+  line-height: 1.75;
+  color: #4b5563;
+  max-width: 720px;
+}
+
+/* ---------- Layout ---------- */
+.docs-layout {
+  display: flex;
+  height: 100vh;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #ffffff;
+}
+
+/* ---------- Main Content ---------- */
+.main-content {
+  flex: 1;
+  padding: 48px 56px;
+  overflow-y: auto;
+  background: #ffffff;
+  color: #1a202c;
+}
+
+.main-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.main-content::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 10px;
+}
+
+.main-content h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #111827;
+  letter-spacing: -0.02em;
+}
+
+.main-content p {
+  font-size: 1rem;
+  line-height: 1.75;
+  color: #4b5563;
+  max-width: 720px;
+}
