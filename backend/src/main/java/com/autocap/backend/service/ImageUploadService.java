@@ -50,6 +50,18 @@ public class ImageUploadService {
         // 1. Validate files
         validateFiles(files);
 
+        // Generate a directory path for the dataset
+        String datasetFolderName = "dataset_" + System.currentTimeMillis();
+        String datasetFilePath = "datasets/" + user.getId() + "/" + datasetFolderName;
+
+        Path datasetDir = Paths.get("datasets", user.getId().toString(), datasetFolderName);
+        try {
+            Files.createDirectories(datasetDir);
+        } catch (IOException e) {
+            log.error("Failed to create dataset directory {}", datasetDir, e);
+            throw new RuntimeException("Could not initialize dataset storage", e);
+        }
+
         // 2. Create Dataset row
         Dataset dataset = new Dataset();
         dataset.setUser(user);
@@ -58,8 +70,9 @@ public class ImageUploadService {
         dataset.setModelName(blipConfig.getModelVariant());
         dataset.setTotalItems(0);
         dataset.setIsPublic(false);
+        dataset.setFilePath(datasetFilePath);
         dataset = datasetRepository.save(dataset);
-        log.info("Created dataset {} for user {}", dataset.getId(), user.getId());
+        log.info("Created dataset {} with path {} for user {}", dataset.getId(), datasetFilePath, user.getId());
 
         // Prepare physical upload directory
         Path uploadDir = Paths.get("uploads", user.getId().toString());

@@ -40,3 +40,8 @@ build/
 .env
 *.env
 application-local.properties
+
+
+# Uploads and Datasets
+uploads/
+datasets/
