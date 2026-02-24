@@ -12,8 +12,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-
 import java.io.IOException;
 import java.util.List;
 
@@ -28,10 +29,11 @@ public class DatasetController {
 
     @GetMapping("/recent")
     public ResponseEntity<List<RecentDatasetDto>> getRecentDatasets(
+            @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(value = "limit", defaultValue = "10") int limit) {
-        // For now, use the first available user (JWT auth is deferred)
-        User user = userRepository.findById(5L)
-                .orElseThrow(() -> new RuntimeException("No users found in the database."));
+
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         List<RecentDatasetDto> datasets = datasetService.getRecentDatasets(user, limit);
         return ResponseEntity.ok(datasets);

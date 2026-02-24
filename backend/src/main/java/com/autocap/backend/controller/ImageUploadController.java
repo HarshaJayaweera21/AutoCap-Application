@@ -8,6 +8,8 @@ import com.autocap.backend.service.ImageUploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,6 +24,7 @@ public class ImageUploadController {
 
         @PostMapping("/upload")
         public ResponseEntity<UploadResponseDto> uploadImages(
+                        @AuthenticationPrincipal UserDetails userDetails,
                         @RequestParam("files[]") MultipartFile[] files,
                         @RequestParam("datasetName") String datasetName,
                         @RequestParam(value = "datasetDescription", required = false, defaultValue = "") String datasetDescription,
@@ -36,11 +39,9 @@ public class ImageUploadController {
                 BlipConfigDto blipConfig = new BlipConfigDto(
                                 modelVariant, temperature, maxLength, minLength, numBeams, repetitionPenalty, topP);
 
-                // For now, use the first available user (JWT auth is deferred)
-                // User user = userRepository.findAll().stream().findFirst()
-                User user = userRepository.findById(5L)
+                User user = userRepository.findByEmail(userDetails.getUsername())
                                 .orElseThrow(() -> new RuntimeException(
-                                                "No users found in the database. Please create a user first."));
+                                                "User not found"));
 
                 UploadResponseDto response = imageUploadService.processUpload(
                                 files, datasetName, datasetDescription, blipConfig, user);

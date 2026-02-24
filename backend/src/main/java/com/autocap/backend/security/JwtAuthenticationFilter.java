@@ -42,6 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String username;
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            System.out.println("DEBUG: Missing or invalid Authorization header");
             filterChain.doFilter(request, response);
             return;
         }
@@ -50,27 +51,42 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // Reject blacklisted tokens (logged out)
         if (tokenBlacklistService.isBlacklisted(jwt)) {
+            System.out.println("DEBUG: Token is blacklisted");
             filterChain.doFilter(request, response);
             return;
         }
 
-        username = jwtService.extractUsername(jwt);
+        try {
+            username = jwtService.extractUsername(jwt);
+            System.out.println("DEBUG: Extracted username: " + username);
+        } catch (Exception e) {
+            System.out.println("DEBUG: Exception extracting username: " + e.getMessage());
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+            try {
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+                System.out.println("DEBUG: Loaded user details for: " + userDetails.getUsername());
 
-            if (jwtService.isTokenValid(jwt, userDetails)) {
+                if (jwtService.isTokenValid(jwt, userDetails)) {
+                    System.out.println("DEBUG: Token is valid. Setting authentication in context.");
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities());
 
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities());
+                    authToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request));
 
-                authToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request));
-
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                } else {
+                    System.out.println("DEBUG: Token is invalid according to jwtService.isTokenValid");
+                }
+            } catch (Exception e) {
+                System.out.println("DEBUG: Exception during UserDetails loading or validation: " + e.getMessage());
             }
         }
 
