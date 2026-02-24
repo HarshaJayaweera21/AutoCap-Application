@@ -2,15 +2,16 @@ package com.autocap.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
 @Entity
-@Table(name = "email_verification_tokens")
+@Table(name = "email_verification_tokens", schema = "public")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+
 public class EmailVerificationToken {
 
     @Id
@@ -18,18 +19,17 @@ public class EmailVerificationToken {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_user_verification"))
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Column(nullable = false, unique = true)
     private String token;
 
     @Column(name = "expires_at", nullable = false)
-    private OffsetDateTime expiresAt;
+    private Instant expiresAt;
 
-    @Column(name = "created_at", insertable = false, updatable = false)
-    private OffsetDateTime createdAt;
+    @Column(name = "created_at")
+    private Instant createdAt;
 
-    @Column
-    private Boolean verified;
+    private Boolean verified = false;
 }

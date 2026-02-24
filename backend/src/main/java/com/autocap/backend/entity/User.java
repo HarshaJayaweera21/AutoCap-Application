@@ -2,17 +2,18 @@ package com.autocap.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", schema = "public")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+
 public class User {
 
     @Id
@@ -41,21 +42,22 @@ public class User {
     private String passwordHash;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "role_id", nullable = false, foreignKey = @ForeignKey(name = "fk_role"))
+    @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
     @Column(name = "is_active")
-    private Boolean isActive;
+    private Boolean isActive = true;
 
     @Column(name = "is_email_verified")
-    private Boolean isEmailVerified;
+    private Boolean isEmailVerified = false;
 
-    @Column(name = "created_at", insertable = false, updatable = false)
-    private OffsetDateTime createdAt;
+    @Column(name = "created_at")
+    private Instant createdAt;
 
-    @Column(name = "updated_at", insertable = false, updatable = false)
-    private OffsetDateTime updatedAt;
+    @Column(name = "updated_at")
+    private Instant updatedAt;
 
     @Column(name = "deleted_at")
-    private OffsetDateTime deletedAt;
+    private Instant deletedAt;
+
 }

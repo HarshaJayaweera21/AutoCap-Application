@@ -1,19 +1,16 @@
 package com.autocap.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-
-import java.time.OffsetDateTime;
+import lombok.*;
+import java.time.Instant;
 
 @Entity
-@Table(name = "roles")
+@Table(name = "roles", schema = "public")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Role {
 
     @Id
@@ -23,9 +20,8 @@ public class Role {
     @Column(nullable = false, unique = true)
     private String name;
 
-    @Column
     private String description;
 
-    @Column(name = "created_at", insertable = false, updatable = false)
-    private OffsetDateTime createdAt;
+    @Column(name = "created_at")
+    private Instant createdAt;
 }

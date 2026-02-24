@@ -1,371 +1,75 @@
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap");
-
-/* ===========================
-   Design Tokens
-   =========================== */
 :root {
-  /* Backgrounds */
-  --bg-base: #110f17;
-  --bg-surface: #1f1e29;
-  --bg-elevated: #252433;
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
 
-  /* Borders */
-  --border-default: #28272f;
-  --border-strong: #3e3e47;
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
 
-  /* Primary Accent — Blue */
-  --primary: #194bff;
-  --primary-light: #466eff;
-  --primary-lighter: #a2b6ff;
-  --primary-dark: #2b59ff;
-
-  /* Secondary Accent — Lime */
-  --accent: #d8ee10;
-  --accent-light: #e3f638;
-  --accent-lighter: #f6ffa0;
-  --accent-medium: #edfe54;
-
-  /* Neutrals (for gradients/overlays) */
-  --neutral-600: #646464;
-  --neutral-800: #292929;
-  --neutral-900: #1b1b1b;
-  --neutral-950: #111112;
-
-  /* Text */
-  --text-primary: #f6f6f6;
-  --text-secondary: #c5c4c7;
-  --text-muted: #98979d;
-  --text-placeholder: #6b6a70;
-
-  /* Semantic */
-  --success: #89eb79;
-  --error: #e84a34;
-
-  /* Typography */
-  --font-family: "Outfit", system-ui, -apple-system, sans-serif;
-
-  /* Font Sizes */
-  --text-xs: 12px;
-  --text-sm: 14px;
-  --text-base: 16px;
-  --text-lg: 18px;
-  --text-xl: 20px;
-  --text-2xl: 24px;
-  --text-3xl: 32px;
-  --text-display: 38px;
-
-  /* Font Weights */
-  --weight-regular: 400;
-  --weight-medium: 500;
-  --weight-semibold: 600;
-
-  /* Spacing */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-8: 32px;
-  --space-10: 40px;
-  --space-12: 48px;
-  --space-16: 64px;
-
-  /* Radius */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 20px;
-
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
-  --shadow-glow-primary: 0 0 20px rgba(25, 75, 255, 0.3);
-  --shadow-glow-accent: 0 0 20px rgba(216, 238, 16, 0.2);
-
-  /* Transitions */
-  --transition-fast: 150ms ease;
-  --transition-base: 250ms ease;
-  --transition-slow: 400ms ease;
-
-  /* Gradients */
-  --gradient-primary: linear-gradient(
-    135deg,
-    #a2b6ff,
-    #466eff,
-    #194bff,
-    #2b59ff
-  );
-  --gradient-accent: linear-gradient(
-    135deg,
-    #f6ffa0,
-    #edfe54,
-    #d8ee10,
-    #e3f638
-  );
-  --gradient-dark: linear-gradient(180deg, #646464, #292929, #111112, #1b1b1b);
-}
-
-/* ===========================
-   Reset & Base Styles
-   =========================== */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html {
-  font-size: 16px;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-  color-scheme: dark;
 }
 
-body {
-  font-family: var(--font-family);
-  font-weight: var(--weight-regular);
-  color: var(--text-primary);
-  background-color: var(--bg-base);
-  line-height: 1.6;
-  min-height: 100vh;
-}
-
-#root {
-  min-height: 100vh;
-}
-
-/* ===========================
-   Typography
-   =========================== */
-h1 {
-  font-size: var(--text-3xl);
-  font-weight: var(--weight-semibold);
-  line-height: 1.2;
-  color: var(--text-primary);
-}
-
-h2 {
-  font-size: var(--text-xl);
-  font-weight: var(--weight-medium);
-  line-height: 1.3;
-  color: var(--text-primary);
-}
-
-h3 {
-  font-size: var(--text-lg);
-  font-weight: var(--weight-medium);
-  color: var(--text-primary);
-}
-
-p {
-  font-size: var(--text-base);
-  font-weight: var(--weight-medium);
-  color: var(--text-secondary);
-}
-
-small {
-  font-size: var(--text-sm);
-  color: var(--text-muted);
-}
-
-/* ===========================
-   Links
-   =========================== */
 a {
-  color: var(--primary-light);
-  text-decoration: none;
-  transition: color var(--transition-fast);
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
 }
 
 a:hover {
-  color: var(--primary-lighter);
+  color: #535bf2;
 }
 
-/* ===========================
-   Buttons (base resets)
-   =========================== */
-button {
-  font-family: var(--font-family);
-  font-weight: var(--weight-medium);
-  cursor: pointer;
-  border: none;
-  background: none;
-  color: inherit;
-  font-size: var(--text-base);
-  transition: all var(--transition-base);
-}
-
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-/* Primary Button */
-.btn-primary {
-  background: var(--primary);
-  color: var(--text-primary);
-  padding: var(--space-3) var(--space-6);
-  border-radius: var(--radius-md);
-  font-weight: var(--weight-medium);
-  font-size: var(--text-base);
-  transition: all var(--transition-base);
-  box-shadow: var(--shadow-sm);
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: var(--primary-light);
-  box-shadow: var(--shadow-glow-primary);
-  transform: translateY(-1px);
-}
-
-.btn-primary:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-/* Secondary Button */
-.btn-secondary {
-  background: var(--bg-surface);
-  color: var(--text-primary);
-  padding: var(--space-3) var(--space-6);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-default);
-  font-weight: var(--weight-medium);
-  font-size: var(--text-base);
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background: var(--bg-elevated);
-  border-color: var(--border-strong);
-}
-
-/* ===========================
-   Inputs
-   =========================== */
-input,
-textarea,
-select {
-  font-family: var(--font-family);
-  font-size: var(--text-base);
-  font-weight: var(--weight-regular);
-  color: var(--text-primary);
-  background-color: var(--bg-base);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  padding: var(--space-3) var(--space-4);
-  outline: none;
-  transition:
-    border-color var(--transition-fast),
-    box-shadow var(--transition-fast);
+body {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
   width: 100%;
 }
 
-input:focus,
-textarea:focus,
-select:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(25, 75, 255, 0.15);
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
 }
 
-input::placeholder,
-textarea::placeholder {
-  color: var(--text-placeholder);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-regular);
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
 }
 
-textarea {
-  resize: vertical;
-  min-height: 80px;
+button:hover {
+  border-color: #646cff;
 }
 
-/* ===========================
-   Scrollbar
-   =========================== */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
 }
 
-::-webkit-scrollbar-track {
-  background: var(--bg-base);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
-}
-
-/* ===========================
-   Utility Classes
-   =========================== */
-.surface {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-}
-
-.text-muted {
-  color: var(--text-muted);
-}
-
-.text-success {
-  color: var(--success);
-}
-
-.text-error {
-  color: var(--error);
-}
-
-/* ===========================
-   Animations
-   =========================== */
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
   }
-  50% {
-    opacity: 0.5;
-  }
-}
 
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
+  a:hover {
+    color: #747bff;
   }
-  to {
-    transform: rotate(360deg);
+
+  button {
+    background-color: #f9f9f9;
   }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-
-.animate-fadeIn {
-  animation: fadeIn var(--transition-slow) ease forwards;
 }
