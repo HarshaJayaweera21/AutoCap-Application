@@ -117,11 +117,10 @@ export const JobProgressTracker: React.FC<JobProgressTrackerProps> = ({
         )}
       </div>
 
-      {/* Terminal states */}
-      {currentStatus === 'COMPLETE' && statusData && (
+      {currentStatus === 'COMPLETE' && statusData && statusData.datasetId && (
         <CompletionCard
-          datasetId={statusData.datasetId!}
-          datasetName={`Dataset #${statusData.datasetId}`}
+          datasetId={statusData.datasetId}
+          datasetName={statusData.datasetName || `Dataset #${statusData.datasetId}`}
           totalItems={statusData.totalCount}
           onDownload={() => {}}
           onView={() => navigate(`/datasets/${statusData.datasetId}`)}

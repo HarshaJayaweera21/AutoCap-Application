@@ -2,13 +2,11 @@ package com.autocap.backend.service;
 
 import com.autocap.backend.dto.BlipConfigDto;
 import com.autocap.backend.dto.UploadResponseDto;
-import com.autocap.backend.entity.Dataset;
 import com.autocap.backend.entity.Image;
 import com.autocap.backend.entity.User;
 import com.autocap.backend.entity.enums.FlagStatus;
 import com.autocap.backend.entity.enums.ImageStatus;
 import com.autocap.backend.entity.enums.JobStatus;
-import com.autocap.backend.repository.DatasetRepository;
 import com.autocap.backend.repository.ImageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +31,6 @@ public class ImageUploadService {
     private static final List<String> ALLOWED_TYPES = List.of("image/jpeg", "image/png", "image/webp");
 
     private final ImageRepository imageRepository;
-    private final DatasetRepository datasetRepository;
     private final JobService jobService;
 
     /**
@@ -50,31 +47,7 @@ public class ImageUploadService {
         // 1. Validate files
         validateFiles(files);
 
-        // Generate a directory path for the dataset
-        String datasetFolderName = "dataset_" + System.currentTimeMillis();
-        String datasetFilePath = "datasets/" + user.getId() + "/" + datasetFolderName;
-
-        Path datasetDir = Paths.get("datasets", user.getId().toString(), datasetFolderName);
-        try {
-            Files.createDirectories(datasetDir);
-        } catch (IOException e) {
-            log.error("Failed to create dataset directory {}", datasetDir, e);
-            throw new RuntimeException("Could not initialize dataset storage", e);
-        }
-
-        // 2. Create Dataset row
-        Dataset dataset = new Dataset();
-        dataset.setUser(user);
-        dataset.setName(datasetName);
-        dataset.setDescription(datasetDescription);
-        dataset.setModelName(blipConfig.getModelVariant());
-        dataset.setTotalItems(0);
-        dataset.setIsPublic(false);
-        dataset.setFilePath(datasetFilePath);
-        dataset = datasetRepository.save(dataset);
-        log.info("Created dataset {} with path {} for user {}", dataset.getId(), datasetFilePath, user.getId());
-
-        // Prepare physical upload directory
+        // 2. Prepare physical upload directory
         Path uploadDir = Paths.get("uploads", user.getId().toString());
         try {
             Files.createDirectories(uploadDir);
@@ -114,16 +87,17 @@ public class ImageUploadService {
             image.setFlagStatus(FlagStatus.Clean);
             imageRepository.save(image);
         }
-        log.info("Saved {} image records for dataset {}", files.length, dataset.getId());
+        log.info("Saved {} image records for user {}", files.length, user.getId());
 
         // 4. Create in-memory job entry
-        Long jobId = jobService.createJob(dataset.getId(), files.length);
+        Long jobId = jobService.createJob(user, datasetName, datasetDescription, blipConfig.getModelVariant(),
+                files.length);
         jobService.updateStatus(jobId, JobStatus.QUEUED);
 
         // 5. Stub: Log where FastAPI dispatch would go
         log.info("[STUB] Would dispatch to FastAPI POST /caption/batch for job {} with {} images", jobId, files.length);
 
-        return new UploadResponseDto(jobId, dataset.getId());
+        return new UploadResponseDto(jobId, null);
     }
 
     private void validateFiles(MultipartFile[] files) {

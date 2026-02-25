@@ -18,6 +18,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -37,7 +41,8 @@ public class JobService {
     /**
      * Creates an in-memory job entry. Returns the synthetic jobId.
      */
-    public Long createJob(Long datasetId, int totalCount) {
+    public Long createJob(com.autocap.backend.entity.User user, String datasetName, String datasetDescription,
+            String modelName, int totalCount) {
         Long jobId = jobIdGenerator.getAndIncrement();
         JobStatusDto status = new JobStatusDto(
                 jobId,
@@ -45,9 +50,13 @@ public class JobService {
                 0,
                 totalCount,
                 null,
-                datasetId);
+                null,
+                user,
+                datasetName,
+                datasetDescription,
+                modelName);
         jobStore.put(jobId, status);
-        log.info("Created in-memory job {} for dataset {} with {} images", jobId, datasetId, totalCount);
+        log.info("Created in-memory job {} with {} images", jobId, totalCount);
         return jobId;
     }
 
@@ -80,10 +89,6 @@ public class JobService {
     @Transactional
     public void processCallback(Long jobId, FastApiCallbackDto callbackDto) {
         JobStatusDto jobStatus = getStatus(jobId);
-        Long datasetId = jobStatus.getDatasetId();
-
-        Dataset dataset = datasetRepository.findById(datasetId)
-                .orElseThrow(() -> new JobNotFoundException("Dataset " + datasetId + " not found"));
 
         if ("FAILED".equalsIgnoreCase(callbackDto.getStatus())) {
             jobStatus.setStatus(JobStatus.FAILED);
@@ -91,6 +96,34 @@ public class JobService {
             log.error("Job {} failed: {}", jobId, callbackDto.getErrorMessage());
             return;
         }
+
+        // Generate dataset directory and physical path
+        String datasetFolderName = "dataset_" + System.currentTimeMillis();
+        String datasetFilePath = "datasets/" + jobStatus.getUser().getId() + "/" + datasetFolderName;
+
+        Path datasetDir = Paths.get("datasets", jobStatus.getUser().getId().toString(), datasetFolderName);
+        try {
+            Files.createDirectories(datasetDir);
+        } catch (IOException e) {
+            log.error("Failed to create dataset directory {}", datasetDir, e);
+            throw new RuntimeException("Could not initialize dataset storage for successful callback", e);
+        }
+
+        // Create the dataset entity
+        Dataset dataset = new Dataset();
+        dataset.setUser(jobStatus.getUser());
+        dataset.setName(jobStatus.getDatasetName());
+        dataset.setDescription(jobStatus.getDatasetDescription());
+        dataset.setModelName(jobStatus.getModelName());
+        dataset.setTotalItems(0);
+        dataset.setIsPublic(false);
+        dataset.setFilePath(datasetFilePath);
+        dataset = datasetRepository.save(dataset);
+        log.info("Deferred Creation: Created dataset {} with path {} for user {} based on Job {}",
+                dataset.getId(), datasetFilePath, jobStatus.getUser().getId(), jobId);
+
+        // Link the job to the new datasetId
+        jobStatus.setDatasetId(dataset.getId());
 
         double totalSimilarity = 0.0;
         int scoreCount = 0;
@@ -124,7 +157,7 @@ public class JobService {
 
             // Insert dataset_item
             DatasetItemId itemId = new DatasetItemId();
-            itemId.setDatasetId(datasetId);
+            itemId.setDatasetId(dataset.getId());
             itemId.setImageId(image.getId());
             itemId.setCaptionId(caption.getId());
 

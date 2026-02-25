@@ -15,4 +15,10 @@ public class JobStatusDto {
     private int totalCount;
     private String errorMessage;
     private Long datasetId;
+
+    // Dataset Configuration stored in-memory during processing
+    private com.autocap.backend.entity.User user;
+    private String datasetName;
+    private String datasetDescription;
+    private String modelName;
 }

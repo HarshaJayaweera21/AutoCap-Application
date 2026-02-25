@@ -50,11 +50,12 @@ export interface JobStatusResponse {
   totalCount: number;
   errorMessage: string | null;
   datasetId: number | null;
+  datasetName?: string;
 }
 
 export interface UploadResponse {
   jobId: number;
-  datasetId: number;
+  datasetId: number | null;
 }
 
 export interface RecentDataset {

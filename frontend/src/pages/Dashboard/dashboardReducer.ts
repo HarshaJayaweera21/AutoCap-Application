@@ -6,7 +6,7 @@ export type DashboardAction =
   | { type: 'SET_BLIP_CONFIG'; payload: BlipConfig }
   | { type: 'SET_DATASET_NAME'; payload: string }
   | { type: 'SET_DATASET_DESC'; payload: string }
-  | { type: 'SET_ACTIVE_JOB'; payload: { jobId: number; datasetId: number } }
+  | { type: 'SET_ACTIVE_JOB'; payload: { jobId: number; datasetId: number | null } }
   | { type: 'SET_JOB_STATUS'; payload: JobStatus }
   | { type: 'RESET' };
 
