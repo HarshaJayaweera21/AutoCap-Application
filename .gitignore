@@ -22,3 +22,5 @@ VisionCaption_Dashboard_Module_Spec.pdf
 ui-guidelines.md
 dashboard_module_spec.md
 frontend/.env
+ai-service/models/caption_model_baseline.pth
+ai-service/models/base_line_model.ipynb
