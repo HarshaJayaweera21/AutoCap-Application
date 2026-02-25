@@ -1,0 +1,190 @@
+/* ===== Google Font ===== */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@500;700&display=swap');
+
+/* ===== Header Bar ===== */
+.app-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2rem;
+    height: 60px;
+    background: rgba(20, 20, 26, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.app-header__brand {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.75rem;
+    letter-spacing: -0.3px;
+    background: linear-gradient(135deg, #a78bfa, #6366f1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    user-select: none;
+}
+
+.app-header__hamburger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    font-size: 1.5rem;
+}
+
+.app-header__hamburger:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: scale(1.05);
+}
+
+/* ===== Overlay ===== */
+.menu-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1001;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.menu-overlay--open {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* ===== Side Menu ===== */
+.side-menu {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 1002;
+    width: 280px;
+    max-width: 80vw;
+    height: 100vh;
+    background: #18181f;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    border-left: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.side-menu--open {
+    transform: translateX(0);
+}
+
+/* Close button inside menu */
+.side-menu__close {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0.75rem 1.25rem;
+    border: none;
+    background: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    font-size: 1.5rem;
+    transition: color 0.2s;
+}
+
+.side-menu__close:hover {
+    color: #fff;
+}
+
+/* Nav list */
+.side-menu__nav {
+    flex: 1;
+    list-style: none;
+    margin: 0;
+    padding: 0.5rem 0;
+    overflow-y: auto;
+}
+
+.side-menu__nav li a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.8rem 1.5rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.75);
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s, padding-left 0.2s;
+    border-radius: 0;
+}
+
+.side-menu__nav li a:hover {
+    background: rgba(99, 102, 241, 0.12);
+    color: #a78bfa;
+    padding-left: 1.75rem;
+}
+
+.side-menu__nav li a .nav-icon {
+    font-size: 1.15rem;
+    flex-shrink: 0;
+    opacity: 0.8;
+}
+
+/* Active nav link */
+.side-menu__nav li a.active {
+    background: rgba(99, 102, 241, 0.15);
+    color: #a78bfa;
+    border-left: 3px solid #a78bfa;
+    padding-left: calc(1.5rem - 3px);
+}
+
+.side-menu__nav li a.active .nav-icon {
+    opacity: 1;
+}
+
+/* Logout section */
+.side-menu__footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.side-menu__logout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0.7rem 0;
+    border: none;
+    border-radius: 10px;
+    background: rgba(239, 68, 68, 0.12);
+    color: #f87171;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 0.92rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+}
+
+.side-menu__logout:hover {
+    background: rgba(239, 68, 68, 0.22);
+    transform: scale(1.02);
+}
+
+/* ===== Spacer to push page content below fixed header ===== */
+.header-spacer {
+    height: 60px;
+}

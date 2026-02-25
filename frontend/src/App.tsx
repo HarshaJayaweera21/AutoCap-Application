@@ -3,6 +3,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import VerifyEmail from './pages/VerifyEmail';
 import AdminDashboard from './pages/AdminDashboard';
+import Dashboard from './pages/Dashboard';
+import ManageUsers from './pages/ManageUsers';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 
@@ -13,6 +15,8 @@ function App() {
       <Route path="/register" element={<Register />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
       <Route path="/admin-dashboard" element={<AdminDashboard />} />
+      <Route path="/admin/manage-users" element={<ManageUsers />} />
+      <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       {/* Redirect root to login for now */}
