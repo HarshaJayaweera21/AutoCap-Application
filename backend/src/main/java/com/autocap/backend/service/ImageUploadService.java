@@ -7,12 +7,17 @@ import com.autocap.backend.entity.User;
 import com.autocap.backend.entity.enums.FlagStatus;
 import com.autocap.backend.entity.enums.ImageStatus;
 import com.autocap.backend.entity.enums.JobStatus;
+import com.autocap.backend.dto.FastApiJobRequestDto;
 import com.autocap.backend.repository.ImageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.ArrayList;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,6 +37,7 @@ public class ImageUploadService {
 
     private final ImageRepository imageRepository;
     private final JobService jobService;
+    private final RestTemplate restTemplate;
 
     /**
      * Validates files, creates Dataset + Image rows, registers an in-memory job.
@@ -57,6 +63,7 @@ public class ImageUploadService {
         }
 
         // 3. Create Image rows for each file and save physically
+        List<FastApiJobRequestDto.ImageDto> imageDtos = new ArrayList<>();
         for (MultipartFile file : files) {
             String originalFilename = file.getOriginalFilename();
             if (originalFilename == null) {
@@ -86,6 +93,7 @@ public class ImageUploadService {
             image.setIsFlagged(false);
             image.setFlagStatus(FlagStatus.Clean);
             imageRepository.save(image);
+            imageDtos.add(new FastApiJobRequestDto.ImageDto(image.getId(), destinationFile.toString()));
         }
         log.info("Saved {} image records for user {}", files.length, user.getId());
 
@@ -94,8 +102,26 @@ public class ImageUploadService {
                 files.length);
         jobService.updateStatus(jobId, JobStatus.QUEUED);
 
-        // 5. Stub: Log where FastAPI dispatch would go
-        log.info("[STUB] Would dispatch to FastAPI POST /caption/batch for job {} with {} images", jobId, files.length);
+        // 5. Dispatch to FastAPI POST /api/jobs/process
+        FastApiJobRequestDto jobRequest = new FastApiJobRequestDto(
+                jobId,
+                user.getId(),
+                datasetName,
+                datasetDescription,
+                blipConfig.getModelVariant(),
+                imageDtos);
+
+        try {
+            log.info("Dispatching job {} to FastAPI service", jobId);
+            ResponseEntity<String> response = restTemplate.postForEntity(
+                    "http://127.0.0.1:8000/api/jobs/process",
+                    jobRequest,
+                    String.class);
+            log.info("FastAPI service responded with status: {}", response.getStatusCode());
+        } catch (Exception e) {
+            log.error("Failed to dispatch job to FastAPI service", e);
+            jobService.updateStatus(jobId, JobStatus.FAILED);
+        }
 
         return new UploadResponseDto(jobId, null);
     }
