@@ -4,7 +4,9 @@ frontend/dist/
 
 # Java
 backend/target/
+*.jar
 *.log
+*.log.*
 
 # Python
 ai-service/venv/
@@ -18,3 +20,13 @@ __pycache__/
 # OS
 .DS_Store
 Thumbs.db
+
+# Other
+*.tar
+*.tar.*
+*.exe
+*.msi
+*.deb
+*.zip
+*.tgz
+*.sig
