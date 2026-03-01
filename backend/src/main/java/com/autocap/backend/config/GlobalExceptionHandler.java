@@ -32,7 +32,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDto> handleMaxUploadSize(MaxUploadSizeExceededException ex) {
         log.warn("Upload size exceeded: {}", ex.getMessage());
         return ResponseEntity.badRequest().body(
-                new ErrorResponseDto("UPLOAD_TOO_LARGE", "File size exceeds the maximum allowed limit.", 400));
+                new ErrorResponseDto("UPLOAD_TOO_LARGE",
+                        "Upload failed: each file must be under 10 MB and the total request must be under 500 MB. Please reduce the number or size of images.",
+                        400));
     }
 
     @ExceptionHandler(RuntimeException.class)
