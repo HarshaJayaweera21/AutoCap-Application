@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { HiOutlineEye, HiOutlineEyeSlash } from 'react-icons/hi2';
 import './ResetPassword.css';
 
 function ResetPassword() {
@@ -9,7 +10,8 @@ function ResetPassword() {
 
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
@@ -87,7 +89,7 @@ function ResetPassword() {
                         <div className="password-wrapper">
                             <input
                                 id="newPassword"
-                                type={showPassword ? 'text' : 'password'}
+                                type={showNewPassword ? 'text' : 'password'}
                                 placeholder="Enter new password"
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
@@ -96,10 +98,10 @@ function ResetPassword() {
                             <button
                                 type="button"
                                 className="toggle-password"
-                                onClick={() => setShowPassword(!showPassword)}
-                                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                onClick={() => setShowNewPassword(!showNewPassword)}
+                                aria-label={showNewPassword ? 'Hide password' : 'Show password'}
                             >
-                                {showPassword ? '🙈' : '👁️'}
+                                {showNewPassword ? <HiOutlineEye /> : <HiOutlineEyeSlash /> }
                             </button>
                         </div>
                     </div>
@@ -107,14 +109,24 @@ function ResetPassword() {
                     {/* Confirm Password */}
                     <div className="form-group">
                         <label htmlFor="confirmPassword">Confirm Password</label>
-                        <input
-                            id="confirmPassword"
-                            type={showPassword ? 'text' : 'password'}
-                            placeholder="Confirm new password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            required
-                        />
+                        <div className="password-wrapper">
+                            <input
+                                id="confirmPassword"
+                                type={showConfirmPassword ? 'text' : 'password'}
+                                placeholder="Confirm new password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                required
+                            />
+                            <button
+                                type="button"
+                                className="toggle-password"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                            >
+                                {showConfirmPassword ? <HiOutlineEye /> : <HiOutlineEyeSlash />}
+                            </button>
+                        </div>
                     </div>
 
                     {/* Error Message */}
