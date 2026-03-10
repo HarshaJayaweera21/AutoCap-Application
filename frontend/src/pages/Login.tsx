@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { HiOutlineEye, HiOutlineEyeSlash } from 'react-icons/hi2';
 import './Login.css';
 
 function Login() {
@@ -59,7 +60,7 @@ function Login() {
     return (
         <div className="login-container">
             <div className="login-card">
-                <h2>Login</h2>
+                <h2>Sign In</h2>
 
                 <form onSubmit={handleSubmit}>
                     {/* Email Field */}
@@ -93,7 +94,7 @@ function Login() {
                                 onClick={() => setShowPassword(!showPassword)}
                                 aria-label={showPassword ? 'Hide password' : 'Show password'}
                             >
-                                {showPassword ? '🙈' : '👁️'}
+                                {showPassword ? <HiOutlineEyeSlash /> : <HiOutlineEye />}
                             </button>
                         </div>
                     </div>
@@ -110,7 +111,7 @@ function Login() {
 
                     {/* Submit Button */}
                     <button type="submit" className="login-btn" disabled={loading}>
-                        {loading ? 'Logging in...' : 'Login'}
+                        {loading ? 'Signing In...' : 'Sign In'}
                     </button>
                 </form>
 
@@ -118,7 +119,7 @@ function Login() {
                 <p className="register-link">
                     Don't have an account?{' '}
                     <a href="/register" onClick={(e) => { e.preventDefault(); navigate('/register'); }}>
-                        Register
+                        Sign Up
                     </a>
                 </p>
             </div>
