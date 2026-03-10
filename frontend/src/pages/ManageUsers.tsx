@@ -5,6 +5,8 @@ import {
     HiOutlineNoSymbol,
     HiOutlineCheckCircle,
     HiOutlineXMark,
+    HiOutlineUsers,
+    HiOutlineXCircle,
 } from 'react-icons/hi2';
 import './ManageUsers.css';
 
@@ -29,6 +31,14 @@ interface PageResponse {
     last: boolean;
 }
 
+interface AdminStats {
+    adminFirstName: string;
+    adminLastName: string;
+    totalUsers: number;
+    activeUsers: number;
+    deactiveUsers: number;
+}
+
 /* ---------- cookie helper ---------- */
 const getCookie = (name: string): string | null => {
     const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
@@ -41,15 +51,25 @@ function ManageUsers() {
     const [pageInfo, setPageInfo] = useState<PageResponse | null>(null);
     const [loading, setLoading] = useState(true);
 
+    // User stats
+    const [stats, setStats] = useState<AdminStats | null>(null);
+    const [statsLoading, setStatsLoading] = useState(true);
+
     // Edit modal state
     const [editUser, setEditUser] = useState<UserData | null>(null);
     const [editFirstName, setEditFirstName] = useState('');
     const [editLastName, setEditLastName] = useState('');
     const [saving, setSaving] = useState(false);
 
-    const token = getCookie('token');
+    // Confirm toggle modal state
+    const [confirmUser, setConfirmUser] = useState<UserData | null>(null);
+    const [toggling, setToggling] = useState(false);
+
+    const getToken = () => getCookie('token');
 
     const fetchUsers = async (pageNum: number) => {
+        const token = getToken();
+        if (!token) return;
         setLoading(true);
         try {
             const res = await fetch(
@@ -68,6 +88,25 @@ function ManageUsers() {
         }
     };
 
+    const fetchStats = async () => {
+        const token = getToken();
+        if (!token) { setStatsLoading(false); return; }
+        try {
+            const res = await fetch('http://localhost:8080/api/admin/stats', {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (res.ok) setStats(await res.json());
+        } catch {
+            // silently ignore
+        } finally {
+            setStatsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchStats();
+    }, []);
+
     useEffect(() => {
         fetchUsers(page);
     }, [page]);
@@ -85,6 +124,8 @@ function ManageUsers() {
 
     const handleSave = async () => {
         if (!editUser) return;
+        const token = getToken();
+        if (!token) return;
         setSaving(true);
         try {
             const res = await fetch(
@@ -112,11 +153,23 @@ function ManageUsers() {
         }
     };
 
-    /* ---------- Toggle Active ---------- */
-    const handleToggleActive = async (userId: number) => {
+    /* ---------- Toggle Active with Confirmation ---------- */
+    const openConfirm = (user: UserData) => {
+        setConfirmUser(user);
+    };
+
+    const closeConfirm = () => {
+        setConfirmUser(null);
+    };
+
+    const handleConfirmToggle = async () => {
+        if (!confirmUser) return;
+        const token = getToken();
+        if (!token) return;
+        setToggling(true);
         try {
             const res = await fetch(
-                `http://localhost:8080/api/admin/users/${userId}/toggle-active`,
+                `http://localhost:8080/api/admin/users/${confirmUser.id}/toggle-active`,
                 {
                     method: 'PATCH',
                     headers: { Authorization: `Bearer ${token}` },
@@ -124,9 +177,13 @@ function ManageUsers() {
             );
             if (res.ok) {
                 await fetchUsers(page);
+                await fetchStats();
+                closeConfirm();
             }
         } catch {
             // silently ignore
+        } finally {
+            setToggling(false);
         }
     };
 
@@ -136,6 +193,45 @@ function ManageUsers() {
 
             <div className="manage-users-content">
                 <h2 className="manage-users-title">Manage Users</h2>
+
+                {/* ===== User Stat Cards ===== */}
+                <div className="mu-stat-cards">
+                    <div className="mu-stat-card mu-stat-card--total">
+                        <div className="mu-stat-card__icon-wrapper mu-stat-card__icon-wrapper--total">
+                            <HiOutlineUsers className="mu-stat-card__icon" />
+                        </div>
+                        <div className="mu-stat-card__info">
+                            <span className="mu-stat-card__count">
+                                {statsLoading ? '—' : stats?.totalUsers ?? 0}
+                            </span>
+                            <span className="mu-stat-card__label">Total Users</span>
+                        </div>
+                    </div>
+
+                    <div className="mu-stat-card mu-stat-card--active">
+                        <div className="mu-stat-card__icon-wrapper mu-stat-card__icon-wrapper--active">
+                            <HiOutlineCheckCircle className="mu-stat-card__icon" />
+                        </div>
+                        <div className="mu-stat-card__info">
+                            <span className="mu-stat-card__count">
+                                {statsLoading ? '—' : stats?.activeUsers ?? 0}
+                            </span>
+                            <span className="mu-stat-card__label">Active Users</span>
+                        </div>
+                    </div>
+
+                    <div className="mu-stat-card mu-stat-card--deactive">
+                        <div className="mu-stat-card__icon-wrapper mu-stat-card__icon-wrapper--deactive">
+                            <HiOutlineXCircle className="mu-stat-card__icon" />
+                        </div>
+                        <div className="mu-stat-card__info">
+                            <span className="mu-stat-card__count">
+                                {statsLoading ? '—' : stats?.deactiveUsers ?? 0}
+                            </span>
+                            <span className="mu-stat-card__label">Deactive Users</span>
+                        </div>
+                    </div>
+                </div>
 
                 {loading ? (
                     <div className="manage-users-loading">Loading...</div>
@@ -196,7 +292,7 @@ function ManageUsers() {
                                                     </button>
                                                     <button
                                                         className={`action-btn ${user.isActive ? 'action-btn--deactivate' : 'action-btn--activate'}`}
-                                                        onClick={() => handleToggleActive(user.id)}
+                                                        onClick={() => openConfirm(user)}
                                                         title={user.isActive ? 'Deactivate' : 'Activate'}
                                                     >
                                                         {user.isActive ? (
@@ -315,6 +411,53 @@ function ManageUsers() {
                                 disabled={saving}
                             >
                                 {saving ? 'Saving...' : 'Save Changes'}
+                            </button>
+                        </div>
+                    </div>
+                </>
+            )}
+
+            {/* ===== Confirm Toggle Modal ===== */}
+            {confirmUser && (
+                <>
+                    <div className="modal-overlay" onClick={closeConfirm} />
+                    <div className="modal confirm-modal">
+                        <div className="modal__header">
+                            <h3>Confirm Action</h3>
+                            <button className="modal__close" onClick={closeConfirm}>
+                                <HiOutlineXMark />
+                            </button>
+                        </div>
+                        <div className="modal__body">
+                            <p className="confirm-modal__message">
+                                Are you sure you want to{' '}
+                                <strong>
+                                    {confirmUser.isActive ? 'deactivate' : 'activate'}
+                                </strong>{' '}
+                                user{' '}
+                                <strong>
+                                    {confirmUser.firstName} {confirmUser.lastName}
+                                </strong>{' '}
+                                ({confirmUser.email})?
+                            </p>
+                        </div>
+                        <div className="modal__footer">
+                            <button
+                                className="modal__btn modal__btn--cancel"
+                                onClick={closeConfirm}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className={`modal__btn ${confirmUser.isActive ? 'modal__btn--danger' : 'modal__btn--save'}`}
+                                onClick={handleConfirmToggle}
+                                disabled={toggling}
+                            >
+                                {toggling
+                                    ? 'Processing...'
+                                    : confirmUser.isActive
+                                        ? 'Deactivate'
+                                        : 'Activate'}
                             </button>
                         </div>
                     </div>
