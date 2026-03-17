@@ -274,3 +274,58 @@
     font-size: 1.1rem;
     flex-shrink: 0;
 }
+
+/* --- Password Rules Checklist --- */
+.password-rules {
+    list-style: none;
+    padding: 0.5rem 0.75rem;
+    margin: 0.4rem 0 0;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.password-rules li {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: color 0.2s;
+}
+
+.rule-pass {
+    color: #059669;
+}
+
+.rule-fail {
+    color: #9ca3af;
+}
+
+.rule-icon {
+    font-size: 0.85rem;
+    font-weight: 700;
+    width: 14px;
+    text-align: center;
+}
+
+/* --- Inline Field Availability Error --- */
+.field-error {
+    color: #dc2626;
+    font-size: 0.78rem;
+    margin-top: 0.3rem;
+    margin-bottom: 0;
+    font-family: 'Outfit', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.field-error::before {
+    content: '✗';
+    font-size: 0.75rem;
+    font-weight: 700;
+}
