@@ -7,6 +7,8 @@ import {
     HiOutlineXMark,
     HiOutlineUsers,
     HiOutlineXCircle,
+    HiOutlineCheckBadge,
+    HiOutlineInformationCircle,
 } from 'react-icons/hi2';
 import './ManageUsers.css';
 
@@ -64,6 +66,19 @@ function ManageUsers() {
     // Confirm toggle modal state
     const [confirmUser, setConfirmUser] = useState<UserData | null>(null);
     const [toggling, setToggling] = useState(false);
+
+    // Toast
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' } | null>(null);
+
+    const showToast = (message: string, type: 'success' | 'info' = 'success') => {
+        setToast({ message, type });
+    };
+
+    useEffect(() => {
+        if (!toast) return;
+        const timer = setTimeout(() => setToast(null), 3500);
+        return () => clearTimeout(timer);
+    }, [toast]);
 
     const getToken = () => getCookie('token');
 
@@ -145,6 +160,7 @@ function ManageUsers() {
             if (res.ok) {
                 await fetchUsers(page);
                 closeEdit();
+                showToast('User info updated successfully.');
             }
         } catch {
             // silently ignore
@@ -178,6 +194,8 @@ function ManageUsers() {
             if (res.ok) {
                 await fetchUsers(page);
                 await fetchStats();
+                const action = confirmUser.isActive ? 'deactivated' : 'activated';
+                showToast(`User ${confirmUser.firstName} ${confirmUser.lastName} has been ${action}.`);
                 closeConfirm();
             }
         } catch {
@@ -191,6 +209,17 @@ function ManageUsers() {
         <div className="manage-users-container">
             <Header />
 
+            {/* ===== Toast Notification ===== */}
+            {toast && (
+                <div className={`mu-toast mu-toast--${toast.type}`}>
+                    <span className="mu-toast__icon">
+                        {toast.type === 'success'
+                            ? <HiOutlineCheckBadge />
+                            : <HiOutlineInformationCircle />}
+                    </span>
+                    <span className="mu-toast__message">{toast.message}</span>
+                </div>
+            )}
             <div className="manage-users-content">
                 <h2 className="manage-users-title">Manage Users</h2>
 
