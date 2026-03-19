@@ -1,7 +1,6 @@
-/* ===== Google Font ===== */
+/* ===== Header Bar ===== */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@500;700&display=swap');
 
-/* ===== Header Bar ===== */
 .app-header {
     position: fixed;
     top: 0;
@@ -13,9 +12,9 @@
     align-items: center;
     padding: 0 2rem;
     height: 60px;
-    background: #ffffff;
-    border-bottom: 1px solid #e5e7eb;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    background: #1F1E29;
+    border-bottom: 1px solid #28272F;
+    box-shadow: 0 1px 12px rgba(0, 0, 0, 0.4);
 }
 
 .app-header__brand {
@@ -23,7 +22,7 @@
     font-weight: 700;
     font-size: 1.75rem;
     letter-spacing: -0.3px;
-    background: linear-gradient(135deg, #a78bfa, #6366f1);
+    background: linear-gradient(135deg, #466EFF, #194BFF);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -38,21 +37,22 @@
     height: 42px;
     border: none;
     border-radius: 10px;
-    background: #f3f4f6;
-    color: #374151;
+    background: #28272F;
+    color: #C5C4C7;
     cursor: pointer;
-    transition: background 0.2s, transform 0.2s;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
     font-size: 1.5rem;
     line-height: 1;
 }
 
 .app-header__hamburger:hover {
-    background: #e5e7eb;
+    background: #3E3E47;
     transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(25, 75, 255, 0.25);
 }
 
 .app-header__hamburger:focus {
-    outline: 2px solid #6366f1;
+    outline: 2px solid #194BFF;
     outline-offset: 2px;
 }
 
@@ -61,9 +61,9 @@
     position: fixed;
     inset: 0;
     z-index: 1001;
-    background: rgba(0, 0, 0, 0.35);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s, visibility 0.3s;
@@ -83,13 +83,13 @@
     width: 280px;
     max-width: 80vw;
     height: 100vh;
-    background: #ffffff;
-    border-left: 1px solid #e5e7eb;
+    background: #1F1E29;
+    border-left: 1px solid #28272F;
     display: flex;
     flex-direction: column;
     transform: translateX(100%);
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.08);
+    box-shadow: -6px 0 32px rgba(0, 0, 0, 0.5);
 }
 
 .side-menu--open {
@@ -104,7 +104,7 @@
     padding: 0.75rem 1.25rem;
     border: none;
     background: none;
-    color: #6b7280;
+    color: #98979D;
     cursor: pointer;
     font-size: 1.5rem;
     line-height: 1;
@@ -112,7 +112,7 @@
 }
 
 .side-menu__close:hover {
-    color: #111827;
+    color: #F6F6F6;
 }
 
 /* Nav list */
@@ -132,43 +132,43 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 500;
     font-size: 0.95rem;
-    color: #374151;
+    color: #C5C4C7;
     text-decoration: none;
     transition: background 0.2s, color 0.2s, padding-left 0.2s;
 }
 
 .side-menu__nav li a:hover {
-    background: #f5f3ff;
-    color: #6366f1;
+    background: rgba(25, 75, 255, 0.1);
+    color: #F6F6F6;
     padding-left: 1.75rem;
 }
 
 .side-menu__nav li a .nav-icon {
     font-size: 1.15rem;
     flex-shrink: 0;
-    color: #9ca3af;
+    color: #98979D;
 }
 
 .side-menu__nav li a:hover .nav-icon {
-    color: #6366f1;
+    color: #194BFF;
 }
 
 /* Active nav link */
 .side-menu__nav li a.active {
-    background: #f5f3ff;
-    color: #6366f1;
-    border-left: 3px solid #6366f1;
+    background: rgba(25, 75, 255, 0.12);
+    color: #A2B6FF;
+    border-left: 3px solid #194BFF;
     padding-left: calc(1.5rem - 3px);
 }
 
 .side-menu__nav li a.active .nav-icon {
-    color: #6366f1;
+    color: #194BFF;
 }
 
 /* Logout section */
 .side-menu__footer {
     padding: 1rem 1.25rem;
-    border-top: 1px solid #f3f4f6;
+    border-top: 1px solid #28272F;
 }
 
 .side-menu__logout {
@@ -180,8 +180,8 @@
     padding: 0.7rem 0;
     border: none;
     border-radius: 10px;
-    background: #fff1f2;
-    color: #ef4444;
+    background: rgba(232, 74, 52, 0.12);
+    color: #E84A34;
     font-family: 'Outfit', sans-serif;
     font-weight: 600;
     font-size: 0.92rem;
@@ -190,7 +190,7 @@
 }
 
 .side-menu__logout:hover {
-    background: #ffe4e6;
+    background: rgba(232, 74, 52, 0.22);
     transform: scale(1.02);
 }
 

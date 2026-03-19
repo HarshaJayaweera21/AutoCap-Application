@@ -1,9 +1,12 @@
+/* ===== Access Denied Page – Dark Theme ===== */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+
 .access-denied-container {
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f9fafb;
+    background: #110F17;
     padding: 1.5rem;
 }
 
@@ -15,10 +18,10 @@
     max-width: 420px;
     width: 100%;
     padding: 3rem 2.5rem;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
+    background: #1F1E29;
+    border: 1px solid #28272F;
     border-radius: 20px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
 }
 
 .access-denied-icon-wrapper {
@@ -28,20 +31,21 @@
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    background: rgba(232, 74, 52, 0.12);
+    border: 1px solid rgba(232, 74, 52, 0.25);
     margin-bottom: 1.5rem;
 }
 
 .access-denied-icon {
     font-size: 2.4rem;
-    color: #dc2626;
+    color: #E84A34;
 }
 
 .access-denied-title {
     font-family: 'Outfit', sans-serif;
     font-weight: 700;
     font-size: 1.6rem;
-    color: #111827;
+    color: #F6F6F6;
     margin: 0 0 0.75rem;
     letter-spacing: -0.3px;
 }
@@ -50,7 +54,7 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 400;
     font-size: 0.95rem;
-    color: #6b7280;
+    color: #98979D;
     line-height: 1.6;
     margin: 0 0 2rem;
 }
@@ -59,17 +63,18 @@
     padding: 0.75rem 2.5rem;
     border: none;
     border-radius: 10px;
-    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
-    color: #ffffff;
+    background: linear-gradient(135deg, #466EFF, #194BFF);
+    color: #F6F6F6;
     font-family: 'Outfit', sans-serif;
     font-weight: 600;
     font-size: 0.95rem;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 2px 12px rgba(99, 102, 241, 0.3);
+    transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 12px rgba(25, 75, 255, 0.35);
 }
 
 .access-denied-btn:hover {
+    opacity: 0.9;
     transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.45);
+    box-shadow: 0 6px 20px rgba(25, 75, 255, 0.45);
 }

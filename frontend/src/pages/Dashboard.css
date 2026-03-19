@@ -1,11 +1,11 @@
-/* ===== Dashboard - Placeholder Styling ===== */
+/* ===== Dashboard – Dark Theme ===== */
 
 .dashboard-container {
     min-height: 100vh;
     width: 100%;
     display: flex;
     flex-direction: column;
-    background: #f9fafb;
+    background: #110F17;
 }
 
 .dashboard-content {
@@ -17,6 +17,7 @@
 }
 
 .dashboard-content p {
+    font-family: 'Outfit', sans-serif;
     font-size: 1.2rem;
-    color: #6b7280;
+    color: #98979D;
 }

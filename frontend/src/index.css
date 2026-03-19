@@ -1,11 +1,34 @@
-/* ===== Global Reset & Light Theme ===== */
+/* ===== Global Reset & Dark Theme ===== */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  /* Background layers */
+  --bg-base:    #110F17;
+  --bg-surface: #1F1E29;
+  --bg-raised:  #28272F;
+
+  /* Borders */
+  --border-subtle: #28272F;
+  --border-strong: #3E3E47;
+
+  /* Accent colors */
+  --accent-primary:   #194BFF;
+  --accent-secondary: #D8EE10;
+  --accent-success:   #89EB79;
+  --accent-error:     #E84A34;
+
+  /* Text */
+  --text-primary:   #F6F6F6;
+  --text-secondary: #C5C4C7;
+  --text-muted:     #98979D;
+
+  /* Font */
+  font-family: 'Outfit', sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color-scheme: light;
-  color: #213547;
-  background-color: #ffffff;
+  color-scheme: dark;
+  color: var(--text-primary);
+  background-color: var(--bg-base);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -22,7 +45,8 @@ body {
   min-width: 320px;
   min-height: 100vh;
   width: 100%;
-  background-color: #ffffff;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
 }
 
 #root {
@@ -32,12 +56,12 @@ body {
 
 a {
   font-weight: 500;
-  color: #6366f1;
+  color: var(--accent-primary);
   text-decoration: inherit;
 }
 
 a:hover {
-  color: #4f46e5;
+  color: #4e76ff;
 }
 
 /* Reset global button styles — individual components define their own */
@@ -54,6 +78,6 @@ button {
 
 button:focus,
 button:focus-visible {
-  outline: 2px solid #6366f1;
+  outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
 }
