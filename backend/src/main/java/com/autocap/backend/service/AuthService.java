@@ -216,10 +216,12 @@ public class AuthService {
         return ResponseEntity.ok("Password reset successfully");
     }
 
+    @Transactional(readOnly = true)
     public boolean checkEmailExists(String email) {
         return userRepository.existsByEmail(email);
     }
 
+    @Transactional(readOnly = true)
     public boolean checkUsernameExists(String username) {
         return userRepository.existsByUsername(username);
     }
