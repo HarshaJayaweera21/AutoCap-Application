@@ -1,10 +1,10 @@
 package com.autocap.backend.controller;
 
 import com.autocap.backend.dto.AdminStatsResponse;
+import com.autocap.backend.dto.PagedResponse;
 import com.autocap.backend.dto.UserDto;
 import com.autocap.backend.dto.UserUpdateRequest;
 import com.autocap.backend.service.AdminService;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -59,21 +59,21 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<Page<UserDto>> getUsers(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+    public ResponseEntity<PagedResponse<UserDto>> getUsers(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
         return ResponseEntity.ok(adminService.getUsers(page, size));
     }
 
     @PutMapping("/users/{id}")
     public ResponseEntity<UserDto> updateUser(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @RequestBody UserUpdateRequest request) {
         return ResponseEntity.ok(adminService.updateUser(id, request));
     }
 
     @PatchMapping("/users/{id}/toggle-active")
-    public ResponseEntity<UserDto> toggleActive(@PathVariable Long id) {
+    public ResponseEntity<UserDto> toggleActive(@PathVariable("id") Long id) {
         return ResponseEntity.ok(adminService.toggleActive(id));
     }
 }

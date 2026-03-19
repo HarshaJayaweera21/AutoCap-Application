@@ -2,6 +2,7 @@ package com.autocap.backend.service;
 
 import com.autocap.backend.dto.AdminStatsResponse;
 import com.autocap.backend.dto.DatasetIntelligenceResponse;
+import com.autocap.backend.dto.PagedResponse;
 import com.autocap.backend.dto.UserDto;
 import com.autocap.backend.dto.UserUpdateRequest;
 import com.autocap.backend.entity.User;
@@ -154,10 +155,11 @@ public class AdminService {
 
     // ── Existing user-management methods ──
 
-    public Page<UserDto> getUsers(int page, int size) {
+    public PagedResponse<UserDto> getUsers(int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by("id").ascending());
         Page<User> users = userRepository.findByRole_Name("USER", pageRequest);
-        return users.map(UserDto::fromEntity);
+        Page<UserDto> dtoPage = users.map(UserDto::fromEntity);
+        return PagedResponse.from(dtoPage);
     }
 
     @Transactional

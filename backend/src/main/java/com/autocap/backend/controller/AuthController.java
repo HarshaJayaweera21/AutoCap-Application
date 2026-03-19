@@ -25,7 +25,7 @@ public class AuthController {
     }
 
     @GetMapping("/verify")
-    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
+    public ResponseEntity<String> verifyEmail(@RequestParam("token") String token) {
         return authService.verifyEmail(token);
     }
 
@@ -36,12 +36,12 @@ public class AuthController {
     }
 
     @GetMapping("/check-email")
-    public ResponseEntity<Boolean> checkEmail(@RequestParam String email) {
+    public ResponseEntity<Boolean> checkEmail(@RequestParam("email") String email) {
         return ResponseEntity.ok(authService.checkEmailExists(email));
     }
 
     @GetMapping("/check-username")
-    public ResponseEntity<Boolean> checkUsername(@RequestParam String username) {
+    public ResponseEntity<Boolean> checkUsername(@RequestParam("username") String username) {
         return ResponseEntity.ok(authService.checkUsernameExists(username));
     }
 
@@ -51,7 +51,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(@RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<String> logout(@RequestHeader(value = "Authorization") String authHeader) {
         return authService.logout(authHeader);
     }
 
