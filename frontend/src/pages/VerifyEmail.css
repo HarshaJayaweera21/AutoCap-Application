@@ -1,4 +1,4 @@
-/* ===== Verify Email Page ===== */
+/* ===== Verify Email Page – Dark Theme ===== */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
 
 .verify-container {
@@ -7,7 +7,7 @@
     align-items: center;
     min-height: 100vh;
     width: 100%;
-    background-color: #f3f4f6;
+    background-color: #110F17;
     padding: 1.5rem;
 }
 
@@ -15,10 +15,10 @@
     width: 100%;
     max-width: 420px;
     padding: 2.5rem;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
+    background: #1F1E29;
+    border: 1px solid #28272F;
     border-radius: 16px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
     text-align: center;
 }
 
@@ -35,26 +35,21 @@
     font-weight: 700;
     font-size: 1.75rem;
     margin: 0 0 0.75rem;
-    color: #111827;
+    color: #F6F6F6;
 }
 
 /* --- Body Text --- */
 .verify-card p {
     font-family: 'Outfit', sans-serif;
     font-size: 0.95rem;
-    color: #6b7280;
+    color: #98979D;
     margin-bottom: 1.75rem;
     line-height: 1.5;
 }
 
 /* Status-specific text colours */
-.verify-card.success p {
-    color: #059669;
-}
-
-.verify-card.error p {
-    color: #dc2626;
-}
+.verify-card.success p { color: #89EB79; }
+.verify-card.error p   { color: #E84A34; }
 
 /* --- Button --- */
 .verify-btn {
@@ -65,19 +60,17 @@
     font-weight: 600;
     border: none;
     border-radius: 10px;
-    background: linear-gradient(135deg, #6366f1, #4f46e5);
-    color: #ffffff;
+    background: linear-gradient(135deg, #466EFF, #194BFF);
+    color: #F6F6F6;
     cursor: pointer;
-    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+    transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 2px 12px rgba(25, 75, 255, 0.35);
 }
 
 .verify-btn:hover {
-    background: linear-gradient(135deg, #4f46e5, #4338ca);
+    opacity: 0.9;
     transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 6px 20px rgba(25, 75, 255, 0.45);
 }
 
-.verify-btn:active {
-    transform: translateY(0);
-}
+.verify-btn:active { transform: translateY(0); }
