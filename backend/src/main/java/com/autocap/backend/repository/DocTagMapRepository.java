@@ -10,5 +10,10 @@ import java.util.UUID;
 
 @Repository
 public interface DocTagMapRepository extends JpaRepository<DocTagMap, DocTagMapId> {
+
     List<DocTagMap> findByDocId(UUID docId);
+
+    void deleteByDocId(UUID docId);
+
+    void deleteByTagId(UUID tagId);
 }

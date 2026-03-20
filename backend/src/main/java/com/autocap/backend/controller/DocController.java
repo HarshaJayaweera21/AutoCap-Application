@@ -21,6 +21,11 @@ public class DocController {
         return ResponseEntity.ok(docService.getAllDocs());
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<DocResponseDTO>> searchDocs(@RequestParam("q") String query) {
+        return ResponseEntity.ok(docService.searchDocs(query));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<DocResponseDTO> getDocById(@PathVariable UUID id) {
         return ResponseEntity.ok(docService.getDocById(id));

@@ -39,7 +39,7 @@ const Sidebar = () => {
     };
 
     const handleDocClick = (docId: string) => {
-        navigate(`/docs/${docId}`);
+        navigate(`/categories/${docId}`);
     };
 
     return (
