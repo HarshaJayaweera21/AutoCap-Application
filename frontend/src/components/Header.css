@@ -1,0 +1,200 @@
+/* ===== Header Bar ===== */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@500;700&display=swap');
+
+.app-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2rem;
+    height: 60px;
+    background: #1F1E29;
+    border-bottom: 1px solid #28272F;
+    box-shadow: 0 1px 12px rgba(0, 0, 0, 0.4);
+}
+
+.app-header__brand {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.75rem;
+    letter-spacing: -0.3px;
+    background: linear-gradient(135deg, #466EFF, #194BFF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    user-select: none;
+}
+
+.app-header__hamburger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: 10px;
+    background: #28272F;
+    color: #C5C4C7;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.app-header__hamburger:hover {
+    background: #3E3E47;
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(25, 75, 255, 0.25);
+}
+
+.app-header__hamburger:focus {
+    outline: 2px solid #194BFF;
+    outline-offset: 2px;
+}
+
+/* ===== Overlay ===== */
+.menu-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1001;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.menu-overlay--open {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* ===== Side Menu ===== */
+.side-menu {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 1002;
+    width: 280px;
+    max-width: 80vw;
+    height: 100vh;
+    background: #1F1E29;
+    border-left: 1px solid #28272F;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: -6px 0 32px rgba(0, 0, 0, 0.5);
+}
+
+.side-menu--open {
+    transform: translateX(0);
+}
+
+/* Close button inside menu */
+.side-menu__close {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0.75rem 1.25rem;
+    border: none;
+    background: none;
+    color: #98979D;
+    cursor: pointer;
+    font-size: 1.5rem;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.side-menu__close:hover {
+    color: #F6F6F6;
+}
+
+/* Nav list */
+.side-menu__nav {
+    flex: 1;
+    list-style: none;
+    margin: 0;
+    padding: 0.5rem 0;
+    overflow-y: auto;
+}
+
+.side-menu__nav li a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.8rem 1.5rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: #C5C4C7;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s, padding-left 0.2s;
+}
+
+.side-menu__nav li a:hover {
+    background: rgba(25, 75, 255, 0.1);
+    color: #F6F6F6;
+    padding-left: 1.75rem;
+}
+
+.side-menu__nav li a .nav-icon {
+    font-size: 1.15rem;
+    flex-shrink: 0;
+    color: #98979D;
+}
+
+.side-menu__nav li a:hover .nav-icon {
+    color: #194BFF;
+}
+
+/* Active nav link */
+.side-menu__nav li a.active {
+    background: rgba(25, 75, 255, 0.12);
+    color: #A2B6FF;
+    border-left: 3px solid #194BFF;
+    padding-left: calc(1.5rem - 3px);
+}
+
+.side-menu__nav li a.active .nav-icon {
+    color: #194BFF;
+}
+
+/* Logout section */
+.side-menu__footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid #28272F;
+}
+
+.side-menu__logout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0.7rem 0;
+    border: none;
+    border-radius: 10px;
+    background: rgba(232, 74, 52, 0.12);
+    color: #E84A34;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 0.92rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+}
+
+.side-menu__logout:hover {
+    background: rgba(232, 74, 52, 0.22);
+    transform: scale(1.02);
+}
+
+/* ===== Spacer to push page content below fixed header ===== */
+.header-spacer {
+    height: 60px;
+}
