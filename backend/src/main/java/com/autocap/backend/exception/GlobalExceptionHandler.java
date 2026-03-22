@@ -1,6 +1,9 @@
 package com.autocap.backend.exception;
 
 import com.autocap.backend.dto.ErrorResponse;
+import com.autocap.backend.dto.ErrorResponseDto;
+import com.autocap.backend.service.ImageUploadService;
+import com.autocap.backend.service.JobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -10,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -17,6 +21,24 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    // ── Feature-branch-specific handlers ──
+
+    @ExceptionHandler(ImageUploadService.ValidationException.class)
+    public ResponseEntity<ErrorResponseDto> handleValidation(ImageUploadService.ValidationException ex) {
+        log.warn("Validation error: {}", ex.getMessage());
+        return ResponseEntity.badRequest().body(
+                new ErrorResponseDto("VALIDATION_ERROR", ex.getMessage(), 400));
+    }
+
+    @ExceptionHandler(JobService.JobNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleJobNotFound(JobService.JobNotFoundException ex) {
+        log.warn("Job not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                new ErrorResponseDto("NOT_FOUND", ex.getMessage(), 404));
+    }
+
+    // ── General handlers ──
 
     /**
      * Handle our own ResponseStatusException (thrown explicitly in service methods).
@@ -34,8 +56,29 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
         log.error("Unhandled exception: ", ex);
-        ErrorResponse error = new ErrorResponse("An unexpected error occurred. Please try again.");
+        String message = ex.getMessage();
+        if (ex.getCause() != null && ex.getCause().getMessage() != null) {
+            message = message + " | Caused by: " + ex.getCause().getMessage();
+        }
+        ErrorResponse error = new ErrorResponse(message != null ? message : "An unexpected error occurred. Please try again.");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+
+    /**
+     * Override the parent's handler for MaxUploadSizeExceededException
+     * to return our custom ErrorResponseDto shape.
+     */
+    @Override
+    protected ResponseEntity<Object> handleMaxUploadSizeExceededException(
+            MaxUploadSizeExceededException ex,
+            HttpHeaders headers,
+            HttpStatusCode status,
+            WebRequest request) {
+        log.warn("Upload size exceeded: {}", ex.getMessage());
+        ErrorResponseDto body = new ErrorResponseDto("UPLOAD_TOO_LARGE",
+                "Upload failed: each file must be under 10 MB and the total request must be under 500 MB. Please reduce the number or size of images.",
+                400);
+        return ResponseEntity.badRequest().headers(headers).body(body);
     }
 
     /**
