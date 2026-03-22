@@ -11,6 +11,7 @@ import java.time.OffsetDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Caption {
 
     @Id
@@ -55,11 +56,13 @@ public class Caption {
     @Column(name = "model_version", length = 50)
     private String modelVersion;
 
+    @Builder.Default
     @Column(name = "is_accepted")
-    private Boolean isAccepted;
+    private Boolean isAccepted = false;
 
+    @Builder.Default
     @Column(name = "is_edited")
-    private Boolean isEdited;
+    private Boolean isEdited = false;
 
     @Column(name = "original_caption_text", columnDefinition = "text")
     private String originalCaptionText;
@@ -69,4 +72,7 @@ public class Caption {
 
     @Column(name = "updated_at", insertable = false, updatable = false)
     private OffsetDateTime updatedAt;
+
+    @Column(name = "image_url")
+    private String imageUrl;
 }

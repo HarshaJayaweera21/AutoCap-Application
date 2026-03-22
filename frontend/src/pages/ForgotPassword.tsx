@@ -6,13 +6,13 @@ function ForgotPassword() {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
-    const [resetUrl, setResetUrl] = useState('');
+    const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setError('');
-        setResetUrl('');
+        setSuccess(false);
         setLoading(true);
 
         try {
@@ -28,12 +28,14 @@ function ForgotPassword() {
                 throw new Error(message || 'Failed to process request');
             }
 
-            // Parse the token from backend response: "Password reset token generated. Reset using token: <uuid>"
+            // Log the reset URL to the browser console (for dev/testing)
             const tokenMatch = message.match(/token:\s*(.+)$/i);
             if (tokenMatch) {
                 const token = tokenMatch[1].trim();
-                setResetUrl(`${window.location.origin}/reset-password?token=${token}`);
+                const resetUrl = `${window.location.origin}/reset-password?token=${token}`;
+                console.log('Password reset link:', resetUrl);
             }
+            setSuccess(true);
         } catch (err: unknown) {
             if (err instanceof Error) {
                 setError(err.message);
@@ -53,7 +55,7 @@ function ForgotPassword() {
                     Enter your email address and we'll generate a password reset link.
                 </p>
 
-                {!resetUrl ? (
+                {!success ? (
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
                             <label htmlFor="email">Email</label>
@@ -76,18 +78,8 @@ function ForgotPassword() {
                 ) : (
                     <div className="success-block">
                         <p className="success-message">
-                            Password reset link generated! Copy the URL below and paste it in your browser:
+                            Password reset link has been sent. Please check your email to reset your password.
                         </p>
-                        <div className="reset-url-box">
-                            <code className="reset-url-text">{resetUrl}</code>
-                            <button
-                                type="button"
-                                className="copy-btn"
-                                onClick={() => navigator.clipboard.writeText(resetUrl)}
-                            >
-                                📋 Copy
-                            </button>
-                        </div>
                     </div>
                 )}
 

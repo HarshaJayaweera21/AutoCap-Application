@@ -13,6 +13,7 @@ import java.time.OffsetDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Image {
 
     @Id
@@ -46,8 +47,9 @@ public class Image {
     @Column(columnDefinition = "character varying")
     private ImageStatus status;
 
+    @Builder.Default
     @Column(name = "is_flagged")
-    private Boolean isFlagged;
+    private Boolean isFlagged = false;
 
     /** Maps check constraint: 'Clean'|'Flagged'|'Rejected' */
     @Enumerated(EnumType.STRING)

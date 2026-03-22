@@ -205,6 +205,12 @@ button:disabled {
   opacity: 0.5;
 }
 
+button:focus,
+button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
 /* Primary Button */
 .btn-primary {
   background: var(--primary);
@@ -262,6 +268,8 @@ select {
     border-color var(--transition-fast),
     box-shadow var(--transition-fast);
   width: 100%;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
 }
 
 input:focus,

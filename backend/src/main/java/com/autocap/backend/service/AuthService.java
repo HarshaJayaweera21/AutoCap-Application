@@ -52,6 +52,9 @@ public class AuthService {
         this.tokenBlacklistService = tokenBlacklistService;
     }
 
+    private static final String PASSWORD_REGEX =
+            "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).{8,}$";
+
     @Transactional
     public ResponseEntity<String> register(RegisterRequest request) {
 
@@ -60,7 +63,11 @@ public class AuthService {
         }
 
         if (userRepository.existsByUsername(request.getUsername())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Username already exists");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Username already taken");
+        }
+
+        if (request.getPassword() == null || !request.getPassword().matches(PASSWORD_REGEX)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password does not meet requirements");
         }
 
         Role role = roleRepository.findByName("USER")
@@ -130,11 +137,11 @@ public class AuthService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
 
         if (!user.getIsActive()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Account is inactive");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Your account is deactivated. Contact admin");
         }
 
         if (!user.getIsEmailVerified()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Email not verified");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Please verify your email before logging in");
         }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
@@ -207,5 +214,15 @@ public class AuthService {
         passwordResetTokenRepository.save(token);
 
         return ResponseEntity.ok("Password reset successfully");
+    }
+
+    @Transactional(readOnly = true)
+    public boolean checkEmailExists(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean checkUsernameExists(String username) {
+        return userRepository.existsByUsername(username);
     }
 }

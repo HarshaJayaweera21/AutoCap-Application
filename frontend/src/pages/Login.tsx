@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { HiOutlineEye, HiOutlineEyeSlash } from 'react-icons/hi2';
 import './Login.css';
 
 function Login() {
@@ -29,8 +30,8 @@ function Login() {
             });
 
             if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(errorText || 'Login failed');
+                const data = await response.json().catch(() => null);
+                throw new Error((data && data.message) ? data.message : 'Login failed');
             }
 
             const data = await response.json();
@@ -59,7 +60,10 @@ function Login() {
     return (
         <div className="login-container">
             <div className="login-card">
-                <h2>Login</h2>
+                <h2>Sign In to AutoCap</h2>
+
+                {/* Error Message – shown directly under the title */}
+                {error && <p className="error-message">{error}</p>}
 
                 <form onSubmit={handleSubmit}>
                     {/* Email Field */}
@@ -93,13 +97,10 @@ function Login() {
                                 onClick={() => setShowPassword(!showPassword)}
                                 aria-label={showPassword ? 'Hide password' : 'Show password'}
                             >
-                                {showPassword ? '🙈' : '👁️'}
+                                {showPassword ? <HiOutlineEye /> : <HiOutlineEyeSlash />}
                             </button>
                         </div>
                     </div>
-
-                    {/* Error Message */}
-                    {error && <p className="error-message">{error}</p>}
 
                     {/* Forgot Password Link */}
                     <p className="forgot-link">
@@ -110,7 +111,7 @@ function Login() {
 
                     {/* Submit Button */}
                     <button type="submit" className="login-btn" disabled={loading}>
-                        {loading ? 'Logging in...' : 'Login'}
+                        {loading ? 'Signing In...' : 'Sign In'}
                     </button>
                 </form>
 
@@ -118,7 +119,7 @@ function Login() {
                 <p className="register-link">
                     Don't have an account?{' '}
                     <a href="/register" onClick={(e) => { e.preventDefault(); navigate('/register'); }}>
-                        Register
+                        Sign Up
                     </a>
                 </p>
             </div>

@@ -11,6 +11,7 @@ import java.time.OffsetDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Dataset {
 
     @Id
@@ -33,14 +34,16 @@ public class Dataset {
     @Column(name = "model_name", length = 100)
     private String modelName;
 
+    @Builder.Default
     @Column(name = "total_items")
-    private Integer totalItems;
+    private Integer totalItems = 0;
 
     @Column(name = "average_similarity")
     private Double averageSimilarity;
 
+    @Builder.Default
     @Column(name = "is_public")
-    private Boolean isPublic;
+    private Boolean isPublic = false;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private OffsetDateTime createdAt;
@@ -50,4 +53,7 @@ public class Dataset {
 
     @Column(name = "deleted_at")
     private OffsetDateTime deletedAt;
+
+    @Column(name = "format")
+    private String format;
 }
