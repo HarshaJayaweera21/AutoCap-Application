@@ -3,7 +3,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import VerifyEmail from './pages/VerifyEmail';
 import AdminDashboard from './pages/AdminDashboard';
-import Dashboard from './pages/Dashboard';
+import { Dashboard } from './pages/Dashboard/Dashboard';
 import ManageUsers from './pages/ManageUsers';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
