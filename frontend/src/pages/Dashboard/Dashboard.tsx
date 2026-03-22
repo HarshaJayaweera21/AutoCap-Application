@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { DEFAULT_BLIP_CONFIG } from '../../types/dashboard.types';
 import type { DashboardFormState } from '../../types/dashboard.types';
 import { dashboardReducer } from './dashboardReducer';
+import Header from '../../components/Header';
 import { UploadZone } from '../../components/dashboard/UploadZone/UploadZone';
 import { BlipConfigPanel } from '../../components/dashboard/BlipConfigPanel/BlipConfigPanel';
 import { DatasetNameInput } from '../../components/dashboard/DatasetNameInput/DatasetNameInput';
@@ -147,6 +148,7 @@ export const Dashboard: React.FC = () => {
   /* ── Render ─────────────────────────────────────────────────────── */
   return (
     <div className={styles.page}>
+      <Header />
       <div className={`${styles.container} ${styles.fadeIn}`}>
 
         {/* ── Header ─────────────────────────────────────────────── */}
