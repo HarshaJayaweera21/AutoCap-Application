@@ -18,10 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -97,17 +93,10 @@ public class JobService {
             return;
         }
 
-        // Generate dataset directory and physical path
+        // Generate a logical dataset identifier (no local filesystem needed – images
+        // live in Supabase)
         String datasetFolderName = "dataset_" + System.currentTimeMillis();
-        String datasetFilePath = "datasets/" + jobStatus.getUser().getId() + "/" + datasetFolderName;
-
-        Path datasetDir = Paths.get("datasets", jobStatus.getUser().getId().toString(), datasetFolderName);
-        try {
-            Files.createDirectories(datasetDir);
-        } catch (IOException e) {
-            log.error("Failed to create dataset directory {}", datasetDir, e);
-            throw new RuntimeException("Could not initialize dataset storage for successful callback", e);
-        }
+        String datasetFilePath = "supabase://Images/" + jobStatus.getUser().getId() + "/" + datasetFolderName;
 
         // Create the dataset entity
         Dataset dataset = new Dataset();

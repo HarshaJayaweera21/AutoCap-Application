@@ -40,7 +40,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponseDto> handleRuntime(RuntimeException ex) {
         log.error("Unexpected error: ", ex);
+        // Include cause message to surface wrapped errors (e.g. Supabase Storage HTTP
+        // errors)
+        String message = ex.getMessage();
+        if (ex.getCause() != null && ex.getCause().getMessage() != null) {
+            message = message + " | Caused by: " + ex.getCause().getMessage();
+        }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                new ErrorResponseDto("INTERNAL_ERROR", ex.getMessage(), 500));
+                new ErrorResponseDto("INTERNAL_ERROR", message, 500));
     }
 }

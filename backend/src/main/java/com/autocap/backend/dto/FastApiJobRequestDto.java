@@ -23,6 +23,7 @@ public class FastApiJobRequestDto {
     @AllArgsConstructor
     public static class ImageDto {
         private Long id;
-        private String absolutePath;
+        /** Public Supabase Storage URL for this image. */
+        private String storageUrl;
     }
 }

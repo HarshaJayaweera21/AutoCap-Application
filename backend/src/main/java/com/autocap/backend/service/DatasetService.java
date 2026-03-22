@@ -9,7 +9,9 @@ import com.autocap.backend.repository.DatasetRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import org.springframework.transaction.annotation.Transactional;
 import java.io.ByteArrayOutputStream;
@@ -31,6 +33,7 @@ public class DatasetService {
 
     private final DatasetRepository datasetRepository;
     private final DatasetItemRepository datasetItemRepository;
+    private final RestTemplate restTemplate;
 
     /**
      * Returns the most recent datasets for a given user.
@@ -50,8 +53,12 @@ public class DatasetService {
     }
 
     /**
-     * Builds an in-memory ZIP containing a captions.txt for the given dataset.
-     * Each line in captions.txt is: <original_image_name>\t<caption_text>
+     * Builds an in-memory ZIP containing:
+     *  - captions.txt  (filename TAB caption, one per line)
+     *  - the actual image files
+     *
+     * Image bytes are fetched from Supabase Storage (when file_path is a URL)
+     * or read from local disk (legacy datasets uploaded before the Supabase migration).
      *
      * @param datasetId the ID of the dataset to download
      * @return byte array of the ZIP archive
@@ -66,7 +73,6 @@ public class DatasetService {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (ZipOutputStream zos = new ZipOutputStream(baos)) {
 
-            // --- captions.txt and physical images ---
             StringBuilder captionsSb = new StringBuilder();
             captionsSb.append("filename\tcaption\n");
 
@@ -81,24 +87,20 @@ public class DatasetService {
 
                 captionsSb.append(originalName).append("\t").append(captionText).append("\n");
 
-                // Write the image file into the ZIP archive if it exists
+                // Fetch and add the image bytes to the ZIP
                 if (item.getImage() != null && item.getImage().getFilePath() != null) {
-                    Path physicalPath = Paths.get(item.getImage().getFilePath());
-                    if (Files.exists(physicalPath) && Files.isReadable(physicalPath)) {
+                    String filePath = item.getImage().getFilePath();
+                    byte[] imageBytes = fetchImageBytes(filePath, item.getId().getImageId());
+                    if (imageBytes != null) {
                         try {
                             ZipEntry imageEntry = new ZipEntry(originalName);
                             zos.putNextEntry(imageEntry);
-                            Files.copy(physicalPath, zos);
+                            zos.write(imageBytes);
                             zos.closeEntry();
                         } catch (IOException e) {
-                            log.warn("Failed to zip image file {}, skipping it.", physicalPath, e);
-                            try {
-                                zos.closeEntry();
-                            } catch (Exception ignored) {
-                            }
+                            log.warn("Failed to zip image {}, skipping.", originalName, e);
+                            try { zos.closeEntry(); } catch (Exception ignored) {}
                         }
-                    } else {
-                        log.warn("Image file not found on disk: {}", physicalPath);
                     }
                 }
             }
@@ -112,6 +114,43 @@ public class DatasetService {
         }
 
         return baos.toByteArray();
+    }
+
+    /**
+     * Fetches image bytes from either a Supabase public URL or a local file path.
+     * Returns null and logs a warning if the image cannot be retrieved.
+     */
+    private byte[] fetchImageBytes(String filePath, Long imageId) {
+        if (filePath.startsWith("http://") || filePath.startsWith("https://")) {
+            // Supabase Storage URL — download over HTTP
+            try {
+                ResponseEntity<byte[]> response = restTemplate.getForEntity(filePath, byte[].class);
+                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                    log.debug("Downloaded image {} from Supabase ({} bytes)", imageId, response.getBody().length);
+                    return response.getBody();
+                } else {
+                    log.warn("Unexpected status {} fetching image {} from {}", response.getStatusCode(), imageId, filePath);
+                    return null;
+                }
+            } catch (Exception e) {
+                log.warn("Failed to download image {} from Supabase URL {}: {}", imageId, filePath, e.getMessage());
+                return null;
+            }
+        } else {
+            // Legacy local path
+            Path physicalPath = Paths.get(filePath);
+            if (Files.exists(physicalPath) && Files.isReadable(physicalPath)) {
+                try {
+                    return Files.readAllBytes(physicalPath);
+                } catch (IOException e) {
+                    log.warn("Failed to read local image file {}: {}", physicalPath, e.getMessage());
+                    return null;
+                }
+            } else {
+                log.warn("Local image file not found: {}", physicalPath);
+                return null;
+            }
+        }
     }
 
     /** Thrown when a requested dataset does not exist. */

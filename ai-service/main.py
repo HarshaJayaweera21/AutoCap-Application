@@ -10,7 +10,7 @@ app = FastAPI()
 
 class ImageDto(BaseModel):
     id: int
-    absolutePath: str
+    storageUrl: str  # Supabase public URL for the image
 
 class JobRequest(BaseModel):
     jobId: int
@@ -47,13 +47,16 @@ def process_job_background(job_request: JobRequest):
     
     try:
         for image in job_request.images:
-            if not os.path.exists(image.absolutePath):
-                print(f"File not found: {image.absolutePath}")
+            print(f"Downloading image from Supabase Storage: {image.storageUrl}")
+
+            # Download the image from Supabase Storage
+            response = requests.get(image.storageUrl, timeout=30)
+            if response.status_code != 200:
+                print(f"Failed to download image {image.id} from {image.storageUrl} "
+                      f"(HTTP {response.status_code})")
                 continue
-                
-            with open(image.absolutePath, "rb") as f:
-                contents = f.read()
-            
+
+            contents = response.content
             caption_text = caption_service.get_caption(contents)
             
             # Match FastApiCallbackDto.CaptionResultDto
@@ -96,4 +99,3 @@ def process_job_background(job_request: JobRequest):
 async def process_job_api(job_request: JobRequest, background_tasks: BackgroundTasks):
     background_tasks.add_task(process_job_background, job_request)
     return {"message": f"Job {job_request.jobId} accepted for processing."}
-
