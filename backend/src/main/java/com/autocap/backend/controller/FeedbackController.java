@@ -24,8 +24,7 @@ import java.util.Map;
  * "X-User-Id" header, because user_id is NOT NULL in the DB schema.
  */
 @RestController
-@RequestMapping("/feedback")
-@CrossOrigin(origins = { "http://localhost:5173", "http://localhost:3000" }, allowCredentials = "true")
+@RequestMapping("/api/feedback")
 public class FeedbackController {
 
     @Autowired

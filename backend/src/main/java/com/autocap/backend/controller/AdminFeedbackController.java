@@ -23,8 +23,7 @@ import java.util.Map;
  * GET /admin/feedback/stats/dashboard — Aggregated feedback statistics
  */
 @RestController
-@RequestMapping("/admin/feedback")
-@CrossOrigin(origins = { "http://localhost:5173", "http://localhost:3000" }, allowCredentials = "true")
+@RequestMapping("/api/admin/feedback")
 public class AdminFeedbackController {
 
     @Autowired
