@@ -4,10 +4,12 @@ import com.autocap.backend.entity.Caption;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 
+@Repository
 public interface CaptionRepository extends JpaRepository<Caption, Long> {
 
     // ── Row 1: Total counts ──
@@ -18,11 +20,11 @@ public interface CaptionRepository extends JpaRepository<Caption, Long> {
 
     // ── Row 1: Weekly comparison counts ──
 
-    long countByCreatedAtBetween(Instant start, Instant end);
+    long countByCreatedAtBetween(OffsetDateTime start, OffsetDateTime end);
 
-    long countByImage_IsFlaggedFalseAndCreatedAtBetween(Instant start, Instant end);
+    long countByImage_IsFlaggedFalseAndCreatedAtBetween(OffsetDateTime start, OffsetDateTime end);
 
-    long countByImage_IsFlaggedTrueAndCreatedAtBetween(Instant start, Instant end);
+    long countByImage_IsFlaggedTrueAndCreatedAtBetween(OffsetDateTime start, OffsetDateTime end);
 
     // ── Row 2: Captions per day (last 30 days) ──
 
@@ -33,7 +35,7 @@ public interface CaptionRepository extends JpaRepository<Caption, Long> {
             GROUP BY CAST(c.created_at AS DATE)
             ORDER BY caption_date
             """, nativeQuery = true)
-    List<Object[]> countCaptionsPerDaySince(@Param("since") Instant since);
+    List<Object[]> countCaptionsPerDaySince(@Param("since") OffsetDateTime since);
 
     // ── Row 3: Similarity statistics ──
 

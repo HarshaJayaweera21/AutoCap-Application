@@ -2,10 +2,11 @@ package com.autocap.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.Instant;
+
+import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "datasets", schema = "public")
+@Table(name = "datasets")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,16 +18,20 @@ public class Dataset {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_dataset_user"))
+    private User user;
 
-    @Column(name = "name", nullable = false)
+    @Column(nullable = false, length = 255)
     private String name;
 
-    @Column(name = "description")
+    @Column(columnDefinition = "text")
     private String description;
 
-    @Column(name = "model_name")
+    @Column(name = "file_path", nullable = false)
+    private String filePath;
+
+    @Column(name = "model_name", length = 100)
     private String modelName;
 
     @Builder.Default
@@ -40,17 +45,14 @@ public class Dataset {
     @Column(name = "is_public")
     private Boolean isPublic = false;
 
-    @Column(name = "created_at")
-    private Instant createdAt;
+    @Column(name = "created_at", insertable = false, updatable = false)
+    private OffsetDateTime createdAt;
 
-    @Column(name = "updated_at")
-    private Instant updatedAt;
+    @Column(name = "updated_at", insertable = false, updatable = false)
+    private OffsetDateTime updatedAt;
 
     @Column(name = "deleted_at")
-    private Instant deletedAt;
-
-    @Column(name = "file_path", nullable = false)
-    private String filePath;
+    private OffsetDateTime deletedAt;
 
     @Column(name = "format")
     private String format;
