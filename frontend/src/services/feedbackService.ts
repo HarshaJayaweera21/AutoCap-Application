@@ -2,6 +2,7 @@ import {
     Feedback,
     FeedbackCreateInput,
     FeedbackAdminUpdateInput,
+    FeedbackUpdateInput,
     FeedbackStatsData
 } from '../types/feedback';
 
@@ -65,6 +66,32 @@ class FeedbackService {
         });
         if (!response.ok) throw new Error('Failed to submit feedback');
         return response.json();
+    }
+
+    async updateFeedback(id: number, data: FeedbackUpdateInput): Promise<Feedback> {
+        const headers: any = this.getHeaders();
+        const userId = localStorage.getItem('user_id') || '2';
+        headers['X-User-Id'] = userId;
+
+        const response = await fetch(`${API_BASE_URL}/feedback/${id}`, {
+            method: 'PUT',
+            headers: headers,
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error('Failed to update feedback');
+        return response.json();
+    }
+
+    async deleteFeedback(id: number): Promise<void> {
+        const headers: any = this.getHeaders();
+        const userId = localStorage.getItem('user_id') || '2';
+        headers['X-User-Id'] = userId;
+
+        const response = await fetch(`${API_BASE_URL}/feedback/${id}`, {
+            method: 'DELETE',
+            headers: headers,
+        });
+        if (!response.ok) throw new Error('Failed to delete feedback');
     }
 
     // Admin Methods

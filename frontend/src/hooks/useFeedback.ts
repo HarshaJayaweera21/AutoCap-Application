@@ -2,7 +2,8 @@ import { useState, useCallback } from 'react';
 import { feedbackService } from '../services/feedbackService';
 import {
     FeedbackCreateInput,
-    FeedbackAdminUpdateInput
+    FeedbackAdminUpdateInput,
+    FeedbackUpdateInput
 } from '../types/feedback';
 
 export const useFeedback = () => {
@@ -51,6 +52,14 @@ export const useFeedback = () => {
         return handleRequest(() => feedbackService.uploadAttachment(file));
     }, []);
 
+    const updateFeedback = useCallback((id: number, data: FeedbackUpdateInput) => {
+        return handleRequest(() => feedbackService.updateFeedback(id, data));
+    }, []);
+
+    const deleteFeedback = useCallback((id: number) => {
+        return handleRequest(() => feedbackService.deleteFeedback(id));
+    }, []);
+
     return {
         loading,
         error,
@@ -60,6 +69,8 @@ export const useFeedback = () => {
         getAdminFeedback,
         updateFeedbackStatus,
         getFeedbackStats,
-        uploadAttachment
+        uploadAttachment,
+        updateFeedback,
+        deleteFeedback
     };
 };
