@@ -2,6 +2,7 @@ package com.autocap.backend.controller;
 
 import com.autocap.backend.dto.FeedbackCreateInput;
 import com.autocap.backend.dto.FeedbackDTO;
+import com.autocap.backend.dto.FeedbackUpdateInput;
 import com.autocap.backend.service.FeedbackService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -81,6 +82,60 @@ public class FeedbackController {
         try {
             FeedbackDTO feedback = feedbackService.getFeedbackById(id);
             return ResponseEntity.ok(feedback);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Update a feedback entry by the user who created it.
+     *
+     * Header X-User-Id (required) — the DB user id of the updater
+     * Body FeedbackUpdateInput (validated, partial update)
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateFeedback(
+            @PathVariable Long id,
+            @Valid @RequestBody FeedbackUpdateInput input,
+            @RequestHeader(value = "X-User-Id", required = false) Long userId) {
+
+        if (userId == null || userId <= 0) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "X-User-Id header is required and must be a valid user id"));
+        }
+
+        try {
+            FeedbackDTO updated = feedbackService.updateFeedback(id, input, userId);
+            return ResponseEntity.ok(updated);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Delete a feedback entry by the user who created it.
+     *
+     * Header X-User-Id (required) — the DB user id of the deleter
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteFeedback(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-User-Id", required = false) Long userId) {
+
+        if (userId == null || userId <= 0) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "X-User-Id header is required and must be a valid user id"));
+        }
+
+        try {
+            feedbackService.deleteFeedbackByUser(id, userId);
+            return ResponseEntity.noContent().build(); // 204 No Content
         } catch (EntityNotFoundException e) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)

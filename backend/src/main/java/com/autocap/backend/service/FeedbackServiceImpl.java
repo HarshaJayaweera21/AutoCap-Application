@@ -4,6 +4,7 @@ import com.autocap.backend.dto.FeedbackAdminUpdateInput;
 import com.autocap.backend.dto.FeedbackCreateInput;
 import com.autocap.backend.dto.FeedbackDTO;
 import com.autocap.backend.dto.FeedbackStatsData;
+import com.autocap.backend.dto.FeedbackUpdateInput;
 import com.autocap.backend.entity.Feedback;
 import com.autocap.backend.repository.FeedbackRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -117,6 +118,49 @@ public class FeedbackServiceImpl implements FeedbackService {
         }
 
         return new FeedbackStatsData(totalCount, avgRating, statusBreakdown, typeDistribution);
+    }
+
+    @Override
+    public FeedbackDTO updateFeedback(Long id, FeedbackUpdateInput updateInput, Long userId) {
+        Feedback feedback = feedbackRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Feedback not found with id: " + id));
+
+        // Check ownership
+        if (feedback.getUserId() == null || !feedback.getUserId().equals(userId)) {
+            throw new EntityNotFoundException("Feedback not found or access denied");
+        }
+
+        if (updateInput.getType() != null && !updateInput.getType().isBlank()) {
+            feedback.setType(updateInput.getType());
+        }
+        if (updateInput.getSubject() != null) {
+            feedback.setSubject(updateInput.getSubject());
+        }
+        if (updateInput.getMessage() != null && !updateInput.getMessage().isBlank()) {
+            feedback.setMessage(updateInput.getMessage());
+        }
+        if (updateInput.getRating() != null) {
+            feedback.setRating(updateInput.getRating());
+        }
+        if (updateInput.getScreenshot_url() != null) {
+            feedback.setScreenshotUrl(updateInput.getScreenshot_url());
+        }
+
+        Feedback updated = feedbackRepository.save(feedback);
+        return convertToDTO(updated);
+    }
+
+    @Override
+    public void deleteFeedbackByUser(Long id, Long userId) {
+        Feedback feedback = feedbackRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Feedback not found with id: " + id));
+
+        // Check ownership
+        if (feedback.getUserId() == null || !feedback.getUserId().equals(userId)) {
+            throw new EntityNotFoundException("Feedback not found or access denied");
+        }
+
+        feedbackRepository.deleteById(id);
     }
 
     // -----------------------------------------------------------------------
