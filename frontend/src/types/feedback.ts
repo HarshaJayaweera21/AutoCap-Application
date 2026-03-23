@@ -26,6 +26,14 @@ export interface FeedbackAdminUpdateInput {
   status?: FeedbackStatus;
 }
 
+export interface FeedbackUpdateInput {
+  type?: FeedbackType;
+  subject?: string;
+  message?: string;
+  rating?: number;
+  screenshot_url?: string;
+}
+
 export interface FeedbackStatsData {
   total_count: number;
   average_rating: number;
