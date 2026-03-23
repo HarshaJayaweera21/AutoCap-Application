@@ -77,15 +77,20 @@
   gap: 0.5rem;
 }
 
-.fb-btn-primary {
+/*.fb-btn-primary {
   background: var(--fb-grad-blue);
-  color: white;
-  box-shadow: 0 4px 12px rgba(25, 75, 255, 0.3);
+  color: #f1eeee;
+  box-shadow: 0 4px 12px rgb(36, 36, 66);
+}*/
+.fb-btn-primary {
+  background: #ffffff;
+  color: #000000; /* text becomes visible */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .fb-btn-primary:hover {
   filter: brightness(1.1);
-  box-shadow: 0 6px 16px rgba(25, 75, 255, 0.4);
+  box-shadow: 0 6px 16px rgb(241, 238, 238);
 }
 
 .fb-btn-secondary {

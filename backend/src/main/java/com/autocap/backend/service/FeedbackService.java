@@ -4,6 +4,7 @@ import com.autocap.backend.dto.FeedbackAdminUpdateInput;
 import com.autocap.backend.dto.FeedbackCreateInput;
 import com.autocap.backend.dto.FeedbackDTO;
 import com.autocap.backend.dto.FeedbackStatsData;
+import com.autocap.backend.dto.FeedbackUpdateInput;
 
 import java.util.List;
 
@@ -19,4 +20,8 @@ public interface FeedbackService {
     void deleteFeedback(Long id);
 
     FeedbackStatsData getFeedbackStats();
+
+    FeedbackDTO updateFeedback(Long id, FeedbackUpdateInput updateInput, Long userId);
+
+    void deleteFeedbackByUser(Long id, Long userId);
 }
