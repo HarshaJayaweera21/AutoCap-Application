@@ -1,22 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFeedback } from '../../hooks/useFeedback';
-import { FeedbackType } from '../../types/feedback';
+import { FeedbackType, Feedback, FeedbackUpdateInput } from '../../types/feedback';
 import './feedback.css';
 
 interface FeedbackFormProps {
     onSuccess?: () => void;
     onCancel?: () => void;
+    feedback?: Feedback; // For editing
+    feedbackId?: number; // For editing by id
 }
 
-const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSuccess, onCancel }) => {
-    const { createFeedback, loading, error } = useFeedback();
+const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSuccess, onCancel, feedback, feedbackId }) => {
+    const { createFeedback, updateFeedback, getFeedbackById, loading, error } = useFeedback();
 
+    const [fetchedFeedback, setFetchedFeedback] = useState<Feedback | null>(null);
     const [type, setType] = useState<FeedbackType>('General');
     const [subject, setSubject] = useState('');
     const [message, setMessage] = useState('');
     const [rating, setRating] = useState(0);
 
     const types: FeedbackType[] = ['Bug Report', 'Feature Request', 'General', 'Caption Quality'];
+
+    const currentFeedback = feedback || fetchedFeedback;
+
+    useEffect(() => {
+        if (feedbackId) {
+            getFeedbackById(feedbackId).then(setFetchedFeedback);
+        }
+    }, [feedbackId, getFeedbackById]);
+
+    useEffect(() => {
+        if (currentFeedback) {
+            setType(currentFeedback.type);
+            setSubject(currentFeedback.subject || '');
+            setMessage(currentFeedback.message);
+            setRating(currentFeedback.rating || 0);
+        }
+    }, [currentFeedback]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -32,7 +52,12 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSuccess, onCancel }) => {
             rating: rating > 0 ? rating : undefined
         };
 
-        const result = await createFeedback(payload);
+        let result;
+        if (currentFeedback) {
+            result = await updateFeedback(currentFeedback.id, payload as FeedbackUpdateInput);
+        } else {
+            result = await createFeedback(payload);
+        }
         if (result && onSuccess) {
             onSuccess();
         }
@@ -41,7 +66,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSuccess, onCancel }) => {
     return (
         <div className="fb-module-container">
             <div className="fb-card" style={{ maxWidth: '600px', margin: '0 auto' }}>
-                <h1 className="fb-h1">Submit Feedback</h1>
+                <h1 className="fb-h1">{currentFeedback ? 'Update Feedback' : 'Submit Feedback'}</h1>
 
                 {error && (
                     <div className="fb-text fb-subtext" style={{ color: 'var(--fb-error)', marginBottom: '1rem' }}>
@@ -130,7 +155,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSuccess, onCancel }) => {
                             style={{ flex: 1 }}
                             disabled={loading || !message.trim()}
                         >
-                            {loading ? 'Submitting...' : 'Submit Feedback'}
+                            {loading ? (currentFeedback ? 'Updating...' : 'Submitting...') : (currentFeedback ? 'Update Feedback' : 'Submit Feedback')}
                         </button>
                     </div>
                 </form>

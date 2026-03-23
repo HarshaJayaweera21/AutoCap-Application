@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useFeedback } from '../../hooks/useFeedback';
 import { Feedback } from '../../types/feedback';
 import { getStatusColor, getStatusDisplay, formatDate } from '../../utils/feedbackHelpers';
@@ -7,10 +8,13 @@ import './feedback.css';
 interface FeedbackListProps {
     onFeedbackClick?: (id: number) => void;
     onNewFeedbackClick?: () => void;
+    onEditFeedbackClick?: (id: number) => void;
+    onDeleteFeedbackClick?: (id: number) => void;
 }
 
-const FeedbackList: React.FC<FeedbackListProps> = ({ onFeedbackClick, onNewFeedbackClick }) => {
-    const { getAllFeedback, loading, error } = useFeedback();
+const FeedbackList: React.FC<FeedbackListProps> = ({ onFeedbackClick, onNewFeedbackClick, onEditFeedbackClick, onDeleteFeedbackClick }) => {
+    const { getAllFeedback, loading, error, deleteFeedback } = useFeedback();
+    const navigate = useNavigate();
     const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
@@ -18,6 +22,8 @@ const FeedbackList: React.FC<FeedbackListProps> = ({ onFeedbackClick, onNewFeedb
 
     const types = ['Bug Report', 'Feature Request', 'General', 'Caption Quality'];
     const statuses = ['New', 'In Review', 'Resolved', "Won't Fix"];
+
+    const currentUserId = parseInt(localStorage.getItem('user_id') || '2', 10);
 
     const fetchFeedbacks = async () => {
         const params: any = {};
@@ -37,6 +43,13 @@ const FeedbackList: React.FC<FeedbackListProps> = ({ onFeedbackClick, onNewFeedb
     const handleSearchSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         fetchFeedbacks();
+    };
+
+    const handleDelete = async (id: number) => {
+        if (window.confirm('Are you sure you want to delete this feedback?')) {
+            await deleteFeedback(id);
+            fetchFeedbacks(); // Refresh list
+        }
     };
 
     if (error) {
@@ -115,12 +128,42 @@ const FeedbackList: React.FC<FeedbackListProps> = ({ onFeedbackClick, onNewFeedb
                                 <p className="fb-text fb-subtext" style={{ flex: 1, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
                                     {fb.message}
                                 </p>
-                                <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginTop: '1.5rem', borderTop: '1px solid var(--fb-border)', paddingTop: '1rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem', borderTop: '1px solid var(--fb-border)', paddingTop: '1rem' }}>
                                     {fb.rating && (
                                         <div className="fb-stars">
                                             {[1, 2, 3, 4, 5].map(s => (
                                                 <span key={s} className={`fb-star ${s <= (fb.rating || 0) ? 'active' : ''}`} style={{ fontSize: '16px' }}>★</span>
                                             ))}
+                                        </div>
+                                    )}
+                                    {fb.user_id === currentUserId && (
+                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                            {onEditFeedbackClick && (
+                                                <button
+                                                    className="fb-btn fb-btn-secondary"
+                                                    onClick={(e) => { e.stopPropagation(); navigate(`/admin/feedback/edit/${fb.id}`); }}
+                                                    style={{ fontSize: '12px', padding: '0.25rem 0.5rem' }}
+                                                >
+                                                    Edit
+                                                </button>
+                                            )}
+                                            {onDeleteFeedbackClick ? (
+                                                <button
+                                                    className="fb-btn fb-btn-danger"
+                                                    onClick={(e) => { e.stopPropagation(); onDeleteFeedbackClick(fb.id); }}
+                                                    style={{ fontSize: '12px', padding: '0.25rem 0.5rem' }}
+                                                >
+                                                    Delete
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    className="fb-btn fb-btn-danger"
+                                                    onClick={(e) => { e.stopPropagation(); handleDelete(fb.id); }}
+                                                    style={{ fontSize: '12px', padding: '0.25rem 0.5rem' }}
+                                                >
+                                                    Delete
+                                                </button>
+                                            )}
                                         </div>
                                     )}
                                 </div>
