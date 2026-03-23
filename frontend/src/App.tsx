@@ -26,6 +26,7 @@ function App() {
                         <Route path="/" element={<Home />} />
                         <Route path="/feedback" element={<FeedbackForm />} />
                         <Route path="/admin/feedback" element={<FeedbackList />} />
+                        <Route path="/admin/feedback/edit/:id" element={<FeedbackEditWrapper />} />
                         <Route path="/admin/feedback/:id" element={<FeedbackDetailWrapper />} />
                     </Routes>
                 </main>
@@ -42,6 +43,11 @@ function FeedbackDetailWrapper() {
     return <FeedbackDetail id={parseInt(id, 10)} />;
 }
 
+function FeedbackEditWrapper() {
+    const { id } = useParams<{ id: string }>();
+    if (!id) return <div>Invalid ID</div>;
+    return <FeedbackForm feedbackId={parseInt(id, 10)} onSuccess={() => window.history.back()} onCancel={() => window.history.back()} />;
+}
 
 function Home() {
     return (
