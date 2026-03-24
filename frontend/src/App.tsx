@@ -9,8 +9,10 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import AccessDenied from './pages/AccessDenied';
 import ProtectedRoute from './components/ProtectedRoute';
+import SearchDatasets from './pages/SearchDatasets';
 
 function App() {
+
   return (
     <Routes>
       {/* Public routes */}
@@ -27,6 +29,7 @@ function App() {
 
       {/* Normal user routes */}
       <Route path="/dashboard" element={<ProtectedRoute requiredRole="USER"><Dashboard /></ProtectedRoute>} />
+      <Route path="/search-datasets" element={<ProtectedRoute requiredRole="USER"><SearchDatasets /></ProtectedRoute>} />
 
       {/* Redirect root to login */}
       <Route path="*" element={<Navigate to="/login" replace />} />

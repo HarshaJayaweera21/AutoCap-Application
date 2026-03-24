@@ -64,4 +64,42 @@ public interface CaptionRepository extends JpaRepository<Caption, Long> {
             ORDER BY score_range
             """, nativeQuery = true)
     List<Object[]> findSimilarityDistribution();
+    // ── Row 4: Public Dataset Search ──
+
+    @Query(value = """
+            SELECT c.id AS "captionId", i.id AS "imageId", i.original_name AS "originalName",
+                   c.caption_text AS "captionText", c.similarity_score AS "similarityScore",
+                   i.is_flagged AS "isFlagged"
+            FROM datasets d
+            JOIN dataset_items di ON d.id = di.dataset_id
+            JOIN captions c ON di.caption_id = c.id
+            JOIN images i ON c.image_id = i.id
+            WHERE d.is_public = true 
+              AND c.caption_text ILIKE CONCAT('%', :query, '%')
+            """,
+            countQuery = """
+            SELECT count(*)
+            FROM datasets d
+            JOIN dataset_items di ON d.id = di.dataset_id
+            JOIN captions c ON di.caption_id = c.id
+            WHERE d.is_public = true 
+              AND c.caption_text ILIKE CONCAT('%', :query, '%')
+            """,
+            nativeQuery = true)
+    org.springframework.data.domain.Page<com.autocap.backend.dto.PublicCaptionSearchProjection> searchPublicCaptions(
+            @Param("query") String query,
+            org.springframework.data.domain.Pageable pageable);
+
+    @Query(value = """
+            SELECT c.id AS "captionId", i.id AS "imageId", i.original_name AS "originalName",
+                   c.caption_text AS "captionText", c.similarity_score AS "similarityScore",
+                   i.is_flagged AS "isFlagged"
+            FROM datasets d
+            JOIN dataset_items di ON d.id = di.dataset_id
+            JOIN captions c ON di.caption_id = c.id
+            JOIN images i ON c.image_id = i.id
+            WHERE c.id IN :captionIds
+            """, nativeQuery = true)
+    List<com.autocap.backend.dto.PublicCaptionSearchProjection> findCaptionsByIds(@Param("captionIds") List<Long> captionIds);
 }
+
