@@ -14,139 +14,145 @@
   color: var(--text-primary);
 }
 
-/* Stepper */
-.stepper {
+/* Pipeline Visualization */
+.pipelineContainer {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  position: relative;
-  margin-bottom: var(--space-6);
-}
-
-.step {
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  position: relative;
-  flex: 1;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+  gap: var(--space-2);
+  width: 100%;
 }
 
-.stepDot {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--bg-base);
-  border: 2px solid var(--border-strong);
+.pipelineBlock {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1;
-  transition: all var(--transition-base);
-}
-
-.completed {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: white;
-}
-
-.active {
-  border-color: var(--primary);
-  box-shadow: 0 0 12px rgba(25, 75, 255, 0.4);
-}
-
-.failed {
-  border-color: var(--error);
-  background: rgba(232, 74, 52, 0.15);
-}
-
-.stepLine {
-  position: absolute;
-  top: 16px;
-  left: calc(50% + 16px);
-  right: calc(-50% + 16px);
-  height: 2px;
-  background: var(--border-strong);
-  z-index: 0;
-}
-
-.lineCompleted {
-  background: var(--primary);
-}
-
-.stepLabel {
-  margin-top: var(--space-2);
-  font-size: var(--text-xs);
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-2);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
   color: var(--text-muted);
-  white-space: nowrap;
-  transition: color var(--transition-fast);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  transition: all var(--transition-base);
+  text-align: center;
 }
 
-.labelActive {
-  color: var(--primary-light);
+.pipelineArrow {
+  color: var(--border-strong);
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.blockActive {
+  background: rgba(25, 75, 255, 0.1);
+  border-color: var(--primary);
+  color: var(--primary-lighter);
+  box-shadow: 0 0 15px rgba(25, 75, 255, 0.2);
+}
+
+.blockCompleted {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+.blockFailed {
+  background: rgba(232, 74, 52, 0.1);
+  border-color: var(--error);
+  color: var(--error);
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Live Stats Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.statCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.statLabel {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   font-weight: var(--weight-medium);
 }
 
-.labelCompleted {
-  color: var(--text-secondary);
-}
-
-/* Pulsing dot */
-.pulsingDot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--primary);
-  animation: dotPulse 1.5s ease-in-out infinite;
-}
-
-@keyframes dotPulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.3); opacity: 0.7; }
-}
-
-/* Detail section */
-.detail {
-  min-height: 40px;
-}
-
-.progressInfo {
+.statValue {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
   display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
+  align-items: baseline;
+  gap: var(--space-2);
 }
 
-.progressBar {
-  flex: 1;
-  max-width: 300px;
-  height: 6px;
-  background: var(--border-default);
-  border-radius: 3px;
+.statSubtext {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  font-weight: var(--weight-regular);
+}
+
+.liveScore {
+  color: var(--accent);
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+  font-variant-numeric: tabular-nums;
+}
+
+.pulsingGlow {
+  animation: scorePulse 2s infinite alternate;
+}
+
+@keyframes scorePulse {
+  0% { text-shadow: 0 0 5px rgba(0, 229, 255, 0.2); }
+  100% { text-shadow: 0 0 15px rgba(0, 229, 255, 0.6); }
+}
+
+/* Progress Bar inside Stat Card */
+.statsProgressBar {
+  width: 100%;
+  height: 4px;
+  background: var(--border-strong);
+  border-radius: 2px;
+  margin-top: var(--space-2);
   overflow: hidden;
 }
 
-.progressFill {
+.statsProgressFill {
   height: 100%;
-  background: var(--gradient-primary);
-  border-radius: 3px;
+  background: var(--primary);
   transition: width var(--transition-base);
 }
 
-.indeterminate {
-  width: 40%;
-  animation: slideProgress 1.5s ease-in-out infinite;
-}
-
-@keyframes slideProgress {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(350%); }
-}
-
-.pulsingIndicator {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--accent);
+@media (max-width: 768px) {
+  .pipelineContainer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .pipelineArrow {
+    display: none;
+  }
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
 }
