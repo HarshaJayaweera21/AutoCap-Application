@@ -48,7 +48,7 @@
 }
 
 .title {
-  font-size: var(--text-display);
+  font-size: var(--text-3xl);
   font-weight: var(--weight-semibold);
   color: var(--text-primary);
   line-height: 1.15;
@@ -60,6 +60,7 @@
 
 .subtitle {
   font-size: var(--text-base);
+  font-weight: var(--weight-medium);
   color: var(--text-muted);
   line-height: 1.5;
   max-width: 480px;
@@ -111,8 +112,8 @@
 }
 
 .panelTitle {
-  font-size: var(--text-lg);
-  font-weight: var(--weight-semibold);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-medium);
   color: var(--text-primary);
 }
 
@@ -182,6 +183,7 @@
 
 .datasetMeta {
   font-size: var(--text-sm);
+  font-weight: var(--weight-regular);
   color: var(--text-secondary);
 }
 
@@ -255,6 +257,7 @@
 
 .emptyState p {
   font-size: var(--text-base);
+  font-weight: var(--weight-medium);
   color: var(--text-muted);
 }
 
@@ -321,8 +324,8 @@
 }
 
 .sidebarPanelTitle {
-  font-size: var(--text-base);
-  font-weight: var(--weight-semibold);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-medium);
   color: var(--text-primary);
 }
 
@@ -398,4 +401,96 @@
   .title {
     font-size: var(--text-3xl);
   }
+}
+
+/* =====================
+   Wizard Stepper
+   ===================== */
+.wizardStepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-2);
+  padding: 0 var(--space-2);
+}
+
+.wizardStep {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  transition: color var(--transition-fast);
+}
+
+.wizardStepActive {
+  color: var(--primary-lighter);
+}
+
+.wizardStepCompleted {
+  color: var(--text-primary);
+}
+
+.wizardStepIcon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  background: var(--bg-surface);
+  transition: all var(--transition-base);
+}
+
+.wizardStepActive .wizardStepIcon {
+  border-color: var(--primary);
+  background: rgba(25, 75, 255, 0.15);
+  color: var(--primary-lighter);
+  box-shadow: 0 0 10px rgba(25, 75, 255, 0.3);
+}
+
+.wizardStepCompleted .wizardStepIcon {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #fff;
+}
+
+.wizardStepLine {
+  flex: 1;
+  height: 2px;
+  background: var(--border-strong);
+  max-width: 60px;
+  border-radius: 1px;
+  transition: background var(--transition-base);
+}
+
+.wizardStepLineActive {
+  background: var(--primary);
+}
+
+/* =====================
+   Wizard Navigation
+   ===================== */
+.wizardNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-2);
+  gap: var(--space-4);
+}
+
+.wizardNavRight {
+  margin-left: auto;
+}
+
+.summaryBox {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-bottom: var(--space-2);
 }

@@ -68,6 +68,7 @@ export const Dashboard: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
   const navigate = useNavigate();
 
   const hasActiveJob = state.activeJobId !== null;
@@ -143,6 +144,7 @@ export const Dashboard: React.FC = () => {
   const handleReset = useCallback(() => {
     dispatch({ type: 'RESET' });
     setUploadError(null);
+    setCurrentStep(1);
   }, []);
 
   /* ── Render ─────────────────────────────────────────────────────── */
@@ -154,11 +156,7 @@ export const Dashboard: React.FC = () => {
         {/* ── Header ─────────────────────────────────────────────── */}
         <header className={styles.header}>
           <div className={styles.headerLeft}>
-            <nav className={styles.breadcrumb}>
-              <span>AutoCap</span>
-              <span className={styles.breadcrumbSep}>›</span>
-              <span className={styles.breadcrumbActive}>Dashboard</span>
-            </nav>
+
             <h1 className={styles.title}>Generate Captions</h1>
             <p className={styles.subtitle}>
               Upload images, configure BLIP model parameters, and generate high-quality captions for your dataset.
@@ -222,42 +220,107 @@ export const Dashboard: React.FC = () => {
               <div className={styles.sidebarBody}>
                 {!hasActiveJob ? (
                   <>
-                    <UploadZone
-                      selectedFiles={state.selectedFiles}
-                      onFilesAdded={(files) => dispatch({ type: 'ADD_FILES', payload: files })}
-                      onFileRemoved={(id) => dispatch({ type: 'REMOVE_FILE', payload: id })}
-                      disabled={isUploading}
-                    />
-
-                    <DatasetNameInput
-                      name={state.datasetName}
-                      description={state.datasetDescription}
-                      onNameChange={(name) => dispatch({ type: 'SET_DATASET_NAME', payload: name })}
-                      onDescriptionChange={(desc) => dispatch({ type: 'SET_DATASET_DESC', payload: desc })}
-                      disabled={isUploading}
-                    />
-
-                    <BlipConfigPanel
-                      config={state.blipConfig}
-                      onChange={(config) => dispatch({ type: 'SET_BLIP_CONFIG', payload: config })}
-                    />
-
-                    {uploadError && (
-                      <div className={styles.uploadError}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="12" cy="12" r="10" />
-                          <line x1="15" y1="9" x2="9" y2="15" />
-                          <line x1="9" y1="9" x2="15" y2="15" />
-                        </svg>
-                        {uploadError}
+                    <div className={styles.wizardStepper}>
+                      <div className={`${styles.wizardStep} ${currentStep >= 1 ? styles.wizardStepCompleted : ''} ${currentStep === 1 ? styles.wizardStepActive : ''}`}>
+                        <div className={styles.wizardStepIcon}>{currentStep > 1 ? '✓' : '1'}</div>
+                        <span>Upload</span>
                       </div>
+                      <div className={`${styles.wizardStepLine} ${currentStep >= 2 ? styles.wizardStepLineActive : ''}`} />
+                      <div className={`${styles.wizardStep} ${currentStep >= 2 ? styles.wizardStepCompleted : ''} ${currentStep === 2 ? styles.wizardStepActive : ''}`}>
+                        <div className={styles.wizardStepIcon}>{currentStep > 2 ? '✓' : '2'}</div>
+                        <span>Configure</span>
+                      </div>
+                      <div className={`${styles.wizardStepLine} ${currentStep >= 3 ? styles.wizardStepLineActive : ''}`} />
+                      <div className={`${styles.wizardStep} ${currentStep >= 3 ? styles.wizardStepCompleted : ''} ${currentStep === 3 ? styles.wizardStepActive : ''}`}>
+                        <div className={styles.wizardStepIcon}>3</div>
+                        <span>Generate</span>
+                      </div>
+                    </div>
+
+                    {currentStep === 1 && (
+                      <>
+                        <UploadZone
+                          selectedFiles={state.selectedFiles}
+                          onFilesAdded={(files) => dispatch({ type: 'ADD_FILES', payload: files })}
+                          onFileRemoved={(id) => dispatch({ type: 'REMOVE_FILE', payload: id })}
+                          onClearAll={() => dispatch({ type: 'CLEAR_FILES' })}
+                          disabled={isUploading}
+                        />
+                        <div className={styles.wizardNav}>
+                          <button 
+                            className={`btn-primary ${styles.wizardNavRight}`} 
+                            onClick={() => setCurrentStep(2)}
+                            disabled={state.selectedFiles.length === 0}
+                          >
+                            Next Step
+                          </button>
+                        </div>
+                      </>
                     )}
 
-                    <GenerateButton
-                      disabled={!canGenerate}
-                      loading={isUploading}
-                      onClick={handleGenerate}
-                    />
+                    {currentStep === 2 && (
+                      <>
+                        <DatasetNameInput
+                          name={state.datasetName}
+                          description={state.datasetDescription}
+                          onNameChange={(name) => dispatch({ type: 'SET_DATASET_NAME', payload: name })}
+                          onDescriptionChange={(desc) => dispatch({ type: 'SET_DATASET_DESC', payload: desc })}
+                          disabled={isUploading}
+                        />
+
+                        <BlipConfigPanel
+                          config={state.blipConfig}
+                          onChange={(config) => dispatch({ type: 'SET_BLIP_CONFIG', payload: config })}
+                        />
+
+                        <div className={styles.wizardNav}>
+                          <button className="btn-secondary" onClick={() => setCurrentStep(1)}>
+                            Back
+                          </button>
+                          <button className={`btn-primary ${styles.wizardNavRight}`} onClick={() => setCurrentStep(3)}>
+                            Next Step
+                          </button>
+                        </div>
+                      </>
+                    )}
+
+                    {currentStep === 3 && (
+                      <>
+                        <div className={styles.summaryBox}>
+                          <h3 style={{ fontSize: 'var(--text-lg)', color: 'var(--text-primary)', marginBottom: 'var(--space-2)' }}>Ready to Generate</h3>
+                          <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>
+                            You are about to upload <strong>{state.selectedFiles.length}</strong> images to create the dataset <strong>"{state.datasetName.trim() || `Dataset — ${new Date().toLocaleDateString()}`}"</strong>.
+                          </p>
+                          <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)', marginTop: 'var(--space-2)' }}>
+                            BLIP Model: {state.blipConfig.modelVariant === 'blip-base' ? 'Base' : 'Large'}
+                          </p>
+                        </div>
+
+                        {uploadError && (
+                          <div className={styles.uploadError}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="12" cy="12" r="10" />
+                              <line x1="15" y1="9" x2="9" y2="15" />
+                              <line x1="9" y1="9" x2="15" y2="15" />
+                            </svg>
+                            {uploadError}
+                          </div>
+                        )}
+
+                        <div className={styles.wizardNav}>
+                          <button className="btn-secondary" onClick={() => setCurrentStep(2)} disabled={isUploading}>
+                            Back
+                          </button>
+                          <div className={styles.wizardNavRight} style={{ flex: 1, marginLeft: 'var(--space-4)' }}>
+                            <GenerateButton
+                              disabled={!canGenerate}
+                              loading={isUploading}
+                              onClick={handleGenerate}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </>
                 ) : (
                   <JobProgressTracker
