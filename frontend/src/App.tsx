@@ -11,7 +11,6 @@ import AccessDenied from './pages/AccessDenied';
 import ProtectedRoute from './components/ProtectedRoute';
 import DocumentationPage from './pages/DocumentationPage';
 import AdminLayout from './components/AdminLayout';
-import AdminWelcome from './pages/AdminWelcome';
 import ManageDocs from './pages/ManageDocs';
 import ManageCategories from './pages/ManageCategories';
 import ManageTags from './pages/ManageTags';
@@ -38,7 +37,6 @@ function App() {
 
       {/* Admin layout routes for documentation management */}
       <Route path="/admin" element={<AdminLayout />}>
-        <Route index element={<AdminWelcome />} />
         <Route path="docs" element={<ManageDocs />} />
         <Route path="categories" element={<ManageCategories />} />
         <Route path="tags" element={<ManageTags />} />
