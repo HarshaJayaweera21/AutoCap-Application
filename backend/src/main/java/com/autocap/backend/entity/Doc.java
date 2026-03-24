@@ -1,51 +1,48 @@
 package com.autocap.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
 @Table(name = "docs")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Doc {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", updatable = false, nullable = false)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", nullable = false)
+    @JoinColumn(name = "category_id", nullable = false, foreignKey = @ForeignKey(name = "fk_docs_category"))
     private DocCategory category;
 
-    @Column(name = "title", nullable = false)
+    @Column(nullable = false, columnDefinition = "text")
     private String title;
 
-    @Column(name = "slug", nullable = false, unique = true)
+    @Column(nullable = false, unique = true, columnDefinition = "text")
     private String slug;
 
-    @Column(name = "content", columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "text")
     private String content;
 
-    @Column(name = "endpoint")
+    @Column(columnDefinition = "text")
     private String endpoint;
 
-    @Column(name = "order_index")
+    @Column(name = "order_index", nullable = false)
     private Integer orderIndex;
 
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "is_published")
+    private Boolean isPublished;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Column(name = "created_at", insertable = false, updatable = false)
+    private OffsetDateTime createdAt;
 
-    @OneToMany(mappedBy = "doc", fetch = FetchType.LAZY)
-    private List<DocTagMap> tagMappings;
+    @Column(name = "updated_at", insertable = false, updatable = false)
+    private OffsetDateTime updatedAt;
 }

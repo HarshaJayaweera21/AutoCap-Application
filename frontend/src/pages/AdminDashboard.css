@@ -1,4 +1,4 @@
-/* ===== Admin Dashboard Layout ===== */
+/* ===== Admin Dashboard – Dark Theme ===== */
 
 .admin-container {
     min-height: 100vh;
@@ -13,170 +13,383 @@
     background: #1a1a2e;
     display: flex;
     flex-direction: column;
-    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    background: #110F17;
 }
 
-.admin-sidebar-brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 1.5rem 1.25rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.admin-sidebar-brand h2 {
-    font-size: 1.3rem;
-    margin: 0;
-    color: #e0e0ff;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-}
-
-.admin-badge {
-    font-size: 0.65rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    background: linear-gradient(135deg, #6c63ff, #4834d4);
-    color: #fff;
-    padding: 3px 8px;
-    border-radius: 4px;
-}
-
-/* ----- Navigation ----- */
-.admin-nav {
-    flex: 1;
-    padding: 1rem 0.75rem;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.admin-nav-label {
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: rgba(255, 255, 255, 0.35);
-    padding: 0 0.5rem;
-    margin: 0 0 0.5rem 0;
-}
-
-.admin-nav-btn {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    padding: 0.65rem 0.75rem;
-    border: none;
-    border-radius: 8px;
-    background: transparent;
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 0.88rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    text-align: left;
-}
-
-.admin-nav-btn:hover {
-    background: rgba(255, 255, 255, 0.06);
-    color: rgba(255, 255, 255, 0.9);
-}
-
-.admin-nav-btn.active {
-    background: linear-gradient(135deg, rgba(108, 99, 255, 0.2), rgba(72, 52, 212, 0.15));
-    color: #a5a0ff;
-    font-weight: 600;
-}
-
-.nav-icon {
-    font-size: 1.1rem;
-    width: 22px;
+/* ===== Welcome Banner ===== */
+.welcome-banner {
+    margin: 1.25rem 1.5rem 0;
+    padding: 2rem 2.5rem;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #194BFF 0%, #2B59FF 50%, #466EFF 100%);
     text-align: center;
+    box-shadow: 0 4px 28px rgba(25, 75, 255, 0.35);
+}
+
+.welcome-banner__title {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.6rem;
+    color: #F6F6F6;
+    margin: 0;
+    letter-spacing: -0.2px;
+}
+
+/* ===== User Stat Cards Row ===== */
+.stat-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    padding: 1.5rem;
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.5rem 1.75rem;
+    border-radius: 14px;
+    background: #1F1E29;
+    border: 1px solid #28272F;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.stat-card--total   { border-left: 4px solid #194BFF; }
+.stat-card--active  { border-left: 4px solid #89EB79; }
+.stat-card--deactive{ border-left: 4px solid #E84A34; }
+
+/* Icon wrapper */
+.stat-card__icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
     flex-shrink: 0;
 }
 
-/* ----- Sidebar Footer ----- */
-.admin-sidebar-footer {
-    padding: 0.75rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+.stat-card__icon-wrapper--total   { background: rgba(25,  75, 255, 0.15); color: #466EFF; }
+.stat-card__icon-wrapper--active  { background: rgba(137, 235, 121, 0.12); color: #89EB79; }
+.stat-card__icon-wrapper--deactive{ background: rgba(232,  74,  52, 0.12); color: #E84A34; }
+
+.stat-card__icon { font-size: 1.6rem; }
+
+.stat-card__info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
 }
 
-.logout-btn {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    padding: 0.65rem 0.75rem;
-    border: none;
-    border-radius: 8px;
-    background: transparent;
-    color: rgba(255, 100, 100, 0.7);
-    font-size: 0.88rem;
+.stat-card__count {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.85rem;
+    color: #F6F6F6;
+    line-height: 1;
+}
+
+.stat-card__label {
+    font-family: 'Outfit', sans-serif;
     font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    text-align: left;
+    font-size: 0.85rem;
+    color: #98979D;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
 }
 
-.logout-btn:hover {
-    background: rgba(255, 80, 80, 0.1);
-    color: #ff6b6b;
+/* ========================================
+   DATASET INTELLIGENCE PANEL
+   ======================================== */
+
+.intel-section {
+    padding: 0 1.5rem 2rem;
 }
 
-/* ----- Main Content Area ----- */
-.admin-main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background: #16162a;
-    min-height: 100vh;
-}
-
-.admin-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.25rem 2rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    background: #1a1a2e;
-}
-
-.admin-header h1 {
+.intel-section__title {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
     font-size: 1.35rem;
-    margin: 0;
-    color: #e0e0ff;
-    font-weight: 600;
-}
-
-.admin-content {
-    flex: 1;
-    padding: 2rem;
-    overflow-y: auto;
-}
-
-/* ----- Dashboard Welcome (default content) ----- */
-.admin-welcome {
+    color: #F6F6F6;
+    margin: 0.5rem 0 1.25rem;
+    letter-spacing: -0.3px;
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.intel-section__title::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 22px;
+    border-radius: 4px;
+    background: linear-gradient(180deg, #466EFF 0%, #194BFF 100%);
+}
+
+/* ── Row 1: 4 Intel Metric Cards ── */
+
+.intel-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.intel-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.4rem 1.5rem;
+    border-radius: 14px;
+    background: #1F1E29;
+    border: 1px solid #28272F;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+    transition: transform 0.22s ease, box-shadow 0.22s ease;
+    cursor: default;
+}
+
+.intel-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+}
+
+.intel-card--neutral { border-left: 4px solid #194BFF; }
+.intel-card--green   { border-left: 4px solid #89EB79; }
+.intel-card--red     { border-left: 4px solid #E84A34; }
+.intel-card--purple  { border-left: 4px solid #D8EE10; }
+
+/* Icon wrappers */
+.intel-card__icon-wrapper {
+    display: flex;
     align-items: center;
     justify-content: center;
-    gap: 1rem;
-    padding: 3rem;
-    text-align: center;
-    color: rgba(255, 255, 255, 0.5);
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    flex-shrink: 0;
 }
 
-.admin-welcome h2 {
-    font-size: 1.5rem;
-    color: rgba(255, 255, 255, 0.7);
-    margin: 0;
+.intel-card__icon-wrapper--neutral { background: rgba(25,  75, 255, 0.15); color: #466EFF; }
+.intel-card__icon-wrapper--green   { background: rgba(137, 235, 121, 0.12); color: #89EB79; }
+.intel-card__icon-wrapper--red     { background: rgba(232,  74,  52, 0.12); color: #E84A34; }
+.intel-card__icon-wrapper--purple  { background: rgba(216, 238,  16, 0.1); color: #D8EE10; }
+
+.intel-card__icon { font-size: 1.45rem; }
+
+.intel-card__info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
 }
 
-.admin-welcome p {
+.intel-card__count {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.7rem;
+    color: #F6F6F6;
+    line-height: 1.1;
+}
+
+.intel-card__label {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+    font-size: 0.78rem;
+    color: #98979D;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+/* ── Change Badges ── */
+
+.change-badge {
+    display: inline-block;
+    margin-top: 0.35rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 0.72rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    letter-spacing: 0.2px;
+}
+
+.change-badge--up      { background: rgba(137, 235, 121, 0.15); color: #89EB79; }
+.change-badge--down    { background: rgba(232,  74,  52, 0.15); color: #E84A34; }
+.change-badge--neutral { background: rgba(62,  62,  71, 0.6);  color: #98979D; }
+.change-badge--new     { background: rgba(25,  75, 255, 0.15); color: #A2B6FF; }
+
+/* ── Row 2 & 3: Two-panel Layout ── */
+
+.intel-row {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.intel-panel {
+    background: #1F1E29;
+    border: 1px solid #28272F;
+    border-radius: 14px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+}
+
+.intel-panel--compact {
+    display: flex;
+    flex-direction: column;
+}
+
+.intel-panel__title {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
     font-size: 0.95rem;
-    margin: 0;
-    max-width: 400px;
-    line-height: 1.6;
+    color: #C5C4C7;
+    margin: 0 0 1rem;
+    letter-spacing: 0.1px;
+}
+
+.intel-panel__chart { width: 100%; }
+
+.intel-panel__chart--donut {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+
+.intel-panel__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 280px;
+    color: #98979D;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+}
+
+/* Donut center text */
+.donut-center-value {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    fill: #F6F6F6;
+}
+
+.donut-center-label {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+    font-size: 0.75rem;
+    fill: #98979D;
+}
+
+/* Donut legend */
+.donut-legend {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 0.75rem;
+}
+
+.donut-legend__item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+    font-size: 0.82rem;
+    color: #98979D;
+}
+
+.donut-legend__dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+/* ── Row 3: Similarity Stats ── */
+
+.similarity-stats {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem 0;
+}
+
+.sim-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.sim-stat--primary .sim-stat__value {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 3rem;
+    line-height: 1;
+    background: linear-gradient(135deg, #466EFF 0%, #A2B6FF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.sim-stat--primary .sim-stat__label {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #98979D;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sim-stat-row {
+    display: flex;
+    gap: 3rem;
+}
+
+.sim-stat--secondary .sim-stat__value {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.6rem;
+    color: #C5C4C7;
+    line-height: 1;
+}
+
+.sim-stat--secondary .sim-stat__label {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+    font-size: 0.8rem;
+    color: #98979D;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+/* ===== Responsive ===== */
+
+@media (max-width: 1024px) {
+    .intel-cards { grid-template-columns: repeat(2, 1fr); }
+    .intel-row   { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+    .stat-cards   { grid-template-columns: 1fr; }
+    .intel-cards  { grid-template-columns: 1fr; }
+
+    .welcome-banner {
+        margin: 1rem 1rem 0;
+        padding: 1.5rem 1.25rem;
+    }
+
+    .welcome-banner__title { font-size: 1.25rem; }
+
+    .intel-section { padding: 0 1rem 1.5rem; }
 }

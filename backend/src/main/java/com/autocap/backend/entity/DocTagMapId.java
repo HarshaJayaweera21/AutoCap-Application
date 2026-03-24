@@ -1,17 +1,23 @@
 package com.autocap.backend.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import lombok.*;
 
 import java.io.Serializable;
 import java.util.UUID;
 
-@Data
+@Embeddable
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 public class DocTagMapId implements Serializable {
 
-    private UUID doc;
-    private UUID tag;
+    @Column(name = "doc_id", nullable = false)
+    private UUID docId;
+
+    @Column(name = "tag_id", nullable = false)
+    private UUID tagId;
 }

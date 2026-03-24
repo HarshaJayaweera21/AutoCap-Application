@@ -1,25 +1,26 @@
 package com.autocap.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "doc_tag_map")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@IdClass(DocTagMapId.class)
 public class DocTagMap {
 
-    @Id
+    @EmbeddedId
+    private DocTagMapId id;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "doc_id", nullable = false)
+    @MapsId("docId")
+    @JoinColumn(name = "doc_id", foreignKey = @ForeignKey(name = "fk_doc_tag_doc"))
     private Doc doc;
 
-    @Id
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tag_id", nullable = false)
+    @MapsId("tagId")
+    @JoinColumn(name = "tag_id", foreignKey = @ForeignKey(name = "fk_doc_tag_tag"))
     private DocTag tag;
 }

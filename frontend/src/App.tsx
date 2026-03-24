@@ -4,6 +4,11 @@ import Register from './pages/Register';
 import VerifyEmail from './pages/VerifyEmail';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import AdminDashboard from './pages/AdminDashboard';
+import { Dashboard } from './pages/Dashboard/Dashboard';
+import ManageUsers from './pages/ManageUsers';
+import AccessDenied from './pages/AccessDenied';
+import ProtectedRoute from './components/ProtectedRoute';
 import DocumentationPage from './pages/DocumentationPage';
 import AdminLayout from './components/AdminLayout';
 import AdminWelcome from './pages/AdminWelcome';
@@ -15,18 +20,23 @@ import ManageTokenizers from './pages/ManageTokenizers';
 function App() {
   return (
     <Routes>
-      {/* Public auth routes */}
+      {/* Public routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/access-denied" element={<AccessDenied />} />
 
       {/* Public documentation routes */}
       <Route path="/categories" element={<DocumentationPage />} />
       <Route path="/categories/:id" element={<DocumentationPage />} />
 
-      {/* Admin routes — separate layout */}
+      {/* Admin-only routes */}
+      <Route path="/admin-dashboard" element={<ProtectedRoute requiredRole="ADMIN"><AdminDashboard /></ProtectedRoute>} />
+      <Route path="/admin/manage-users" element={<ProtectedRoute requiredRole="ADMIN"><ManageUsers /></ProtectedRoute>} />
+
+      {/* Admin layout routes for documentation management */}
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<AdminWelcome />} />
         <Route path="docs" element={<ManageDocs />} />
@@ -34,6 +44,9 @@ function App() {
         <Route path="tags" element={<ManageTags />} />
         <Route path="tokenizers" element={<ManageTokenizers />} />
       </Route>
+
+      {/* Normal user routes */}
+      <Route path="/dashboard" element={<ProtectedRoute requiredRole="USER"><Dashboard /></ProtectedRoute>} />
 
       {/* Redirect root to login */}
       <Route path="*" element={<Navigate to="/login" replace />} />
