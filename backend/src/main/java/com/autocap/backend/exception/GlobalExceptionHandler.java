@@ -38,6 +38,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 new ErrorResponseDto("NOT_FOUND", ex.getMessage(), 404));
     }
 
+    // ── Documentation-module handlers ──
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFoundException(NotFoundException ex) {
+        log.warn("Not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(ex.getMessage()));
+    }
+
+    @ExceptionHandler(SlugAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleSlugAlreadyExistsException(SlugAlreadyExistsException ex) {
+        log.warn("Slug conflict: {}", ex.getMessage());
+        return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
+    }
+
     // ── General handlers ──
 
     /**
