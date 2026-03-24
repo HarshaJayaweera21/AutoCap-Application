@@ -7,6 +7,7 @@ import com.autocap.backend.entity.Doc;
 import com.autocap.backend.entity.DocCategory;
 import com.autocap.backend.entity.DocTag;
 import com.autocap.backend.entity.DocTagMap;
+import com.autocap.backend.entity.DocTagMapId;
 import com.autocap.backend.exception.NotFoundException;
 import com.autocap.backend.exception.SlugAlreadyExistsException;
 import com.autocap.backend.repository.DocCategoryRepository;
@@ -90,6 +91,7 @@ public class DocService {
         // 5. Create tag mappings
         for (DocTag tag : tags) {
             DocTagMap mapping = new DocTagMap();
+            mapping.setId(new DocTagMapId(savedDoc.getId(), tag.getId()));
             mapping.setDoc(savedDoc);
             mapping.setTag(tag);
             tagMapRepository.save(mapping);
@@ -142,6 +144,7 @@ public class DocService {
 
         for (DocTag tag : tags) {
             DocTagMap mapping = new DocTagMap();
+            mapping.setId(new DocTagMapId(doc.getId(), tag.getId()));
             mapping.setDoc(doc);
             mapping.setTag(tag);
             tagMapRepository.save(mapping);
