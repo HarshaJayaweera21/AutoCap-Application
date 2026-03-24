@@ -5,6 +5,7 @@ import { getDocById, searchDocs } from "../services/api";
 import Sidebar from "../components/Sidebar";
 import MainContent from "../components/MainContent";
 import ThemeToggle from "../components/ThemeToggle";
+import Header from "../components/Header";
 import "../docs/docs.css";
 
 const DocumentationPage = () => {
@@ -84,6 +85,7 @@ const DocumentationPage = () => {
 
     return (
         <div className="docs-layout">
+            <Header />
             {/* Top search bar */}
             <div className="docs-topbar">
                 <div className="search-wrapper">

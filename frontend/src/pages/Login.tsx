@@ -44,7 +44,7 @@ function Login() {
             if (data.role === 'ADMIN') {
                 navigate('/admin');
             } else {
-                navigate('/categories');
+                navigate('/dashboard');
             }
         } catch (err: unknown) {
             if (err instanceof Error) {
