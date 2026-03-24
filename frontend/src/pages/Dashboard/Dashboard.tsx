@@ -69,6 +69,7 @@ export const Dashboard: React.FC = () => {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
+  const [filterHighQuality, setFilterHighQuality] = useState(false);
   const navigate = useNavigate();
 
   const hasActiveJob = state.activeJobId !== null;
@@ -88,12 +89,42 @@ export const Dashboard: React.FC = () => {
       withScore.length > 0
         ? withScore.reduce((acc, d) => acc + (d.averageSimilarity ?? 0), 0) / withScore.length
         : null;
+
+    // Sparklines and Trends
+    const reversed = [...recentDatasets].reverse();
+    const imagesSparkline = reversed.map(d => d.totalItems || 0);
+    const scoreSparkline = reversed.map(d => d.averageSimilarity || 0);
+
+    let scoreTrend = undefined;
+    if (recentDatasets.length >= 2) {
+      const latest = recentDatasets[0].averageSimilarity || 0;
+      const prev = recentDatasets[1].averageSimilarity || 0;
+      if (prev > 0) {
+        const diff = ((latest - prev) / prev) * 100;
+        const direction = diff > 0.5 ? 'up' : diff < -0.5 ? 'down' : 'neutral';
+        scoreTrend = {
+          value: Math.abs(Math.round(diff * 10) / 10), // one decimal round
+          direction: direction as 'up'|'down'|'neutral',
+          label: 'vs last'
+        };
+      }
+    }
+
     return {
       totalImages,
       totalDatasets: recentDatasets.length,
       avgScore,
+      imagesSparkline,
+      scoreSparkline,
+      scoreTrend,
     };
   }, [recentDatasets]);
+
+  const displayedDatasets = useMemo(() => {
+    return filterHighQuality 
+      ? recentDatasets.filter(ds => ds.averageSimilarity && ds.averageSimilarity >= 0.8)
+      : recentDatasets;
+  }, [recentDatasets, filterHighQuality]);
 
   /* ── Before-unload guard ─────────────────────────────────────────── */
   useEffect(() => {
@@ -172,6 +203,7 @@ export const Dashboard: React.FC = () => {
             value={datasetsLoading ? '—' : stats.totalImages.toLocaleString()}
             hint="Across all datasets"
             variant="primary"
+            sparklineData={stats.imagesSparkline}
           />
           <StatsCard
             icon={<DatabaseIcon />}
@@ -190,8 +222,12 @@ export const Dashboard: React.FC = () => {
                 ? `${(stats.avgScore * 100).toFixed(1)}%`
                 : 'N/A'
             }
-            hint="CLIP score average"
+            hint={filterHighQuality ? "Filtering: High Quality (>80%)" : "Click to filter high-quality datasets"}
             variant="accent"
+            trend={stats.scoreTrend}
+            sparklineData={stats.scoreSparkline}
+            onClick={() => setFilterHighQuality(!filterHighQuality)}
+            isActive={filterHighQuality}
           />
           <StatsCard
             icon={<ActivityIcon />}
@@ -338,16 +374,18 @@ export const Dashboard: React.FC = () => {
           <aside className={styles.sidebar}>
             <div className={styles.panel}>
               <div className={styles.panelHeader}>
-                <span className={styles.panelTitle}>Recent Datasets</span>
+                <span className={styles.panelTitle}>
+                  {filterHighQuality ? 'High-Quality Datasets' : 'Recent Datasets'}
+                </span>
                 {!datasetsLoading && (
                   <span className={styles.panelCount}>
-                    {recentDatasets.length} {recentDatasets.length === 1 ? 'dataset' : 'datasets'}
+                    {displayedDatasets.length} {displayedDatasets.length === 1 ? 'dataset' : 'datasets'}
                   </span>
                 )}
               </div>
 
               {/* Column headers */}
-              {!datasetsLoading && recentDatasets.length > 0 && (
+              {!datasetsLoading && displayedDatasets.length > 0 && (
                 <div className={`${styles.datasetRow} ${styles.datasetRowHeader}`}>
                   <span className={styles.colLabel}>Name</span>
                   <span className={styles.colLabel}>Model</span>
@@ -367,17 +405,17 @@ export const Dashboard: React.FC = () => {
               )}
 
               {/* Empty state */}
-              {!datasetsLoading && recentDatasets.length === 0 && (
+              {!datasetsLoading && displayedDatasets.length === 0 && (
                 <div className={styles.emptyState}>
                   <FolderIcon />
-                  <p>No datasets yet — upload some images to get started!</p>
+                  <p>{filterHighQuality ? 'No datasets currently match the high-quality filter.' : 'No datasets yet — upload some images to get started!'}</p>
                 </div>
               )}
 
               {/* Dataset rows */}
-              {!datasetsLoading && recentDatasets.length > 0 && (
+              {!datasetsLoading && displayedDatasets.length > 0 && (
                 <div className={styles.datasetList}>
-                  {recentDatasets.map((ds) => {
+                  {displayedDatasets.map((ds) => {
                     const scorePercent =
                       ds.averageSimilarity != null
                         ? Math.round(ds.averageSimilarity * 100)
