@@ -18,6 +18,12 @@ class JobRequest(BaseModel):
     datasetName: str
     datasetDescription: Optional[str] = ""
     modelVariant: str
+    temperature: float = 1.0
+    maxLength: int = 50
+    minLength: int = 5
+    numBeams: int = 4
+    repetitionPenalty: float = 1.0
+    topP: float = 0.9
     images: List[ImageDto]
 
 @app.get("/")
@@ -31,7 +37,13 @@ def say_hello(name: str):
 @app.post("/api/captions/generate")
 async def generate_caption_api(
     file: UploadFile = File(...),
-    modelVariant: str = Form("caption_model")
+    modelVariant: str = Form("caption_model"),
+    temperature: float = Form(1.0),
+    maxLength: int = Form(50),
+    minLength: int = Form(5),
+    numBeams: int = Form(4),
+    repetitionPenalty: float = Form(1.0),
+    topP: float = Form(0.9)
 ):
     if not file.content_type.startswith('image/'):
         raise HTTPException(status_code=400, detail="Invalid file type. Please upload an image.")
@@ -39,7 +51,15 @@ async def generate_caption_api(
     contents = await file.read()
     
     try:
-        caption = caption_service.get_caption(contents, modelVariant)
+        kwargs = {
+            "temperature": temperature,
+            "max_length": maxLength,
+            "min_length": minLength,
+            "num_beams": numBeams,
+            "repetition_penalty": repetitionPenalty,
+            "top_p": topP
+        }
+        caption = caption_service.get_caption(contents, modelVariant, **kwargs)
         return {"caption": caption}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -59,8 +79,16 @@ def process_job_background(job_request: JobRequest):
                       f"(HTTP {response.status_code})")
                 continue
 
+            kwargs = {
+                "temperature": job_request.temperature,
+                "max_length": job_request.maxLength,
+                "min_length": job_request.minLength,
+                "num_beams": job_request.numBeams,
+                "repetition_penalty": job_request.repetitionPenalty,
+                "top_p": job_request.topP
+            }
             contents = response.content
-            caption_text = caption_service.get_caption(contents, job_request.modelVariant)
+            caption_text = caption_service.get_caption(contents, job_request.modelVariant, **kwargs)
             
             # Match FastApiCallbackDto.CaptionResultDto
             results.append({

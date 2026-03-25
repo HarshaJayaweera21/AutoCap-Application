@@ -73,7 +73,7 @@ class CaptionService:
             print(f"Error loading caption_model: {e}")
             self.caption_model = None
 
-    def get_caption(self, image_bytes: bytes, model_variant: str = "caption_model") -> str:
+    def get_caption(self, image_bytes: bytes, model_variant: str = "caption_model", **kwargs) -> str:
         if model_variant in ["base_line_model", "baseline_model"]:
             if self.baseline_encoder is None or self.baseline_decoder is None:
                 raise HTTPException(status_code=503, detail="Baseline model is not loaded.")
@@ -103,7 +103,8 @@ class CaptionService:
                 caption = generate_caption_greedy(
                     self.caption_model,
                     image_tensor,
-                    self.tokenizer
+                    self.tokenizer,
+                    **kwargs
                 )
                 return caption
             except Exception as e:

@@ -16,6 +16,12 @@ public class FastApiJobRequestDto {
     private String datasetName;
     private String datasetDescription;
     private String modelVariant;
+    private Double temperature;
+    private Integer maxLength;
+    private Integer minLength;
+    private Integer numBeams;
+    private Double repetitionPenalty;
+    private Double topP;
     private List<ImageDto> images;
 
     @Data

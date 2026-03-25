@@ -121,7 +121,7 @@ class CaptionModel(nn.Module):
         )
         return outputs
 
-def generate_caption_greedy(model, image, tokenizer, max_length=30):
+def generate_caption_greedy(model, image, tokenizer, max_length=50, min_length=5, temperature=1.0, num_beams=4, repetition_penalty=1.0, top_p=0.9):
     model.eval()
     with torch.no_grad():
         img_feat = model.cnn(image)
@@ -137,19 +137,22 @@ def generate_caption_greedy(model, image, tokenizer, max_length=30):
         start_token_id = tokenizer.bos_token_id or tokenizer.eos_token_id
         input_ids = torch.tensor([[start_token_id]], device=image.device)
         
-        for _ in range(max_length):
-            outputs = model.llm(
-                input_ids=input_ids,
-                encoder_hidden_states=visual_tokens,
-                encoder_attention_mask=encoder_mask
-            )
-            logits = outputs.logits[:, -1, :]
-            next_token = torch.argmax(logits, dim=-1, keepdim=True)
-            input_ids = torch.cat([input_ids, next_token], dim=1)
-            
-            token_id = next_token.squeeze().item()
-            if token_id == tokenizer.eos_token_id:
-                break
-                
-        caption = tokenizer.decode(input_ids[0], skip_special_tokens=True)
+        do_sample = temperature > 0.0 and top_p < 1.0
+        outputs = model.llm.generate(
+            input_ids=input_ids,
+            encoder_hidden_states=visual_tokens,
+            encoder_attention_mask=encoder_mask,
+            max_new_tokens=max_length,
+            min_length=min_length,
+            temperature=temperature,
+            num_beams=num_beams,
+            repetition_penalty=repetition_penalty,
+            top_p=top_p,
+            pad_token_id=tokenizer.eos_token_id,
+            do_sample=do_sample
+        )
+        
+        # Strip the input_ids from the output
+        generated_ids = outputs[0][1:]
+        caption = tokenizer.decode(generated_ids, skip_special_tokens=True)
         return caption
