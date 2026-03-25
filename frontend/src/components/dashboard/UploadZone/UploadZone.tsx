@@ -7,6 +7,7 @@ interface UploadZoneProps {
   selectedFiles: SelectedFile[];
   onFilesAdded: (files: SelectedFile[]) => void;
   onFileRemoved: (id: string) => void;
+  onClearAll: () => void;
   disabled: boolean;
 }
 
@@ -18,6 +19,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
   selectedFiles,
   onFilesAdded,
   onFileRemoved,
+  onClearAll,
   disabled,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -154,8 +156,15 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
 
       {selectedFiles.length > 0 && (
         <>
-          <div className={styles.counter}>
-            {selectedFiles.length} image{selectedFiles.length !== 1 ? 's' : ''} selected — {totalSizeMB} MB
+          <div className={styles.toolbar}>
+            <div className={styles.metrics}>
+              <strong>{selectedFiles.length}</strong> image{selectedFiles.length !== 1 ? 's' : ''} • <strong>{totalSizeMB} MB</strong> total
+            </div>
+            {!disabled && (
+              <button className={styles.clearAllBtn} onClick={onClearAll}>
+                Quick Remove All
+              </button>
+            )}
           </div>
           <div className={styles.thumbnailGrid}>
             {selectedFiles.map((sf) => (
@@ -185,6 +194,15 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
                 </div>
               </div>
             ))}
+          </div>
+          
+          <div className={styles.proMetrics}>
+            <span className={styles.proIcon}>📦</span>
+            <span>
+              <strong>{selectedFiles.length} images ready</strong>
+              <span style={{ margin: '0 8px', opacity: 0.5 }}>|</span>
+              Estimated processing time: <strong>~{Math.ceil(selectedFiles.length * 0.75)}s</strong>
+            </span>
           </div>
         </>
       )}

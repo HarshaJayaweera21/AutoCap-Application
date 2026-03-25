@@ -34,8 +34,10 @@
 
 .dragging {
   border-color: var(--primary) !important;
-  background: rgba(25, 75, 255, 0.08) !important;
-  box-shadow: 0 0 0 3px rgba(25, 75, 255, 0.12), var(--shadow-glow-primary);
+  background: rgba(25, 75, 255, 0.15) !important;
+  box-shadow: 0 0 20px rgba(25, 75, 255, 0.4), inset 0 0 15px rgba(25, 75, 255, 0.2);
+  transform: scale(1.02);
+  z-index: 10;
 }
 
 .dragging::before {
@@ -101,11 +103,59 @@
   font-size: var(--text-sm);
 }
 
-.counter {
-  margin-top: var(--space-3);
+/* Toolbar and Metrics */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-5);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.metrics {
   font-size: var(--text-sm);
   color: var(--text-secondary);
   font-weight: var(--weight-medium);
+}
+
+.metrics strong {
+  color: var(--text-primary);
+}
+
+.clearAllBtn {
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.clearAllBtn:hover {
+  background: rgba(232, 74, 52, 0.1);
+  border-color: rgba(232, 74, 52, 0.3);
+  color: var(--error);
+}
+
+/* Pro Metrics */
+.proMetrics {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding: var(--space-3);
+  background: rgba(25, 75, 255, 0.05);
+  border: 1px solid rgba(25, 75, 255, 0.2);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  color: var(--primary-lighter);
+}
+
+.proIcon {
+  font-size: 18px;
 }
 
 .thumbnailGrid {

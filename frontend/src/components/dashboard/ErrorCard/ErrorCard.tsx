@@ -22,7 +22,7 @@ export const ErrorCard: React.FC<ErrorCardProps> = ({ errorMessage, onReset }) =
           <line x1="15" y1="9" x2="9" y2="15" />
           <line x1="9" y1="9" x2="15" y2="15" />
         </svg>
-        <span style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--weight-semibold)', color: 'var(--error)' }}>
+        <span style={{ fontSize: 'var(--text-xl)', fontWeight: 'var(--weight-medium)', color: 'var(--error)' }}>
           Generation failed
         </span>
       </div>

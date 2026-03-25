@@ -95,6 +95,12 @@ public class ImageUploadService {
                 datasetName,
                 datasetDescription,
                 blipConfig.getModelVariant(),
+                blipConfig.getTemperature(),
+                blipConfig.getMaxLength(),
+                blipConfig.getMinLength(),
+                blipConfig.getNumBeams(),
+                blipConfig.getRepetitionPenalty(),
+                blipConfig.getTopP(),
                 imageDtos);
 
         try {

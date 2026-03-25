@@ -22,7 +22,7 @@ export const DatasetNameInput: React.FC<DatasetNameInputProps> = ({
     <div>
       <div style={{ marginBottom: 'var(--space-4)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-2)' }}>
-          <label style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', fontWeight: 'var(--weight-medium)' }}>
+          <label style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', fontWeight: 'var(--weight-regular)' }}>
             Dataset Name
           </label>
           <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
@@ -46,7 +46,7 @@ export const DatasetNameInput: React.FC<DatasetNameInputProps> = ({
 
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-2)' }}>
-          <label style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', fontWeight: 'var(--weight-medium)' }}>
+          <label style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', fontWeight: 'var(--weight-regular)' }}>
             Description <span style={{ color: 'var(--text-muted)', fontWeight: 'var(--weight-regular)' }}>(optional)</span>
           </label>
           <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
