@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface DatasetItemRepository extends JpaRepository<DatasetItem, DatasetItemId> {
     List<DatasetItem> findAllByIdDatasetId(Long datasetId);
+
+    void deleteByIdDatasetIdAndIdCaptionIdIn(Long datasetId, List<Long> captionIds);
 }

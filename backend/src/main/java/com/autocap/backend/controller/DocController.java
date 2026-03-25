@@ -27,7 +27,7 @@ public class DocController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DocResponseDTO> getDocById(@PathVariable UUID id) {
+    public ResponseEntity<DocResponseDTO> getDocById(@PathVariable("id") UUID id) {
         return ResponseEntity.ok(docService.getDocById(id));
     }
 }
