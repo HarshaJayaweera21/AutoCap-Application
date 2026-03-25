@@ -17,14 +17,14 @@ public class JobController {
     private final JobService jobService;
 
     @GetMapping("/{jobId}/status")
-    public ResponseEntity<JobStatusDto> getJobStatus(@PathVariable Long jobId) {
+    public ResponseEntity<JobStatusDto> getJobStatus(@PathVariable("jobId") Long jobId) {
         JobStatusDto status = jobService.getStatus(jobId);
         return ResponseEntity.ok(status);
     }
 
     @PostMapping("/{jobId}/callback")
     public ResponseEntity<Void> processCallback(
-            @PathVariable Long jobId,
+            @PathVariable("jobId") Long jobId,
             @RequestBody FastApiCallbackDto callbackDto) {
         log.info("Received callback for job {}", jobId);
         jobService.processCallback(jobId, callbackDto);

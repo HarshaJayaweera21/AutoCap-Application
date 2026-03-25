@@ -249,20 +249,22 @@ function AdminDashboard() {
                             ) : (
                                 <ResponsiveContainer width="100%" height={280}>
                                     <LineChart data={intel?.captionsPerDay ?? []}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                                         <XAxis
                                             dataKey="date"
-                                            tick={{ fontSize: 11 }}
+                                            tick={{ fontSize: 11, fill: '#98979d' }}
                                             tickFormatter={(v: string) => {
                                                 const d = new Date(v);
                                                 return `${d.getDate()}/${d.getMonth() + 1}`;
                                             }}
                                         />
-                                        <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                                        <YAxis tick={{ fontSize: 11, fill: '#98979d' }} allowDecimals={false} />
                                         <Tooltip
                                             contentStyle={{
                                                 borderRadius: 10,
-                                                border: '1px solid #e5e7eb',
+                                                border: '1px solid rgba(255,255,255,0.1)',
+                                                background: '#1c1c20',
+                                                color: '#e4e4e7',
                                                 fontSize: 13,
                                             }}
                                         />
@@ -311,7 +313,9 @@ function AdminDashboard() {
                                         <Tooltip
                                             contentStyle={{
                                                 borderRadius: 10,
-                                                border: '1px solid #e5e7eb',
+                                                border: '1px solid rgba(255,255,255,0.1)',
+                                                background: '#1c1c20',
+                                                color: '#e4e4e7',
                                                 fontSize: 13,
                                             }}
                                         />
@@ -407,13 +411,15 @@ function AdminDashboard() {
                             ) : (
                                 <ResponsiveContainer width="100%" height={280}>
                                     <BarChart data={intel?.similarityDistribution ?? []}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                                        <XAxis dataKey="range" tick={{ fontSize: 11 }} />
-                                        <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                                        <XAxis dataKey="range" tick={{ fontSize: 11, fill: '#98979d' }} />
+                                        <YAxis tick={{ fontSize: 11, fill: '#98979d' }} allowDecimals={false} />
                                         <Tooltip
                                             contentStyle={{
                                                 borderRadius: 10,
-                                                border: '1px solid #e5e7eb',
+                                                border: '1px solid rgba(255,255,255,0.1)',
+                                                background: '#1c1c20',
+                                                color: '#e4e4e7',
                                                 fontSize: 13,
                                             }}
                                         />

@@ -34,6 +34,10 @@ public class DatasetService {
     private final DatasetRepository datasetRepository;
     private final DatasetItemRepository datasetItemRepository;
     private final RestTemplate restTemplate;
+    private final com.autocap.backend.repository.CaptionRepository captionRepository;
+    private final com.autocap.backend.repository.ImageRepository imageRepository;
+    
+    private static final String SUPABASE_STORAGE_BASE_URL = "https://mztbiewiqjnairxnurfk.supabase.co/storage/v1/object/public/Images/";
 
     /**
      * Returns the most recent datasets for a given user.
@@ -151,6 +155,112 @@ public class DatasetService {
                 return null;
             }
         }
+    }
+
+    @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<com.autocap.backend.dto.PublicCaptionSearchDto> getDatasetItems(Long datasetId, org.springframework.data.domain.Pageable pageable) {
+        return captionRepository.findItemsByDatasetId(datasetId, pageable)
+                .map(projection -> com.autocap.backend.dto.PublicCaptionSearchDto.builder()
+                        .captionId(projection.getCaptionId())
+                        .imageId(projection.getImageId())
+                        .imageUrl((projection.getOriginalName() != null) ? SUPABASE_STORAGE_BASE_URL + projection.getOriginalName() : null)
+                        .captionText(projection.getCaptionText())
+                        .similarityScore(projection.getSimilarityScore())
+                        .isFlagged(projection.getIsFlagged())
+                        .isEdited(projection.getIsEdited())
+                        .build());
+    }
+
+    @Transactional
+    public void updateCaptions(Long datasetId, List<com.autocap.backend.dto.CaptionUpdateDto> updates) {
+        for (com.autocap.backend.dto.CaptionUpdateDto update : updates) {
+            captionRepository.updateCaptionText(update.getId(), update.getNewText());
+        }
+    }
+
+    @Transactional
+    public void deleteDatasetItems(Long datasetId, List<Long> captionIds) {
+        if (captionIds == null || captionIds.isEmpty()) return;
+
+        // 1. Remove bridge-table rows first (no FK dependents)
+        datasetItemRepository.deleteByIdDatasetIdAndIdCaptionIdIn(datasetId, captionIds);
+        datasetItemRepository.flush();
+
+        // 2. Delete captions (they reference images, so safe to delete after bridge rows)
+        captionRepository.deleteAllById(captionIds);
+        captionRepository.flush();
+
+        // 3. Update dataset item count
+        Dataset dataset = datasetRepository.findById(datasetId)
+                .orElseThrow(() -> new DatasetNotFoundException("Dataset not found"));
+        dataset.setTotalItems(datasetItemRepository.findAllByIdDatasetId(datasetId).size());
+        datasetRepository.save(dataset);
+    }
+
+    /**
+     * Returns all datasets belonging to the given user.
+     */
+    @Transactional(readOnly = true)
+    public List<com.autocap.backend.dto.MyDatasetDto> getAllUserDatasets(User user) {
+        return datasetRepository.findAllByUser(user).stream()
+                .map(d -> com.autocap.backend.dto.MyDatasetDto.builder()
+                        .id(d.getId())
+                        .name(d.getName())
+                        .description(d.getDescription())
+                        .totalItems(d.getTotalItems())
+                        .averageSimilarity(d.getAverageSimilarity())
+                        .isPublic(d.getIsPublic())
+                        .format(d.getFormat())
+                        .createdAt(d.getCreatedAt())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Updates a dataset's name, description, and visibility.
+     */
+    @Transactional
+    public void updateDataset(Long datasetId, com.autocap.backend.dto.DatasetUpdateRequest request) {
+        Dataset dataset = datasetRepository.findById(datasetId)
+                .orElseThrow(() -> new DatasetNotFoundException("Dataset not found"));
+        if (request.getName() != null) dataset.setName(request.getName());
+        if (request.getDescription() != null) dataset.setDescription(request.getDescription());
+        if (request.getIsPublic() != null) dataset.setIsPublic(request.getIsPublic());
+        datasetRepository.save(dataset);
+    }
+
+    /**
+     * Completely deletes a dataset and all related records (dataset_items, captions, images).
+     */
+    @Transactional
+    public void deleteEntireDataset(Long datasetId) {
+        Dataset dataset = datasetRepository.findById(datasetId)
+                .orElseThrow(() -> new DatasetNotFoundException("Dataset not found"));
+
+        List<DatasetItem> items = datasetItemRepository.findAllByIdDatasetId(datasetId);
+        List<Long> captionIds = items.stream().map(i -> i.getId().getCaptionId()).distinct().collect(Collectors.toList());
+        List<Long> imageIds = items.stream().map(i -> i.getId().getImageId()).distinct().collect(Collectors.toList());
+
+        // 1. Delete bridge-table rows
+        for (DatasetItem item : items) {
+            datasetItemRepository.delete(item);
+        }
+        datasetItemRepository.flush();
+
+        // 2. Delete captions
+        if (!captionIds.isEmpty()) {
+            captionRepository.deleteAllById(captionIds);
+            captionRepository.flush();
+        }
+
+        // 3. Delete images
+        if (!imageIds.isEmpty()) {
+            imageRepository.deleteAllById(imageIds);
+            imageRepository.flush();
+        }
+
+        // 4. Delete the dataset itself
+        datasetRepository.delete(dataset);
     }
 
     /** Thrown when a requested dataset does not exist. */

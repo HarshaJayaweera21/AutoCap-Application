@@ -31,7 +31,7 @@ public class AdminTagController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTag(@PathVariable UUID id) {
+    public ResponseEntity<Void> deleteTag(@PathVariable("id") UUID id) {
         tagService.deleteTag(id);
         return ResponseEntity.noContent().build();
     }

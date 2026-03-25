@@ -27,14 +27,14 @@ public class AdminCategoryController {
 
     @PutMapping("/{id}")
     public ResponseEntity<CategoryResponseDTO> updateCategory(
-            @PathVariable UUID id,
+            @PathVariable("id") UUID id,
             @Valid @RequestBody UpdateCategoryRequest request) {
         CategoryResponseDTO updated = categoryService.updateCategory(id, request);
         return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCategory(@PathVariable UUID id) {
+    public ResponseEntity<Void> deleteCategory(@PathVariable("id") UUID id) {
         categoryService.deleteCategory(id);
         return ResponseEntity.noContent().build();
     }
