@@ -19,7 +19,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSuccess, onCancel, feedba
     const [message, setMessage] = useState('');
     const [rating, setRating] = useState(0);
 
-    // ✅ Validation states
+    //  Validation states
     const [messageError, setMessageError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
@@ -45,7 +45,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSuccess, onCancel, feedba
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // ✅ Validation
+        //  Validation
         if (!message.trim()) {
             setMessageError("Please fill the message field.");
             return;
@@ -223,7 +223,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSuccess, onCancel, feedba
                             type="submit"
                             className="fb-btn fb-btn-primary"
                             style={{ flex: 1 }}
-                            disabled={loading} // ✅ allow click even if empty
+                            disabled={loading} // allow click even if empty
                         >
                             {loading
                                 ? (currentFeedback ? 'Updating...' : 'Submitting...')
