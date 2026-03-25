@@ -183,16 +183,9 @@ h2 {
   justify-content: center;
 }
 
-/*.btn-primary {
+.btn-primary {
   background: var(--grad-blue);
   color: white;
-  box-shadow: var(--shadow-soft);
-}*/
-
-.btn-primary {
-  background: white;
-  color: black;
-  /* important so text is visible */
   box-shadow: var(--shadow-soft);
 }
 
