@@ -12,26 +12,20 @@ import java.util.List;
 public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
 
     // Find all feedback submitted by a specific user
-    List<Feedback> findByUserId(Long userId);
-
-    // Find feedback by status (e.g., 'New', 'In Review')
-    List<Feedback> findByStatus(String status);
-
-    // Find feedback by type (e.g., 'Bug Report')
-    List<Feedback> findByType(String type);
-
-    // Find feedback by type and status
-    List<Feedback> findByTypeAndStatus(String type, String status);
+    List<Feedback> findByUser_Id(Long userId);
 
     /**
      * Flexible filtered query used by the service layer.
      * All filters are optional — pass null to skip each filter.
      * Results are ordered by newest first (null-safe: null createdAt comes last).
+     *
+     * Note: type and status are compared as strings because the JPA converters
+     * store them as their DB string values.
      */
     @Query("""
             SELECT f FROM Feedback f
-            WHERE (:type IS NULL OR f.type = :type)
-              AND (:status IS NULL OR f.status = :status)
+            WHERE (:type IS NULL OR CAST(f.type AS string) = :type)
+              AND (:status IS NULL OR CAST(f.status AS string) = :status)
               AND (:search IS NULL OR :search = ''
                    OR LOWER(f.subject) LIKE LOWER(CONCAT('%', :search, '%'))
                    OR LOWER(f.message) LIKE LOWER(CONCAT('%', :search, '%')))

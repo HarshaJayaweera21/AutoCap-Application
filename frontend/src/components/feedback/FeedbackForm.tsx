@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useFeedback } from '../../hooks/useFeedback';
 import { FeedbackType, Feedback, FeedbackUpdateInput } from '../../types/feedback';
+import Header from '../Header';
 import './feedback.css';
 
 interface FeedbackFormProps {
@@ -92,7 +93,9 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSuccess, onCancel, feedba
     };
 
     return (
-        <div className="fb-module-container">
+        <>
+            <Header />
+            <div className="fb-module-container">
             <div className="fb-card" style={{ maxWidth: '600px', margin: '0 auto' }}>
                 <h1 className="fb-h1">
                     {currentFeedback ? 'Update Feedback' : 'Submit Feedback'}
@@ -234,6 +237,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSuccess, onCancel, feedba
                 </form>
             </div>
         </div>
+        </>
     );
 };
 

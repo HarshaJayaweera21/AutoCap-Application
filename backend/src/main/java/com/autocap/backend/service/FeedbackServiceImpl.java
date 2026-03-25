@@ -6,7 +6,11 @@ import com.autocap.backend.dto.FeedbackDTO;
 import com.autocap.backend.dto.FeedbackStatsData;
 import com.autocap.backend.dto.FeedbackUpdateInput;
 import com.autocap.backend.entity.Feedback;
+import com.autocap.backend.entity.User;
+import com.autocap.backend.entity.enums.FeedbackStatus;
+import com.autocap.backend.entity.enums.FeedbackType;
 import com.autocap.backend.repository.FeedbackRepository;
+import com.autocap.backend.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,23 +28,29 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Autowired
     private FeedbackRepository feedbackRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @Override
     public FeedbackDTO createFeedback(FeedbackCreateInput input, Long userId) {
         Feedback feedback = new Feedback();
 
-        // userId may be null (anonymous), which is allowed — the DB column is
-        // nullable-friendly
-        // but we only persist it if it's valid (not 0, which would violate FK)
+        // Look up the User entity by ID if provided
         if (userId != null && userId > 0) {
-            feedback.setUserId(userId);
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+            feedback.setUser(user);
         }
 
-        feedback.setType(input.getType() != null ? input.getType() : "General");
+        // Convert String type from DTO to enum
+        String typeStr = input.getType() != null ? input.getType() : "General";
+        feedback.setType(FeedbackType.fromDbValue(typeStr));
+
         feedback.setSubject(input.getSubject());
         feedback.setMessage(input.getMessage());
         feedback.setRating(input.getRating());
         feedback.setScreenshotUrl(input.getScreenshot_url());
-        feedback.setStatus("New"); // Always start as New
+        feedback.setStatus(FeedbackStatus.NEW); // Always start as New
 
         Feedback saved = feedbackRepository.save(feedback);
         return convertToDTO(saved);
@@ -48,8 +58,8 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     @Override
     public List<FeedbackDTO> getAllFeedback(String type, String status, String search, int skip, int limit) {
-        // Use DB-level filtering via JPQL — avoids loading all rows into memory
-        // Pass null for empty strings so the JPQL IS NULL check works correctly
+        // Pass type/status strings directly — the JPQL query compares against
+        // the DB column which stores the multi-word string values via converter
         String typeFilter = (type != null && !type.isBlank()) ? type : null;
         String statusFilter = (status != null && !status.isBlank()) ? status : null;
         String searchFilter = (search != null && !search.isBlank()) ? search : null;
@@ -77,7 +87,7 @@ public class FeedbackServiceImpl implements FeedbackService {
                 .orElseThrow(() -> new EntityNotFoundException("Feedback not found with id: " + id));
 
         if (updateInput.getStatus() != null && !updateInput.getStatus().isBlank()) {
-            feedback.setStatus(updateInput.getStatus());
+            feedback.setStatus(FeedbackStatus.fromDbValue(updateInput.getStatus()));
         }
 
         Feedback updated = feedbackRepository.save(feedback);
@@ -98,7 +108,6 @@ public class FeedbackServiceImpl implements FeedbackService {
 
         long totalCount = all.size();
 
-        // Fixed: use mapToDouble on Integer field (mapToLong caused autoboxing issues)
         double avgRating = all.stream()
                 .filter(f -> f.getRating() != null)
                 .mapToDouble(Feedback::getRating)
@@ -110,10 +119,10 @@ public class FeedbackServiceImpl implements FeedbackService {
 
         for (Feedback f : all) {
             if (f.getStatus() != null) {
-                statusBreakdown.merge(f.getStatus(), 1L, (a, b) -> a + b);
+                statusBreakdown.merge(f.getStatus().getDbValue(), 1L, (a, b) -> a + b);
             }
             if (f.getType() != null) {
-                typeDistribution.merge(f.getType(), 1L, (a, b) -> a + b);
+                typeDistribution.merge(f.getType().getDbValue(), 1L, (a, b) -> a + b);
             }
         }
 
@@ -126,12 +135,13 @@ public class FeedbackServiceImpl implements FeedbackService {
                 .orElseThrow(() -> new EntityNotFoundException("Feedback not found with id: " + id));
 
         // Check ownership
-        if (feedback.getUserId() == null || !feedback.getUserId().equals(userId)) {
+        Long feedbackUserId = feedback.getUser() != null ? feedback.getUser().getId() : null;
+        if (feedbackUserId == null || !feedbackUserId.equals(userId)) {
             throw new EntityNotFoundException("Feedback not found or access denied");
         }
 
         if (updateInput.getType() != null && !updateInput.getType().isBlank()) {
-            feedback.setType(updateInput.getType());
+            feedback.setType(FeedbackType.fromDbValue(updateInput.getType()));
         }
         if (updateInput.getSubject() != null) {
             feedback.setSubject(updateInput.getSubject());
@@ -156,7 +166,8 @@ public class FeedbackServiceImpl implements FeedbackService {
                 .orElseThrow(() -> new EntityNotFoundException("Feedback not found with id: " + id));
 
         // Check ownership
-        if (feedback.getUserId() == null || !feedback.getUserId().equals(userId)) {
+        Long feedbackUserId = feedback.getUser() != null ? feedback.getUser().getId() : null;
+        if (feedbackUserId == null || !feedbackUserId.equals(userId)) {
             throw new EntityNotFoundException("Feedback not found or access denied");
         }
 
@@ -170,12 +181,12 @@ public class FeedbackServiceImpl implements FeedbackService {
     private FeedbackDTO convertToDTO(Feedback feedback) {
         FeedbackDTO dto = new FeedbackDTO();
         dto.setId(feedback.getId());
-        dto.setUser_id(feedback.getUserId());
-        dto.setType(feedback.getType());
+        dto.setUser_id(feedback.getUser() != null ? feedback.getUser().getId() : null);
+        dto.setType(feedback.getType() != null ? feedback.getType().getDbValue() : null);
         dto.setSubject(feedback.getSubject());
         dto.setMessage(feedback.getMessage());
         dto.setRating(feedback.getRating());
-        dto.setStatus(feedback.getStatus());
+        dto.setStatus(feedback.getStatus() != null ? feedback.getStatus().getDbValue() : null);
         dto.setScreenshot_url(feedback.getScreenshotUrl());
         dto.setCreated_at(feedback.getCreatedAt());
         dto.setUpdated_at(feedback.getUpdatedAt());

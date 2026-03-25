@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useFeedback } from '../../hooks/useFeedback';
 import { Feedback } from '../../types/feedback';
 import { getStatusColor, formatDate } from '../../utils/feedbackHelpers';
+import Header from '../Header';
 import './feedback.css';
 
 const AdminFeedbackDashboard: React.FC = () => {
-    const { getAdminFeedback, updateFeedbackStatus, loading, error } = useFeedback();
+    const { getAdminFeedback, updateFeedbackStatus, deleteFeedback, loading, error } = useFeedback();
     const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
     const [statusFilter, setStatusFilter] = useState('');
     const [typeFilter, setTypeFilter] = useState('');
@@ -41,12 +42,29 @@ const AdminFeedbackDashboard: React.FC = () => {
         }
     };
 
+    const handleDelete = async (id: number) => {
+        if (window.confirm('Are you sure you want to delete this feedback?')) {
+            try {
+                await deleteFeedback(id);
+                setFeedbacks(feedbacks.filter(f => f.id !== id));
+                if (selectedFeedback?.id === id) {
+                    setSelectedFeedback(null);
+                }
+            } catch (err: any) {
+                alert('Failed to delete feedback: ' + err.message);
+            }
+        }
+    };
+
+
     if (error) {
         return <div className="fb-module-container"><div className="fb-text" style={{ color: 'var(--fb-error)' }}>Error: {error}</div></div>;
     }
 
     return (
-        <div className="fb-module-container" style={{ display: 'flex', gap: '2rem', height: '100vh', overflow: 'hidden', padding: '1rem' }}>
+        <>
+            <Header />
+            <div className="fb-module-container" style={{ display: 'flex', gap: '2rem', height: '100vh', overflow: 'hidden', padding: '1rem' }}>
 
             {/* Left Sidebar - List */}
             <div className="fb-card" style={{ flex: '1', display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
@@ -138,6 +156,13 @@ const AdminFeedbackDashboard: React.FC = () => {
                                 >
                                     {statuses.map(s => <option key={s} value={s}>{s}</option>)}
                                 </select>
+                                <button 
+                                    className="fb-btn" 
+                                    style={{ backgroundColor: 'var(--fb-error)', color: 'white', border: '1px solid var(--fb-error)', padding: '0.3rem 0.8rem', borderRadius: '4px', cursor: 'pointer' }}
+                                    onClick={() => handleDelete(selectedFeedback.id)}
+                                >
+                                    Delete
+                                </button>
                             </div>
                         </div>
 
@@ -173,6 +198,7 @@ const AdminFeedbackDashboard: React.FC = () => {
             </div>
 
         </div>
+        </>
     );
 };
 

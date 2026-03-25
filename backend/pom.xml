@@ -80,12 +80,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- PostgreSQL Driver -->
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-        </dependency>
-
         <!-- JWT Dependency -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>

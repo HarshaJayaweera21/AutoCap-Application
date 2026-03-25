@@ -8,13 +8,18 @@ import {
 
 const API_BASE_URL = (import.meta as any).env.VITE_API_URL || 'http://localhost:8080/api';
 
+const getCookie = (name: string): string | null => {
+    const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
+    return match ? decodeURIComponent(match[2]) : null;
+};
+
 class FeedbackService {
     private getHeaders(): HeadersInit {
         const headers: HeadersInit = {
             'Content-Type': 'application/json',
         };
 
-        const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+        const token = getCookie('token') || localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }

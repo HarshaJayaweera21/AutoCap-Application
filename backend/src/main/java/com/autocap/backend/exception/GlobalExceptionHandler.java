@@ -79,20 +79,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Override the parent's handler for MaxUploadSizeExceededException
+     * Handle MaxUploadSizeExceededException
      * to return our custom ErrorResponseDto shape.
      */
-    @Override
-    protected ResponseEntity<Object> handleMaxUploadSizeExceededException(
-            MaxUploadSizeExceededException ex,
-            HttpHeaders headers,
-            HttpStatusCode status,
-            WebRequest request) {
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponseDto> handleMaxUploadSizeExceeded(
+            MaxUploadSizeExceededException ex) {
         log.warn("Upload size exceeded: {}", ex.getMessage());
         ErrorResponseDto body = new ErrorResponseDto("UPLOAD_TOO_LARGE",
                 "Upload failed: each file must be under 10 MB and the total request must be under 500 MB. Please reduce the number or size of images.",
                 400);
-        return ResponseEntity.badRequest().headers(headers).body(body);
+        return ResponseEntity.badRequest().body(body);
     }
 
     /**
