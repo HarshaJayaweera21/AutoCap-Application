@@ -38,13 +38,13 @@ function App() {
             <Route path="/admin-dashboard" element={<ProtectedRoute requiredRole="ADMIN"><AdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/manage-users" element={<ProtectedRoute requiredRole="ADMIN"><ManageUsers /></ProtectedRoute>} />
 
-            {/* Admin layout routes for documentation management */}
-            <Route path="/admin" element={<AdminLayout />}>
-                <Route path="docs" element={<ManageDocs />} />
-                <Route path="categories" element={<ManageCategories />} />
-                <Route path="tags" element={<ManageTags />} />
-                <Route path="tokenizers" element={<ManageTokenizers />} />
-            </Route>
+      {/* Admin layout routes for documentation management */}
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route path="docs" element={<ManageDocs />} />
+        <Route path="categories" element={<ManageCategories />} />
+        <Route path="tags" element={<ManageTags />} />
+        <Route path="tokenizers" element={<ManageTokenizers />} />
+      </Route>
 
             {/* Normal user routes */}
             <Route path="/dashboard" element={<ProtectedRoute requiredRole="USER"><Dashboard /></ProtectedRoute>} />
