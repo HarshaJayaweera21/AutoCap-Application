@@ -24,3 +24,5 @@ dashboard_module_spec.md
 frontend/.env
 ai-service/models/caption_model_baseline.pth
 ai-service/models/base_line_model.ipynb
+ai-service/models/caption_model.ipynb
+ai-service/models/caption_model.pth

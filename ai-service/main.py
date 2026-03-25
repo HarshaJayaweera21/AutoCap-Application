@@ -29,14 +29,17 @@ def say_hello(name: str):
     return {"message": f"Hello, {name}!"}
 
 @app.post("/api/captions/generate")
-async def generate_caption_api(file: UploadFile = File(...)):
+async def generate_caption_api(
+    file: UploadFile = File(...),
+    modelVariant: str = Form("caption_model")
+):
     if not file.content_type.startswith('image/'):
         raise HTTPException(status_code=400, detail="Invalid file type. Please upload an image.")
     
     contents = await file.read()
     
     try:
-        caption = caption_service.get_caption(contents)
+        caption = caption_service.get_caption(contents, modelVariant)
         return {"caption": caption}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -57,7 +60,7 @@ def process_job_background(job_request: JobRequest):
                 continue
 
             contents = response.content
-            caption_text = caption_service.get_caption(contents)
+            caption_text = caption_service.get_caption(contents, job_request.modelVariant)
             
             # Match FastApiCallbackDto.CaptionResultDto
             results.append({

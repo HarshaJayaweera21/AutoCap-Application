@@ -328,7 +328,7 @@ export const Dashboard: React.FC = () => {
                             You are about to upload <strong>{state.selectedFiles.length}</strong> images to create the dataset <strong>"{state.datasetName.trim() || `Dataset — ${new Date().toLocaleDateString()}`}"</strong>.
                           </p>
                           <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)', marginTop: 'var(--space-2)' }}>
-                            BLIP Model: {state.blipConfig.modelVariant === 'blip-base' ? 'Base' : 'Large'}
+                            Selected Model: {state.blipConfig.modelVariant === 'caption_model' ? 'Caption Model (AutoCap-V1)' : 'Baseline Model'}
                           </p>
                         </div>
 

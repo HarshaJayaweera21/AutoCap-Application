@@ -23,12 +23,12 @@ const PARAMS: ParamDef[] = [
   {
     key: 'modelVariant',
     label: 'Model Variant',
-    tooltip: 'BLIP model size. blip-large is more accurate but slower.',
+    tooltip: 'Model selection. Caption Model is the default.',
     min: 0, max: 0, step: 0,
     type: 'select',
     options: [
-      { value: 'blip-base', label: 'BLIP Base' },
-      { value: 'blip-large', label: 'BLIP Large' },
+      { value: 'caption_model', label: 'Caption Model (AutoCap-V1)' },
+      { value: 'base_line_model', label: 'Baseline Model' },
     ],
   },
   {
@@ -132,7 +132,7 @@ export const BlipConfigPanel: React.FC<BlipConfigPanelProps> = ({ config, onChan
           </svg>
           <span className={styles.headerTitle}>Model Configuration</span>
         </div>
-        <span className={styles.headerBadge}>{config.modelVariant}</span>
+        <span className={styles.headerBadge}>{config.modelVariant === 'caption_model' ? 'Caption' : 'Baseline'}</span>
       </button>
 
       {isOpen && (
