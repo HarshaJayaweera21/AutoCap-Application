@@ -19,6 +19,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Date;
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,9 +62,9 @@ public class AdminService {
     public DatasetIntelligenceResponse getDatasetIntelligence() {
 
         // Time boundaries
-        Instant now = Instant.now();
-        Instant oneWeekAgo = now.minus(7, ChronoUnit.DAYS);
-        Instant twoWeeksAgo = now.minus(14, ChronoUnit.DAYS);
+        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        OffsetDateTime oneWeekAgo = now.minus(7, ChronoUnit.DAYS);
+        OffsetDateTime twoWeeksAgo = now.minus(14, ChronoUnit.DAYS);
 
         // ── Row 1: Key Metrics ──
         long totalCaptions = captionRepository.count();
@@ -91,7 +93,7 @@ public class AdminService {
         Double totalDatasetsChange = computeChange(datasetsThisWeek, datasetsLastWeek);
 
         // ── Row 2: Captions per day (last 30 days) ──
-        Instant thirtyDaysAgo = now.minus(30, ChronoUnit.DAYS);
+        OffsetDateTime thirtyDaysAgo = now.minus(30, ChronoUnit.DAYS);
         List<Object[]> rawDaily = captionRepository.countCaptionsPerDaySince(thirtyDaysAgo);
         List<DatasetIntelligenceResponse.DailyCaptionCount> captionsPerDay = new ArrayList<>();
         for (Object[] row : rawDaily) {

@@ -1,11 +1,11 @@
-/* ===== Admin Dashboard – Dark Theme ===== */
+/* ===== Admin Dashboard ===== */
 
 .admin-container {
     min-height: 100vh;
     width: 100%;
     display: flex;
     flex-direction: column;
-    background: #110F17;
+    background: var(--bg-base);
 }
 
 /* ===== Welcome Banner ===== */
@@ -13,16 +13,16 @@
     margin: 1.25rem 1.5rem 0;
     padding: 2rem 2.5rem;
     border-radius: 16px;
-    background: linear-gradient(135deg, #194BFF 0%, #2B59FF 50%, #466EFF 100%);
+    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 50%, #818cf8 100%);
     text-align: center;
-    box-shadow: 0 4px 28px rgba(25, 75, 255, 0.35);
+    box-shadow: 0 4px 24px rgba(99, 102, 241, 0.2);
 }
 
 .welcome-banner__title {
     font-family: 'Outfit', sans-serif;
     font-weight: 700;
     font-size: 1.6rem;
-    color: #F6F6F6;
+    color: #ffffff;
     margin: 0;
     letter-spacing: -0.2px;
 }
@@ -41,20 +41,29 @@
     gap: 1.25rem;
     padding: 1.5rem 1.75rem;
     border-radius: 14px;
-    background: #1F1E29;
-    border: 1px solid #28272F;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-strong);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .stat-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
-.stat-card--total   { border-left: 4px solid #194BFF; }
-.stat-card--active  { border-left: 4px solid #89EB79; }
-.stat-card--deactive{ border-left: 4px solid #E84A34; }
+/* Left color accent border */
+.stat-card--total {
+    border-left: 4px solid #818cf8;
+}
+
+.stat-card--active {
+    border-left: 4px solid #10b981;
+}
+
+.stat-card--deactive {
+    border-left: 4px solid #ef4444;
+}
 
 /* Icon wrapper */
 .stat-card__icon-wrapper {
@@ -67,12 +76,26 @@
     flex-shrink: 0;
 }
 
-.stat-card__icon-wrapper--total   { background: rgba(25,  75, 255, 0.15); color: #466EFF; }
-.stat-card__icon-wrapper--active  { background: rgba(137, 235, 121, 0.12); color: #89EB79; }
-.stat-card__icon-wrapper--deactive{ background: rgba(232,  74,  52, 0.12); color: #E84A34; }
+.stat-card__icon-wrapper--total {
+    background: rgba(99, 102, 241, 0.15);
+    color: #818cf8;
+}
 
-.stat-card__icon { font-size: 1.6rem; }
+.stat-card__icon-wrapper--active {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+}
 
+.stat-card__icon-wrapper--deactive {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+}
+
+.stat-card__icon {
+    font-size: 1.6rem;
+}
+
+/* Info block */
 .stat-card__info {
     display: flex;
     flex-direction: column;
@@ -83,7 +106,7 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 700;
     font-size: 1.85rem;
-    color: #F6F6F6;
+    color: var(--text-primary);
     line-height: 1;
 }
 
@@ -91,7 +114,7 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 500;
     font-size: 0.85rem;
-    color: #98979D;
+    color: var(--text-muted);
     letter-spacing: 0.3px;
     text-transform: uppercase;
 }
@@ -108,7 +131,7 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 700;
     font-size: 1.35rem;
-    color: #F6F6F6;
+    color: var(--text-primary);
     margin: 0.5rem 0 1.25rem;
     letter-spacing: -0.3px;
     display: flex;
@@ -122,7 +145,7 @@
     width: 4px;
     height: 22px;
     border-radius: 4px;
-    background: linear-gradient(180deg, #466EFF 0%, #194BFF 100%);
+    background: linear-gradient(180deg, #6366f1 0%, #818cf8 100%);
 }
 
 /* ── Row 1: 4 Intel Metric Cards ── */
@@ -140,22 +163,34 @@
     gap: 1rem;
     padding: 1.4rem 1.5rem;
     border-radius: 14px;
-    background: #1F1E29;
-    border: 1px solid #28272F;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-strong);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     transition: transform 0.22s ease, box-shadow 0.22s ease;
     cursor: default;
 }
 
 .intel-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
-.intel-card--neutral { border-left: 4px solid #194BFF; }
-.intel-card--green   { border-left: 4px solid #89EB79; }
-.intel-card--red     { border-left: 4px solid #E84A34; }
-.intel-card--purple  { border-left: 4px solid #D8EE10; }
+/* color accents */
+.intel-card--neutral {
+    border-left: 4px solid #818cf8;
+}
+
+.intel-card--green {
+    border-left: 4px solid #10b981;
+}
+
+.intel-card--red {
+    border-left: 4px solid #f97316;
+}
+
+.intel-card--purple {
+    border-left: 4px solid #8b5cf6;
+}
 
 /* Icon wrappers */
 .intel-card__icon-wrapper {
@@ -168,12 +203,29 @@
     flex-shrink: 0;
 }
 
-.intel-card__icon-wrapper--neutral { background: rgba(25,  75, 255, 0.15); color: #466EFF; }
-.intel-card__icon-wrapper--green   { background: rgba(137, 235, 121, 0.12); color: #89EB79; }
-.intel-card__icon-wrapper--red     { background: rgba(232,  74,  52, 0.12); color: #E84A34; }
-.intel-card__icon-wrapper--purple  { background: rgba(216, 238,  16, 0.1); color: #D8EE10; }
+.intel-card__icon-wrapper--neutral {
+    background: rgba(99, 102, 241, 0.15);
+    color: #818cf8;
+}
 
-.intel-card__icon { font-size: 1.45rem; }
+.intel-card__icon-wrapper--green {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+}
+
+.intel-card__icon-wrapper--red {
+    background: rgba(249, 115, 22, 0.15);
+    color: #f97316;
+}
+
+.intel-card__icon-wrapper--purple {
+    background: rgba(139, 92, 246, 0.15);
+    color: #a78bfa;
+}
+
+.intel-card__icon {
+    font-size: 1.45rem;
+}
 
 .intel-card__info {
     display: flex;
@@ -185,7 +237,7 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 700;
     font-size: 1.7rem;
-    color: #F6F6F6;
+    color: var(--text-primary);
     line-height: 1.1;
 }
 
@@ -193,7 +245,7 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 500;
     font-size: 0.78rem;
-    color: #98979D;
+    color: var(--text-muted);
     letter-spacing: 0.3px;
     text-transform: uppercase;
 }
@@ -211,10 +263,25 @@
     letter-spacing: 0.2px;
 }
 
-.change-badge--up      { background: rgba(137, 235, 121, 0.15); color: #89EB79; }
-.change-badge--down    { background: rgba(232,  74,  52, 0.15); color: #E84A34; }
-.change-badge--neutral { background: rgba(62,  62,  71, 0.6);  color: #98979D; }
-.change-badge--new     { background: rgba(25,  75, 255, 0.15); color: #A2B6FF; }
+.change-badge--up {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+}
+
+.change-badge--down {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+}
+
+.change-badge--neutral {
+    background: rgba(152, 151, 157, 0.15);
+    color: var(--text-muted);
+}
+
+.change-badge--new {
+    background: rgba(99, 102, 241, 0.15);
+    color: #818cf8;
+}
 
 /* ── Row 2 & 3: Two-panel Layout ── */
 
@@ -226,11 +293,11 @@
 }
 
 .intel-panel {
-    background: #1F1E29;
-    border: 1px solid #28272F;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-strong);
     border-radius: 14px;
     padding: 1.5rem;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .intel-panel--compact {
@@ -242,12 +309,14 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 600;
     font-size: 0.95rem;
-    color: #C5C4C7;
+    color: var(--text-secondary);
     margin: 0 0 1rem;
     letter-spacing: 0.1px;
 }
 
-.intel-panel__chart { width: 100%; }
+.intel-panel__chart {
+    width: 100%;
+}
 
 .intel-panel__chart--donut {
     display: flex;
@@ -261,7 +330,7 @@
     align-items: center;
     justify-content: center;
     height: 280px;
-    color: #98979D;
+    color: var(--text-muted);
     font-family: 'Outfit', sans-serif;
     font-size: 0.9rem;
 }
@@ -271,14 +340,14 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 700;
     font-size: 1.5rem;
-    fill: #F6F6F6;
+    fill: var(--text-primary);
 }
 
 .donut-center-label {
     font-family: 'Outfit', sans-serif;
     font-weight: 500;
     font-size: 0.75rem;
-    fill: #98979D;
+    fill: var(--text-muted);
 }
 
 /* Donut legend */
@@ -296,7 +365,7 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 500;
     font-size: 0.82rem;
-    color: #98979D;
+    color: var(--text-secondary);
 }
 
 .donut-legend__dot {
@@ -327,8 +396,9 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 800;
     font-size: 3rem;
+    color: #818cf8;
     line-height: 1;
-    background: linear-gradient(135deg, #466EFF 0%, #A2B6FF 100%);
+    background: linear-gradient(135deg, #6366f1 0%, #a78bfa 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -338,7 +408,7 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 600;
     font-size: 0.85rem;
-    color: #98979D;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -352,7 +422,7 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 700;
     font-size: 1.6rem;
-    color: #C5C4C7;
+    color: var(--text-primary);
     line-height: 1;
 }
 
@@ -360,7 +430,7 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 500;
     font-size: 0.8rem;
-    color: #98979D;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.4px;
 }
@@ -368,20 +438,34 @@
 /* ===== Responsive ===== */
 
 @media (max-width: 1024px) {
-    .intel-cards { grid-template-columns: repeat(2, 1fr); }
-    .intel-row   { grid-template-columns: 1fr; }
+    .intel-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .intel-row {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 768px) {
-    .stat-cards   { grid-template-columns: 1fr; }
-    .intel-cards  { grid-template-columns: 1fr; }
+    .stat-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .intel-cards {
+        grid-template-columns: 1fr;
+    }
 
     .welcome-banner {
         margin: 1rem 1rem 0;
         padding: 1.5rem 1.25rem;
     }
 
-    .welcome-banner__title { font-size: 1.25rem; }
+    .welcome-banner__title {
+        font-size: 1.25rem;
+    }
 
-    .intel-section { padding: 0 1rem 1.5rem; }
+    .intel-section {
+        padding: 0 1rem 1.5rem;
+    }
 }

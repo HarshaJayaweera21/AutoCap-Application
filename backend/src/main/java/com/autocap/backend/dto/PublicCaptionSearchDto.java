@@ -16,4 +16,5 @@ public class PublicCaptionSearchDto {
     private String captionText;
     private Double similarityScore;
     private Boolean isFlagged;
+    private Boolean isEdited;
 }

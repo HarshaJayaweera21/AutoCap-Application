@@ -44,7 +44,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.25rem;
-  background-color: var(--accent-primary);
+  background-color: var(--primary);
   color: var(--text-primary);
   border: none;
   border-radius: 8px;
@@ -100,7 +100,7 @@
 }
 
 .search-datasets__search-btn {
-  background-color: var(--accent-primary);
+  background-color: var(--primary);
   color: var(--text-primary);
   padding: 1.25rem 2rem;
   border-radius: 12px;
@@ -121,7 +121,7 @@
 
 .search-datasets__input:focus {
   outline: none;
-  border-color: var(--accent-primary);
+  border-color: var(--primary);
   box-shadow: 0 0 0 2px rgba(25, 75, 255, 0.3);
 }
 
@@ -177,7 +177,7 @@
   width: 1.2rem;
   height: 1.2rem;
   cursor: pointer;
-  accent-color: var(--accent-primary);
+  accent-color: var(--primary);
 }
 
 .search-datasets__img-wrapper {
@@ -251,14 +251,14 @@
 }
 
 .search-datasets__flag.flagged {
-  background-color: rgba(232, 74, 52, 0.15); /* accent-error with opacity */
-  color: var(--accent-error);
+  background-color: rgba(232, 74, 52, 0.15); /* error with opacity */
+  color: var(--error);
   border: 1px solid rgba(232, 74, 52, 0.3);
 }
 
 .search-datasets__flag.okay {
-  background-color: rgba(137, 235, 121, 0.15); /* accent-success with opacity */
-  color: var(--accent-success);
+  background-color: rgba(137, 235, 121, 0.15); /* success with opacity */
+  color: var(--success);
   border: 1px solid rgba(137, 235, 121, 0.3);
 }
 
@@ -386,7 +386,8 @@
 
 .search-datasets__progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, var(--accent-primary) 0%, #608aff 50%, var(--accent-primary) 100%);
+  min-width: 5%;
+  background: linear-gradient(90deg, var(--primary) 0%, #608aff 50%, var(--primary) 100%);
   background-size: 200% 100%;
   animation: progressPulse 1.5s linear infinite;
   transition: width 0.3s ease;
@@ -398,8 +399,8 @@
 }
 
 .search-datasets__progress-bar.error {
-  background-color: var(--accent-error);
-  background: var(--accent-error); /* disable gradient for error */
+  background-color: var(--error);
+  background: var(--error); /* disable gradient for error */
   animation: none;
 }
 

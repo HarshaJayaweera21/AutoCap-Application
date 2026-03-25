@@ -7,4 +7,5 @@ public interface PublicCaptionSearchProjection {
     String getCaptionText();
     Double getSimilarityScore();
     Boolean getIsFlagged();
+    Boolean getIsEdited();
 }

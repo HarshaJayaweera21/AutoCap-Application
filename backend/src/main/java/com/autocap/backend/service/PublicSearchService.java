@@ -32,6 +32,7 @@ public class PublicSearchService {
                     .captionText(projection.getCaptionText())
                     .similarityScore(projection.getSimilarityScore())
                     .isFlagged(projection.getIsFlagged())
+                    .isEdited(projection.getIsEdited())
                     .build();
         });
         

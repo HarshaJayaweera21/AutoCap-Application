@@ -38,14 +38,14 @@ const USER_NAV: NavItem[] = [
     { label: 'Dashboard', to: '/dashboard', icon: <HiOutlineSquares2X2 className="nav-icon" /> },
     { label: 'My Datasets', to: '/my-datasets', icon: <HiOutlineCircleStack className="nav-icon" /> },
     { label: 'Search Datasets', to: '/search-datasets', icon: <HiOutlineMagnifyingGlass className="nav-icon" /> },
-    { label: 'Documentation', to: '/documentation', icon: <HiOutlineBookOpen className="nav-icon" /> },
+    { label: 'Documentation', to: '/categories', icon: <HiOutlineBookOpen className="nav-icon" /> },
     { label: 'Feedback', to: '/feedback', icon: <HiOutlineChatBubbleLeftEllipsis className="nav-icon" /> },
 ];
 
 const ADMIN_NAV: NavItem[] = [
     { label: 'Dashboard', to: '/admin-dashboard', icon: <HiOutlineSquares2X2 className="nav-icon" /> },
     { label: 'Manage Users', to: '/admin/manage-users', icon: <HiOutlineUserGroup className="nav-icon" /> },
-    { label: 'Manage Documentation', to: '/admin/manage-documentation', icon: <HiOutlineDocumentText className="nav-icon" /> },
+    { label: 'Manage Documentation', to: '/admin/docs', icon: <HiOutlineDocumentText className="nav-icon" /> },
     { label: 'Manage Feedbacks', to: '/admin/manage-feedbacks', icon: <HiOutlineChatBubbleBottomCenterText className="nav-icon" /> },
 ];
 
