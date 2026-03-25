@@ -51,6 +51,7 @@ export interface JobStatusResponse {
   errorMessage: string | null;
   datasetId: number | null;
   datasetName?: string;
+  averageSimilarity?: number | null;
 }
 
 export interface UploadResponse {

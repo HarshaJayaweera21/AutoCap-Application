@@ -47,10 +47,12 @@ public class JobService {
                 totalCount,
                 null,
                 null,
+                null,
                 user,
                 datasetName,
                 datasetDescription,
                 modelName);
+
         jobStore.put(jobId, status);
         log.info("Created in-memory job {} with {} images", jobId, totalCount);
         return jobId;
@@ -179,7 +181,11 @@ public class JobService {
         // Update in-memory job status
         jobStatus.setProcessedCount(jobStatus.getProcessedCount() + processedCount);
         jobStatus.setStatus(JobStatus.COMPLETE);
+        if (scoreCount > 0) {
+            jobStatus.setAverageSimilarity(totalSimilarity / scoreCount);
+        }
         log.info("Job {} completed. {} images processed.", jobId, processedCount);
+
     }
 
     /**

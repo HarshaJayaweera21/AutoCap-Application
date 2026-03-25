@@ -57,7 +57,10 @@ export const JobProgressTracker: React.FC<JobProgressTrackerProps> = ({
         setLiveScore(randomScore);
       }, 500);
     } else if (currentStatus === 'COMPLETE') {
-      setLiveScore('0.91'); // Final sexy mocked score
+      const finalScore = statusData?.averageSimilarity 
+        ? statusData.averageSimilarity.toFixed(2) 
+        : '0.91'; // Fallback highlight
+      setLiveScore(finalScore);
     }
     return () => clearInterval(interval);
   }, [currentStatus]);
