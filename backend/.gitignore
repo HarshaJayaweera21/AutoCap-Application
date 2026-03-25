@@ -19,6 +19,8 @@ target/
 *.iml
 *.ipr
 
+.env
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
@@ -31,3 +33,15 @@ build/
 
 ### VS Code ###
 .vscode/
+.vscode
+.vscode\settings.json
+
+### Environment / Secrets ###
+.env
+*.env
+application-local.properties
+
+
+# Uploads and Datasets
+uploads/
+datasets/

@@ -1,0 +1,23 @@
+# Test your FastAPI endpoints
+
+GET http://127.0.0.1:8000/
+Accept: application/json
+
+###
+
+### Test root endpoint
+GET http://127.0.0.1:8000/
+
+### Test hello endpoint
+GET http://127.0.0.1:8000/hello/Harsha
+
+### Test caption generation
+POST http://127.0.0.1:8000/api/captions/generate
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< ../backend/uploads/8/1771989846055_test.jpg
+--boundary--

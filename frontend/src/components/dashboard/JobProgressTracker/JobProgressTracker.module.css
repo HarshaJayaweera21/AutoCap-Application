@@ -1,0 +1,158 @@
+.container {
+  animation: fadeIn var(--transition-slow) ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.title {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-medium);
+  margin-bottom: var(--space-6);
+  color: var(--text-primary);
+}
+
+/* Pipeline Visualization */
+.pipelineContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.pipelineBlock {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-2);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  transition: all var(--transition-base);
+  text-align: center;
+}
+
+.pipelineArrow {
+  color: var(--border-strong);
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.blockActive {
+  background: rgba(25, 75, 255, 0.1);
+  border-color: var(--primary);
+  color: var(--primary-lighter);
+  box-shadow: 0 0 15px rgba(25, 75, 255, 0.2);
+}
+
+.blockCompleted {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+.blockFailed {
+  background: rgba(232, 74, 52, 0.1);
+  border-color: var(--error);
+  color: var(--error);
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Live Stats Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.statCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.statLabel {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: var(--weight-medium);
+}
+
+.statValue {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.statSubtext {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  font-weight: var(--weight-regular);
+}
+
+.liveScore {
+  color: var(--accent);
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+  font-variant-numeric: tabular-nums;
+}
+
+.pulsingGlow {
+  animation: scorePulse 2s infinite alternate;
+}
+
+@keyframes scorePulse {
+  0% { text-shadow: 0 0 5px rgba(0, 229, 255, 0.2); }
+  100% { text-shadow: 0 0 15px rgba(0, 229, 255, 0.6); }
+}
+
+/* Progress Bar inside Stat Card */
+.statsProgressBar {
+  width: 100%;
+  height: 4px;
+  background: var(--border-strong);
+  border-radius: 2px;
+  margin-top: var(--space-2);
+  overflow: hidden;
+}
+
+.statsProgressFill {
+  height: 100%;
+  background: var(--primary);
+  transition: width var(--transition-base);
+}
+
+@media (max-width: 768px) {
+  .pipelineContainer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .pipelineArrow {
+    display: none;
+  }
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+}

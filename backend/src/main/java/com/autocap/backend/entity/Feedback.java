@@ -1,73 +1,58 @@
 package com.autocap.backend.entity;
 
+import com.autocap.backend.entity.enums.FeedbackStatus;
+import com.autocap.backend.entity.enums.FeedbackType;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.*;
 
 import java.time.OffsetDateTime;
 
-/**
- * Entity mapping for the 'feedback' table in Supabase PostgreSQL.
- */
 @Entity
 @Table(name = "feedback")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Feedback {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id")
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_feedback_user"))
+    private User user;
 
-    @Column(name = "type", length = 50)
-    private String type; // e.g., 'Bug Report', 'Feature Request', 'General', 'Caption Quality'
+    /**
+     * Uses FeedbackTypeConverter (autoApply=true) to map multi-word DB values.
+     * DB values: 'Bug Report' | 'Feature Request' | 'General' | 'Caption Quality'
+     */
+    @Column(length = 50, columnDefinition = "character varying")
+    private FeedbackType type;
 
-    @Column(name = "subject", length = 120)
+    @Column(length = 255)
     private String subject;
 
-    @Column(name = "message", nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "text")
     private String message;
 
-    @Column(name = "rating")
-    private Integer rating; // 1 to 5
+    /** Check constraint: rating >= 1 AND rating <= 5 */
+    @Column
+    private Integer rating;
 
-    @Column(name = "status", length = 30)
-    private String status; // e.g., 'New', 'In Review', 'Resolved', 'Won't Fix'
+    /**
+     * Uses FeedbackStatusConverter (autoApply=true) to map multi-word DB values.
+     * DB values: 'New' | 'In Review' | 'Resolved' | 'Won''t Fix'
+     */
+    @Column(length = 50, columnDefinition = "character varying")
+    private FeedbackStatus status;
 
-    @Column(name = "screenshot_url", columnDefinition = "TEXT")
+    @Column(name = "screenshot_url", columnDefinition = "text")
     private String screenshotUrl;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", insertable = false, updatable = false)
     private OffsetDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", insertable = false, updatable = false)
     private OffsetDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        if (this.createdAt == null) {
-            this.createdAt = OffsetDateTime.now();
-        }
-        if (this.updatedAt == null) {
-            this.updatedAt = OffsetDateTime.now();
-        }
-        if (this.type == null) {
-            this.type = "General";
-        }
-        if (this.status == null) {
-            this.status = "New";
-        }
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = OffsetDateTime.now();
-    }
 }
