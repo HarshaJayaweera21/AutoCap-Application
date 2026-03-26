@@ -1,6 +1,6 @@
 package com.autocap.backend.config;
 
-import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.tomcat.servlet.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,14 +23,15 @@ public class WebServerConfig {
     }
 
     /**
-     * Customizes Tomcat to allow more multipart parts in a single request,
-     * enabling up to 50 files + metadata fields in a single batch upload.
+     * Raises Tomcat's multipart part count limit from the restrictive default
+     * to 100, allowing up to 50 files + metadata fields in a single request.
+     * Without this, Tomcat throws FileCountLimitExceededException on batch uploads.
      */
     @Bean
     public WebServerFactoryCustomizer<TomcatServletWebServerFactory> tomcatCustomizer() {
         return factory -> factory.addConnectorCustomizers(connector -> {
-            // Allow larger max post size for batch uploads (100MB)
-            connector.setMaxPostSize(100 * 1024 * 1024);
+            // Allow up to 100 multipart parts (50 image files + form field params)
+            connector.setMaxPartCount(100);
         });
     }
 }

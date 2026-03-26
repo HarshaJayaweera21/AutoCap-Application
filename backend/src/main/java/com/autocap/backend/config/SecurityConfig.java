@@ -22,7 +22,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 @Configuration
-@EnableWebSecurity // <-- ADDED – required for Spring Security 6 / Spring Boot 3
 @RequiredArgsConstructor
 public class SecurityConfig {
 
