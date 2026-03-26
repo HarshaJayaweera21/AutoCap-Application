@@ -8,7 +8,7 @@ export type JobStatus =
   | 'FAILED';
 
 export interface BlipConfig {
-  modelVariant: 'blip-base' | 'blip-large';
+  modelVariant: 'caption_model' | 'base_line_model';
   temperature: number;
   maxLength: number;
   minLength: number;
@@ -18,7 +18,7 @@ export interface BlipConfig {
 }
 
 export const DEFAULT_BLIP_CONFIG: BlipConfig = {
-  modelVariant: 'blip-base',
+  modelVariant: 'caption_model',
   temperature: 1.0,
   maxLength: 50,
   minLength: 5,

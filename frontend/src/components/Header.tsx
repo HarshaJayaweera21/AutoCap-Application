@@ -46,7 +46,7 @@ const ADMIN_NAV: NavItem[] = [
     { label: 'Dashboard', to: '/admin-dashboard', icon: <HiOutlineSquares2X2 className="nav-icon" /> },
     { label: 'Manage Users', to: '/admin/manage-users', icon: <HiOutlineUserGroup className="nav-icon" /> },
     { label: 'Manage Documentation', to: '/admin/docs', icon: <HiOutlineDocumentText className="nav-icon" /> },
-    { label: 'Manage Feedbacks', to: '/admin/manage-feedbacks', icon: <HiOutlineChatBubbleBottomCenterText className="nav-icon" /> },
+    { label: 'Manage Feedbacks', to: '/admin/feedback/dashboard', icon: <HiOutlineChatBubbleBottomCenterText className="nav-icon" /> },
 ];
 
 /* ---------- component ---------- */

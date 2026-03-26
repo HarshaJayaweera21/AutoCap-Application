@@ -3,6 +3,7 @@ import type { DashboardFormState, BlipConfig, SelectedFile, JobStatus } from '..
 export type DashboardAction =
   | { type: 'ADD_FILES'; payload: SelectedFile[] }
   | { type: 'REMOVE_FILE'; payload: string }
+  | { type: 'CLEAR_FILES' }
   | { type: 'SET_BLIP_CONFIG'; payload: BlipConfig }
   | { type: 'SET_DATASET_NAME'; payload: string }
   | { type: 'SET_DATASET_DESC'; payload: string }
@@ -30,6 +31,12 @@ export const dashboardReducer = (
         selectedFiles: state.selectedFiles.filter((f) => f.id !== action.payload),
       };
     }
+    case 'CLEAR_FILES':
+      state.selectedFiles.forEach((f) => URL.revokeObjectURL(f.previewUrl));
+      return {
+        ...state,
+        selectedFiles: [],
+      };
     case 'SET_BLIP_CONFIG':
       return { ...state, blipConfig: action.payload };
     case 'SET_DATASET_NAME':

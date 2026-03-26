@@ -68,6 +68,8 @@ export const Dashboard: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
+  const [filterHighQuality, setFilterHighQuality] = useState(false);
   const navigate = useNavigate();
 
   const hasActiveJob = state.activeJobId !== null;
@@ -87,12 +89,42 @@ export const Dashboard: React.FC = () => {
       withScore.length > 0
         ? withScore.reduce((acc, d) => acc + (d.averageSimilarity ?? 0), 0) / withScore.length
         : null;
+
+    // Sparklines and Trends
+    const reversed = [...recentDatasets].reverse();
+    const imagesSparkline = reversed.map(d => d.totalItems || 0);
+    const scoreSparkline = reversed.map(d => d.averageSimilarity || 0);
+
+    let scoreTrend = undefined;
+    if (recentDatasets.length >= 2) {
+      const latest = recentDatasets[0].averageSimilarity || 0;
+      const prev = recentDatasets[1].averageSimilarity || 0;
+      if (prev > 0) {
+        const diff = ((latest - prev) / prev) * 100;
+        const direction = diff > 0.5 ? 'up' : diff < -0.5 ? 'down' : 'neutral';
+        scoreTrend = {
+          value: Math.abs(Math.round(diff * 10) / 10), // one decimal round
+          direction: direction as 'up'|'down'|'neutral',
+          label: 'vs last'
+        };
+      }
+    }
+
     return {
       totalImages,
       totalDatasets: recentDatasets.length,
       avgScore,
+      imagesSparkline,
+      scoreSparkline,
+      scoreTrend,
     };
   }, [recentDatasets]);
+
+  const displayedDatasets = useMemo(() => {
+    return filterHighQuality 
+      ? recentDatasets.filter(ds => ds.averageSimilarity && ds.averageSimilarity >= 0.8)
+      : recentDatasets;
+  }, [recentDatasets, filterHighQuality]);
 
   /* ── Before-unload guard ─────────────────────────────────────────── */
   useEffect(() => {
@@ -143,6 +175,7 @@ export const Dashboard: React.FC = () => {
   const handleReset = useCallback(() => {
     dispatch({ type: 'RESET' });
     setUploadError(null);
+    setCurrentStep(1);
   }, []);
 
   /* ── Render ─────────────────────────────────────────────────────── */
@@ -154,11 +187,7 @@ export const Dashboard: React.FC = () => {
         {/* ── Header ─────────────────────────────────────────────── */}
         <header className={styles.header}>
           <div className={styles.headerLeft}>
-            <nav className={styles.breadcrumb}>
-              <span>AutoCap</span>
-              <span className={styles.breadcrumbSep}>›</span>
-              <span className={styles.breadcrumbActive}>Dashboard</span>
-            </nav>
+
             <h1 className={styles.title}>Generate Captions</h1>
             <p className={styles.subtitle}>
               Upload images, configure BLIP model parameters, and generate high-quality captions for your dataset.
@@ -174,6 +203,7 @@ export const Dashboard: React.FC = () => {
             value={datasetsLoading ? '—' : stats.totalImages.toLocaleString()}
             hint="Across all datasets"
             variant="primary"
+            sparklineData={stats.imagesSparkline}
           />
           <StatsCard
             icon={<DatabaseIcon />}
@@ -192,8 +222,12 @@ export const Dashboard: React.FC = () => {
                 ? `${(stats.avgScore * 100).toFixed(1)}%`
                 : 'N/A'
             }
-            hint="CLIP score average"
+            hint={filterHighQuality ? "Filtering: High Quality (>80%)" : "Click to filter high-quality datasets"}
             variant="accent"
+            trend={stats.scoreTrend}
+            sparklineData={stats.scoreSparkline}
+            onClick={() => setFilterHighQuality(!filterHighQuality)}
+            isActive={filterHighQuality}
           />
           <StatsCard
             icon={<ActivityIcon />}
@@ -222,42 +256,107 @@ export const Dashboard: React.FC = () => {
               <div className={styles.sidebarBody}>
                 {!hasActiveJob ? (
                   <>
-                    <UploadZone
-                      selectedFiles={state.selectedFiles}
-                      onFilesAdded={(files) => dispatch({ type: 'ADD_FILES', payload: files })}
-                      onFileRemoved={(id) => dispatch({ type: 'REMOVE_FILE', payload: id })}
-                      disabled={isUploading}
-                    />
-
-                    <DatasetNameInput
-                      name={state.datasetName}
-                      description={state.datasetDescription}
-                      onNameChange={(name) => dispatch({ type: 'SET_DATASET_NAME', payload: name })}
-                      onDescriptionChange={(desc) => dispatch({ type: 'SET_DATASET_DESC', payload: desc })}
-                      disabled={isUploading}
-                    />
-
-                    <BlipConfigPanel
-                      config={state.blipConfig}
-                      onChange={(config) => dispatch({ type: 'SET_BLIP_CONFIG', payload: config })}
-                    />
-
-                    {uploadError && (
-                      <div className={styles.uploadError}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="12" cy="12" r="10" />
-                          <line x1="15" y1="9" x2="9" y2="15" />
-                          <line x1="9" y1="9" x2="15" y2="15" />
-                        </svg>
-                        {uploadError}
+                    <div className={styles.wizardStepper}>
+                      <div className={`${styles.wizardStep} ${currentStep >= 1 ? styles.wizardStepCompleted : ''} ${currentStep === 1 ? styles.wizardStepActive : ''}`}>
+                        <div className={styles.wizardStepIcon}>{currentStep > 1 ? '✓' : '1'}</div>
+                        <span>Upload</span>
                       </div>
+                      <div className={`${styles.wizardStepLine} ${currentStep >= 2 ? styles.wizardStepLineActive : ''}`} />
+                      <div className={`${styles.wizardStep} ${currentStep >= 2 ? styles.wizardStepCompleted : ''} ${currentStep === 2 ? styles.wizardStepActive : ''}`}>
+                        <div className={styles.wizardStepIcon}>{currentStep > 2 ? '✓' : '2'}</div>
+                        <span>Configure</span>
+                      </div>
+                      <div className={`${styles.wizardStepLine} ${currentStep >= 3 ? styles.wizardStepLineActive : ''}`} />
+                      <div className={`${styles.wizardStep} ${currentStep >= 3 ? styles.wizardStepCompleted : ''} ${currentStep === 3 ? styles.wizardStepActive : ''}`}>
+                        <div className={styles.wizardStepIcon}>3</div>
+                        <span>Generate</span>
+                      </div>
+                    </div>
+
+                    {currentStep === 1 && (
+                      <>
+                        <UploadZone
+                          selectedFiles={state.selectedFiles}
+                          onFilesAdded={(files) => dispatch({ type: 'ADD_FILES', payload: files })}
+                          onFileRemoved={(id) => dispatch({ type: 'REMOVE_FILE', payload: id })}
+                          onClearAll={() => dispatch({ type: 'CLEAR_FILES' })}
+                          disabled={isUploading}
+                        />
+                        <div className={styles.wizardNav}>
+                          <button 
+                            className={`btn-primary ${styles.wizardNavRight}`} 
+                            onClick={() => setCurrentStep(2)}
+                            disabled={state.selectedFiles.length === 0}
+                          >
+                            Next Step
+                          </button>
+                        </div>
+                      </>
                     )}
 
-                    <GenerateButton
-                      disabled={!canGenerate}
-                      loading={isUploading}
-                      onClick={handleGenerate}
-                    />
+                    {currentStep === 2 && (
+                      <>
+                        <DatasetNameInput
+                          name={state.datasetName}
+                          description={state.datasetDescription}
+                          onNameChange={(name) => dispatch({ type: 'SET_DATASET_NAME', payload: name })}
+                          onDescriptionChange={(desc) => dispatch({ type: 'SET_DATASET_DESC', payload: desc })}
+                          disabled={isUploading}
+                        />
+
+                        <BlipConfigPanel
+                          config={state.blipConfig}
+                          onChange={(config) => dispatch({ type: 'SET_BLIP_CONFIG', payload: config })}
+                        />
+
+                        <div className={styles.wizardNav}>
+                          <button className="btn-secondary" onClick={() => setCurrentStep(1)}>
+                            Back
+                          </button>
+                          <button className={`btn-primary ${styles.wizardNavRight}`} onClick={() => setCurrentStep(3)}>
+                            Next Step
+                          </button>
+                        </div>
+                      </>
+                    )}
+
+                    {currentStep === 3 && (
+                      <>
+                        <div className={styles.summaryBox}>
+                          <h3 style={{ fontSize: 'var(--text-lg)', color: 'var(--text-primary)', marginBottom: 'var(--space-2)' }}>Ready to Generate</h3>
+                          <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>
+                            You are about to upload <strong>{state.selectedFiles.length}</strong> images to create the dataset <strong>"{state.datasetName.trim() || `Dataset — ${new Date().toLocaleDateString()}`}"</strong>.
+                          </p>
+                          <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)', marginTop: 'var(--space-2)' }}>
+                            Selected Model: {state.blipConfig.modelVariant === 'caption_model' ? 'Caption Model (AutoCap-V1)' : 'Baseline Model'}
+                          </p>
+                        </div>
+
+                        {uploadError && (
+                          <div className={styles.uploadError}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="12" cy="12" r="10" />
+                              <line x1="15" y1="9" x2="9" y2="15" />
+                              <line x1="9" y1="9" x2="15" y2="15" />
+                            </svg>
+                            {uploadError}
+                          </div>
+                        )}
+
+                        <div className={styles.wizardNav}>
+                          <button className="btn-secondary" onClick={() => setCurrentStep(2)} disabled={isUploading}>
+                            Back
+                          </button>
+                          <div className={styles.wizardNavRight} style={{ flex: 1, marginLeft: 'var(--space-4)' }}>
+                            <GenerateButton
+                              disabled={!canGenerate}
+                              loading={isUploading}
+                              onClick={handleGenerate}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </>
                 ) : (
                   <JobProgressTracker
@@ -275,16 +374,18 @@ export const Dashboard: React.FC = () => {
           <aside className={styles.sidebar}>
             <div className={styles.panel}>
               <div className={styles.panelHeader}>
-                <span className={styles.panelTitle}>Recent Datasets</span>
+                <span className={styles.panelTitle}>
+                  {filterHighQuality ? 'High-Quality Datasets' : 'Recent Datasets'}
+                </span>
                 {!datasetsLoading && (
                   <span className={styles.panelCount}>
-                    {recentDatasets.length} {recentDatasets.length === 1 ? 'dataset' : 'datasets'}
+                    {displayedDatasets.length} {displayedDatasets.length === 1 ? 'dataset' : 'datasets'}
                   </span>
                 )}
               </div>
 
               {/* Column headers */}
-              {!datasetsLoading && recentDatasets.length > 0 && (
+              {!datasetsLoading && displayedDatasets.length > 0 && (
                 <div className={`${styles.datasetRow} ${styles.datasetRowHeader}`}>
                   <span className={styles.colLabel}>Name</span>
                   <span className={styles.colLabel}>Model</span>
@@ -304,17 +405,17 @@ export const Dashboard: React.FC = () => {
               )}
 
               {/* Empty state */}
-              {!datasetsLoading && recentDatasets.length === 0 && (
+              {!datasetsLoading && displayedDatasets.length === 0 && (
                 <div className={styles.emptyState}>
                   <FolderIcon />
-                  <p>No datasets yet — upload some images to get started!</p>
+                  <p>{filterHighQuality ? 'No datasets currently match the high-quality filter.' : 'No datasets yet — upload some images to get started!'}</p>
                 </div>
               )}
 
               {/* Dataset rows */}
-              {!datasetsLoading && recentDatasets.length > 0 && (
+              {!datasetsLoading && displayedDatasets.length > 0 && (
                 <div className={styles.datasetList}>
-                  {recentDatasets.map((ds) => {
+                  {displayedDatasets.map((ds) => {
                     const scorePercent =
                       ds.averageSimilarity != null
                         ? Math.round(ds.averageSimilarity * 100)

@@ -19,6 +19,28 @@ import SearchDatasets from './pages/SearchDatasets';
 import DatasetExplorer from './pages/DatasetExplorer/DatasetExplorer';
 import MyDatasets from './pages/MyDatasets/MyDatasets';
 
+// Feedback module imports
+import FeedbackForm from './components/feedback/FeedbackForm';
+import FeedbackList from './components/feedback/FeedbackList';
+import FeedbackDetail from './components/feedback/FeedbackDetail';
+import FeedbackStats from './components/feedback/FeedbackStats';
+import AdminFeedbackDashboard from './components/feedback/AdminFeedbackDashboard';
+
+// Wrapper for feedback detail route (needs URL params)
+import { useParams } from 'react-router-dom';
+
+function FeedbackDetailWrapper() {
+    const { id } = useParams<{ id: string }>();
+    if (!id) return <div>Invalid ID</div>;
+    return <FeedbackDetail id={parseInt(id, 10)} onBack={() => window.history.back()} />;
+}
+
+function FeedbackEditWrapper() {
+    const { id } = useParams<{ id: string }>();
+    if (!id) return <div>Invalid ID</div>;
+    return <FeedbackForm feedbackId={parseInt(id, 10)} onSuccess={() => window.history.back()} onCancel={() => window.history.back()} />;
+}
+
 function App() {
     return (
         <Routes>
@@ -46,11 +68,23 @@ function App() {
         <Route path="tokenizers" element={<ManageTokenizers />} />
       </Route>
 
+            {/* Admin feedback management routes */}
+            <Route path="/admin/feedback" element={<ProtectedRoute requiredRole="ADMIN"><FeedbackList onNewFeedbackClick={() => {}} onEditFeedbackClick={() => {}} onDeleteFeedbackClick={() => {}} /></ProtectedRoute>} />
+            <Route path="/admin/feedback/dashboard" element={<ProtectedRoute requiredRole="ADMIN"><AdminFeedbackDashboard /></ProtectedRoute>} />
+            <Route path="/admin/feedback/stats" element={<ProtectedRoute requiredRole="ADMIN"><FeedbackStats /></ProtectedRoute>} />
+            <Route path="/admin/feedback/edit/:id" element={<ProtectedRoute requiredRole="ADMIN"><FeedbackEditWrapper /></ProtectedRoute>} />
+            <Route path="/admin/feedback/:id" element={<ProtectedRoute requiredRole="ADMIN"><FeedbackDetailWrapper /></ProtectedRoute>} />
+
             {/* Normal user routes */}
             <Route path="/dashboard" element={<ProtectedRoute requiredRole="USER"><Dashboard /></ProtectedRoute>} />
             <Route path="/search-datasets" element={<ProtectedRoute requiredRole="USER"><SearchDatasets /></ProtectedRoute>} />
             <Route path="/my-datasets" element={<ProtectedRoute requiredRole="USER"><MyDatasets /></ProtectedRoute>} />
             <Route path="/datasets/:id" element={<ProtectedRoute requiredRole="USER"><DatasetExplorer /></ProtectedRoute>} />
+
+            {/* User feedback routes */}
+            <Route path="/feedback" element={<ProtectedRoute requiredRole="USER"><FeedbackForm /></ProtectedRoute>} />
+            <Route path="/feedback/list" element={<ProtectedRoute requiredRole="USER"><FeedbackList /></ProtectedRoute>} />
+            <Route path="/feedback/:id" element={<ProtectedRoute requiredRole="USER"><FeedbackDetailWrapper /></ProtectedRoute>} />
 
             {/* Redirect root to login */}
             <Route path="*" element={<Navigate to="/login" replace />} />
