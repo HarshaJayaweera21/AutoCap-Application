@@ -1,182 +1,366 @@
-/* ===== Register Page – Dark Theme ===== */
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+/* ===== Register Page — Split-Screen Dark Theme ===== */
 
-.register-container {
+/* ---------- Layout ---------- */
+.register-page {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-direction: row;
     min-height: 100vh;
     width: 100%;
-    background-color: #110F17;
-    padding: 2rem 1.5rem;
-}
-
-.register-card {
-    width: 100%;
-    max-width: 500px;
-    padding: 2.5rem;
-    background: #1F1E29;
-    border: 1px solid #28272F;
-    border-radius: 16px;
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
-}
-
-.register-card h2 {
-    font-family: 'Outfit', sans-serif;
-    font-weight: 700;
-    font-size: 1.75rem;
-    text-align: center;
-    margin: 0 0 1.75rem;
-    color: #F6F6F6;
-}
-
-/* --- Form Row (side-by-side) --- */
-.form-row {
-    display: flex;
-    gap: 1rem;
-}
-
-.form-row .form-group {
-    flex: 1;
-}
-
-/* --- Form Groups --- */
-.register-card .form-group {
-    margin-bottom: 1rem;
-}
-
-.register-card .form-group label {
-    display: block;
-    margin-bottom: 0.4rem;
-    font-family: 'Outfit', sans-serif;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #C5C4C7;
-}
-
-.register-card .form-group input {
-    width: 100%;
-    padding: 0.65rem 0.9rem;
-    font-size: 0.95rem;
-    font-family: 'Outfit', sans-serif;
-    border: 1px solid #3E3E47;
-    border-radius: 8px;
-    background: #28272F;
-    color: #F6F6F6;
-    box-sizing: border-box;
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.register-card .form-group input::placeholder {
-    color: #98979D;
-    font-size: 0.875rem;
-}
-
-.register-card .form-group input:focus {
-    outline: none;
-    border-color: #194BFF;
-    box-shadow: 0 0 0 3px rgba(25, 75, 255, 0.18);
-    background: #2a2934;
-}
-
-/* --- Password Toggle --- */
-.register-card .password-wrapper {
+    overflow-x: hidden;
     position: relative;
 }
 
-.register-card .password-wrapper input {
-    padding-right: 2.8rem;
-}
-
-.register-card .toggle-password {
-    position: absolute;
-    right: 0.6rem;
-    top: 50%;
-    transform: translateY(-50%);
+/* ---------- Left: Brand Panel ---------- */
+.register-brand-panel {
+    position: relative;
+    width: 45%;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    padding: 4rem;
+    overflow: hidden;
+    background: var(--bg-base);
+}
+
+/* Decorative gradient orbs */
+.register-brand-panel::before {
+    content: '';
+    position: absolute;
+    top: -10%;
+    left: -10%;
+    width: 380px;
+    height: 380px;
+    background: radial-gradient(circle at center, rgba(25, 75, 255, 0.08) 0%, transparent 70%);
+    border-radius: 50%;
+    filter: blur(60px);
+    pointer-events: none;
+}
+
+.register-brand-panel::after {
+    content: '';
+    position: absolute;
+    bottom: -10%;
+    right: -10%;
+    width: 320px;
+    height: 320px;
+    background: radial-gradient(circle at center, rgba(7, 116, 14, 0.04) 0%, transparent 70%);
+    border-radius: 50%;
+    filter: blur(60px);
+    pointer-events: none;
+}
+
+.register-brand-content {
+    position: relative;
+    z-index: 1;
+    max-width: 440px;
+}
+
+.register-brand-logo {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 900;
+    font-size: 1.875rem;
+    color: var(--text-primary);
+    letter-spacing: -0.04em;
+    margin-bottom: 3rem;
+}
+
+.register-brand-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 800;
+    font-size: 3.25rem;
+    color: var(--text-primary);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+}
+
+.register-brand-description {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 300;
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 2.5rem;
+}
+
+/* Feature highlights */
+.register-features {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.register-feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.register-feature-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: var(--bg-elevated);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.register-feature-icon .material-symbols-outlined {
+    font-size: 1.25rem;
+    color: var(--primary);
+}
+
+.register-feature h3 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    margin: 0 0 0.15rem;
+}
+
+/* Background image overlay */
+.register-brand-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    opacity: 0.2;
+    pointer-events: none;
+}
+
+.register-brand-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.register-feature p {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* ---------- Right: Form Panel ---------- */
+.register-form-panel {
+    width: 55%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 3rem;
+    background: #110F17;
+}
+
+.register-form-wrapper {
+    width: 100%;
+    max-width: 640px;
+}
+
+/* Mobile branding (visible only below lg) */
+.register-mobile-brand {
+    display: none;
+    margin-bottom: 2.5rem;
+}
+
+.register-mobile-brand span {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 900;
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    letter-spacing: -0.04em;
+}
+
+/* ---------- Form Card ---------- */
+.register-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: 12px;
+    padding: 2.5rem;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+}
+
+.register-card-header {
+    margin-bottom: 2rem;
+}
+
+.register-card-header h2 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin: 0 0 0.5rem;
+    text-align: left;
+}
+
+.register-card-header p {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* ---------- Form ---------- */
+.register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Two-column grid rows */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.form-group label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-left: 2px;
+}
+
+/* Input base */
+.form-group input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    background: var(--bg-elevated);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: var(--text-primary);
+    outline: none;
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.form-group input::placeholder {
+    color: var(--text-placeholder);
+    font-size: 0.875rem;
+}
+
+.form-group input:focus {
+    box-shadow: 0 0 0 2px rgba(25, 75, 255, 0.15);
+    border-color: var(--primary);
+}
+
+/* Date input dark scheme */
+.form-group input[type="date"] {
+    color-scheme: dark;
+}
+
+/* ---------- Username with @ prefix ---------- */
+.username-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.username-prefix {
+    position: absolute;
+    left: 1rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.username-input-wrapper input {
+    padding-left: 2rem;
+}
+
+/* ---------- Password wrapper ---------- */
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper input {
+    padding-right: 3rem;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 1.1rem;
-    color: #98979D;
-    border-radius: 6px;
-    transition: color 0.2s, background 0.2s;
+    color: var(--text-muted);
     padding: 0;
-    line-height: 1;
-}
-
-.register-card .toggle-password:hover {
-    color: #194BFF;
-    background: rgba(25, 75, 255, 0.1);
-}
-
-/* --- Messages --- */
-.error-message {
-    color: #E84A34;
-    font-size: 0.85rem;
-    margin-bottom: 1rem;
-    text-align: center;
-    background: rgba(232, 74, 52, 0.1);
-    border: 1px solid rgba(232, 74, 52, 0.3);
-    border-radius: 8px;
-    padding: 0.5rem 0.75rem;
-}
-
-.password-mismatch {
-    color: #E84A34;
-    font-size: 0.78rem;
-    margin-top: 0.35rem;
-    margin-bottom: 0;
-    font-family: 'Outfit', sans-serif;
-}
-
-/* --- Password Rules Checklist --- */
-.password-rules {
-    list-style: none;
-    padding: 0.5rem 0.75rem;
-    margin: 0.4rem 0 0;
-    background: #28272F;
-    border: 1px solid #3E3E47;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-.password-rules li {
-    font-family: 'Outfit', sans-serif;
-    font-size: 0.8rem;
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
+    z-index: 1;
     transition: color 0.2s;
 }
 
-.rule-pass {
-    color: #89EB79;
+.toggle-password:hover {
+    color: var(--text-primary);
 }
 
-.rule-fail {
-    color: #98979D;
+.toggle-password:focus {
+    outline: none;
 }
 
-.rule-icon {
-    font-size: 0.85rem;
-    font-weight: 700;
-    width: 14px;
-    text-align: center;
+.toggle-password .material-symbols-outlined {
+    font-size: 1.15rem;
 }
 
-/* --- Inline Field Availability Error --- */
+/* ---------- Password Requirements (inline chips) ---------- */
+.password-requirements {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    padding: 0.5rem 0 0.25rem;
+}
+
+.password-requirements .req-item {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.password-requirements .req-item.req-pass {
+    color: var(--success);
+}
+
+.password-requirements .req-item.req-fail {
+    color: var(--text-muted);
+}
+
+.password-requirements .req-item .material-symbols-outlined {
+    font-size: 0.875rem;
+}
+
+/* ---------- Password Mismatch ---------- */
+.password-mismatch {
+    color: var(--error);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.75rem;
+    margin: 0;
+}
+
+/* ---------- Field Availability Error ---------- */
 .field-error {
-    color: #E84A34;
-    font-size: 0.78rem;
-    margin-top: 0.3rem;
-    margin-bottom: 0;
+    color: var(--error);
+    font-size: 0.75rem;
+    margin: 0;
     font-family: 'Outfit', sans-serif;
     display: flex;
     align-items: center;
@@ -185,35 +369,86 @@
 
 .field-error::before {
     content: '✗';
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 700;
 }
 
-/* --- Register Button --- */
+/* ---------- Terms Row ---------- */
+.terms-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.25rem 0;
+}
+
+.terms-row input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    border-radius: 3px;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-elevated);
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
+.terms-row label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: none;
+    letter-spacing: normal;
+    font-weight: 400;
+    cursor: pointer;
+}
+
+.terms-row label a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.terms-row label a:hover {
+    text-decoration: underline;
+}
+
+/* ---------- Error Message ---------- */
+.error-message {
+    color: #E84A34;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    text-align: center;
+    background: rgba(232, 74, 52, 0.08);
+    border: 1px solid rgba(232, 74, 52, 0.25);
+    border-radius: 8px;
+    padding: 0.6rem 0.85rem;
+    margin: 0;
+}
+
+/* ---------- Register Button ---------- */
 .register-btn {
     width: 100%;
-    padding: 0.75rem;
+    padding: 1rem;
     font-family: 'Outfit', sans-serif;
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 1.1rem;
+    font-weight: 700;
     border: none;
     border-radius: 10px;
-    background: linear-gradient(135deg, #466EFF, #194BFF);
-    color: #F6F6F6;
+    background: var(--primary);
+    color: #fff;
     cursor: pointer;
-    margin-top: 0.5rem;
-    transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+    margin-top: 0.25rem;
+    letter-spacing: -0.01em;
+    transition: box-shadow 0.3s, filter 0.3s, transform 0.15s;
     box-shadow: 0 2px 12px rgba(25, 75, 255, 0.35);
 }
 
 .register-btn:hover:not(:disabled) {
-    opacity: 0.9;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(25, 75, 255, 0.45);
+    box-shadow: 0 0 20px rgba(25, 75, 255, 0.45);
+    filter: brightness(1.1);
 }
 
 .register-btn:active:not(:disabled) {
-    transform: translateY(0);
+    transform: scale(0.98);
 }
 
 .register-btn:disabled {
@@ -221,26 +456,56 @@
     cursor: not-allowed;
 }
 
-/* --- Login Link --- */
-.login-link {
+/* ---------- Footer ---------- */
+.register-footer {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-default);
     text-align: center;
-    margin-top: 1.25rem;
-    font-size: 0.9rem;
-    color: #98979D;
-    font-family: 'Outfit', sans-serif;
 }
 
-.login-link a {
-    color: #194BFF;
+.register-footer p {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.register-footer a {
+    color: var(--primary);
     font-weight: 600;
     text-decoration: none;
+    margin-left: 0.25rem;
 }
 
-.login-link a:hover {
+.register-footer a:hover {
     text-decoration: underline;
 }
 
-/* --- Toast Notification --- */
+/* ---------- Testimonial ---------- */
+.register-testimonial {
+    margin-top: 3rem;
+    text-align: center;
+}
+
+.register-testimonial p {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.75rem;
+    font-style: italic;
+    color: var(--text-placeholder);
+    max-width: 320px;
+    margin: 0 auto;
+    line-height: 1.5;
+}
+
+.register-testimonial .testimonial-author {
+    display: block;
+    margin-top: 0.35rem;
+    font-style: normal;
+    font-weight: 400;
+    opacity: 0.6;
+}
+
+/* ---------- Toast Notification ---------- */
 @keyframes toastSlideIn {
     from {
         opacity: 0;
@@ -260,16 +525,16 @@
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    background: #1F1E29;
-    border: 1px solid #28272F;
-    border-left: 4px solid #89EB79;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-left: 4px solid var(--success);
     border-radius: 10px;
     padding: 0.75rem 1.25rem;
     box-shadow: 0 6px 28px rgba(0, 0, 0, 0.45);
     font-family: 'Outfit', sans-serif;
     font-size: 0.9rem;
     font-weight: 500;
-    color: #89EB79;
+    color: var(--success);
     white-space: nowrap;
     z-index: 9999;
     animation: toastSlideIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
@@ -278,4 +543,38 @@
 .register-toast-icon {
     font-size: 1.1rem;
     flex-shrink: 0;
+}
+
+/* ---------- Material Symbols ---------- */
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1024px) {
+    .register-brand-panel {
+        display: none;
+    }
+
+    .register-form-panel {
+        width: 100%;
+    }
+
+    .register-mobile-brand {
+        display: block;
+    }
+}
+
+@media (max-width: 600px) {
+    .register-form-panel {
+        padding: 1.5rem;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .register-card {
+        padding: 1.75rem;
+    }
 }

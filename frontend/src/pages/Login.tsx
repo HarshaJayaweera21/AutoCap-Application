@@ -1,6 +1,5 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HiOutlineEye, HiOutlineEyeSlash } from 'react-icons/hi2';
 import './Login.css';
 
 function Login() {
@@ -58,71 +57,135 @@ function Login() {
     };
 
     return (
-        <div className="login-container">
-            <div className="login-card">
-                <h2>Sign In to AutoCap</h2>
+        <div className="login-page">
+            {/* ---- Left: Brand Panel ---- */}
+            <section className="login-brand-panel">
+                <div className="brand-content">
+                    <div className="brand-logo">AutoCap</div>
 
-                {/* Error Message – shown directly under the title */}
-                {error && <p className="error-message">{error}</p>}
-
-                <form onSubmit={handleSubmit}>
-                    {/* Email Field */}
-                    <div className="form-group">
-                        <label htmlFor="email">Email</label>
-                        <input
-                            id="email"
-                            type="email"
-                            placeholder="Enter your email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
+                    <div>
+                        <h1 className="brand-hero-title">Welcome to AutoCap</h1>
+                        <p className="brand-subtitle">
+                            A Domain-Specific Image Captioning and Validation System
+                        </p>
+                        <p className="brand-description">
+                            Generate and validate image captions using advanced AI
+                            models in a structured and scalable environment.
+                        </p>
                     </div>
 
-                    {/* Password Field with Visibility Toggle */}
-                    <div className="form-group">
-                        <label htmlFor="password">Password</label>
-                        <div className="password-wrapper">
-                            <input
-                                id="password"
-                                type={showPassword ? 'text' : 'password'}
-                                placeholder="Enter your password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
-                            <button
-                                type="button"
-                                className="toggle-password"
-                                onClick={() => setShowPassword(!showPassword)}
-                                aria-label={showPassword ? 'Hide password' : 'Show password'}
-                            >
-                                {showPassword ? <HiOutlineEye /> : <HiOutlineEyeSlash />}
-                            </button>
+                    {/* Social proof accent */}
+                    <div className="brand-social-proof">
+                        <div className="avatar-stack">
+                            <div className="avatar">
+                                <span className="material-symbols-outlined" style={{ fontSize: '20px', color: 'var(--text-muted)' }}>person</span>
+                            </div>
+                            <div className="avatar">
+                                <span className="material-symbols-outlined" style={{ fontSize: '20px', color: 'var(--text-muted)' }}>person</span>
+                            </div>
+                            <div className="avatar avatar-count">+12k</div>
                         </div>
+                        <span className="social-proof-label">Trusted by AI researchers</span>
+                    </div>
+                </div>
+            </section>
+
+            {/* ---- Right: Form Panel ---- */}
+            <section className="login-form-panel">
+                <div className="login-form-wrapper">
+                    {/* Form card */}
+                    <div className="login-card">
+                        <div className="login-card-header">
+                            <h2>Sign In</h2>
+                            <p>Enter your credentials to access your workspace</p>
+                        </div>
+
+                        {/* Error message */}
+                        {error && <p className="error-message">{error}</p>}
+
+                        <form className="login-form" onSubmit={handleSubmit}>
+                            {/* Email */}
+                            <div className="form-group">
+                                <label htmlFor="email">Email Address</label>
+                                <div className="input-icon-wrapper">
+                                    <span className="input-icon material-symbols-outlined">mail</span>
+                                    <input
+                                        id="email"
+                                        type="email"
+                                        placeholder="name@company.com"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Password */}
+                            <div className="form-group">
+                                <div className="label-row">
+                                    <label htmlFor="password">Password</label>
+                                    <a
+                                        href="/forgot-password"
+                                        className="forgot-inline-link"
+                                        onClick={(e) => { e.preventDefault(); navigate('/forgot-password'); }}
+                                    >
+                                        Forgot Password?
+                                    </a>
+                                </div>
+                                <div className="input-icon-wrapper">
+                                    <span className="input-icon material-symbols-outlined">lock</span>
+                                    <input
+                                        id="password"
+                                        type={showPassword ? 'text' : 'password'}
+                                        placeholder="••••••••"
+                                        className="has-toggle"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
+                                    />
+                                    <button
+                                        type="button"
+                                        className="toggle-password-btn"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                    >
+                                        <span className="material-symbols-outlined">
+                                            {showPassword ? 'visibility' : 'visibility_off'}
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Submit */}
+                            <button type="submit" className="login-btn" disabled={loading}>
+                                <span>{loading ? 'Signing In...' : 'Sign In'}</span>
+                                {!loading && <span className="material-symbols-outlined">arrow_forward</span>}
+                            </button>
+                        </form>
                     </div>
 
-                    {/* Forgot Password Link */}
-                    <p className="forgot-link">
-                        <a href="/forgot-password" onClick={(e) => { e.preventDefault(); navigate('/forgot-password'); }}>
-                            Forgot Password?
-                        </a>
-                    </p>
+                    {/* Footer: Sign Up */}
+                    <div className="login-footer">
+                        <p>
+                            Don't have an account?
+                            <a href="/register" onClick={(e) => { e.preventDefault(); navigate('/register'); }}>
+                                Sign Up
+                            </a>
+                        </p>
+                    </div>
 
-                    {/* Submit Button */}
-                    <button type="submit" className="login-btn" disabled={loading}>
-                        {loading ? 'Signing In...' : 'Sign In'}
-                    </button>
-                </form>
+                    {/* Auxiliary links */}
+                    <div className="login-aux-links">
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">Support</a>
+                    </div>
+                </div>
+            </section>
 
-                {/* Register Link */}
-                <p className="register-link">
-                    Don't have an account?{' '}
-                    <a href="/register" onClick={(e) => { e.preventDefault(); navigate('/register'); }}>
-                        Sign Up
-                    </a>
-                </p>
-            </div>
+            {/* Floating background orbs for depth */}
+            <div className="bg-orb bg-orb--top-right" />
+            <div className="bg-orb bg-orb--bottom-left" />
         </div>
     );
 }
