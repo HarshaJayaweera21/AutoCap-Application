@@ -105,6 +105,19 @@
           #e3f638
   );
   --gradient-dark: linear-gradient(180deg, #646464, #292929, #111112, #1b1b1b);
+
+  /* Legacy variable aliases for feedback module compatibility */
+  --bg-base: #110f17;
+  --surface: #1f1e29;
+  --border: #28272f;
+  --border-hover: #3e3e47;
+  --highlight: #d8ee10;
+  --grad-blue: linear-gradient(135deg, #a2b6ff, #466eff, #194bff, #2b59ff);
+  --grad-lime: linear-gradient(135deg, #f6ffa0, #edfe54, #d8ee10, #e3f638);
+  --grad-dark: linear-gradient(135deg, #646464, #292929, #111112, #1b1b1b);
+  --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-glow: 0 0 15px rgba(25, 75, 255, 0.3);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ===========================
