@@ -28,7 +28,7 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({
         borderRadius: 'var(--radius-md)',
         background: disabled
           ? 'var(--border-strong)'
-          : 'var(--gradient-primary)',
+          : 'var(--primary)',
         boxShadow: !disabled && !loading ? 'var(--shadow-glow-primary)' : 'none',
       }}
     >
