@@ -17,10 +17,10 @@ export const downloadDataset = async (
   const response = await api.get(`/api/datasets/${datasetId}/download`, {
     responseType: 'blob',
   });
-  const url = window.URL.createObjectURL(new Blob([response.data]));
+  const url = window.URL.createObjectURL(response.data);
   const link = document.createElement('a');
   link.href = url;
-  link.setAttribute('download', `dataset-${datasetName}-${datasetId}.zip`);
+  link.setAttribute('download', `dataset-${datasetName.replace(/\s+/g, '_')}-${datasetId}.zip`);
   document.body.appendChild(link);
   link.click();
   link.remove();

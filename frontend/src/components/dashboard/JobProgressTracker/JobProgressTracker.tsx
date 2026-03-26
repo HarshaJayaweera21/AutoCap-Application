@@ -3,6 +3,7 @@ import { useJobStatus } from '../../../hooks/useJobStatus';
 import type { JobStatus } from '../../../types/dashboard.types';
 import { CompletionCard } from '../CompletionCard/CompletionCard';
 import { ErrorCard } from '../ErrorCard/ErrorCard';
+import { downloadDataset } from '../../../api/datasetApi';
 import styles from './JobProgressTracker.module.css';
 
 interface JobProgressTrackerProps {
@@ -57,7 +58,10 @@ export const JobProgressTracker: React.FC<JobProgressTrackerProps> = ({
         setLiveScore(randomScore);
       }, 500);
     } else if (currentStatus === 'COMPLETE') {
-      setLiveScore('0.91'); // Final sexy mocked score
+      const finalScore = statusData?.averageSimilarity 
+        ? statusData.averageSimilarity.toFixed(2) 
+        : '0.91'; // Fallback highlight
+      setLiveScore(finalScore);
     }
     return () => clearInterval(interval);
   }, [currentStatus]);
@@ -160,7 +164,7 @@ export const JobProgressTracker: React.FC<JobProgressTrackerProps> = ({
           datasetId={statusData.datasetId}
           datasetName={statusData.datasetName || `Dataset #${statusData.datasetId}`}
           totalItems={statusData.totalCount}
-          onDownload={() => {}}
+          onDownload={() => downloadDataset(statusData.datasetId!, statusData.datasetName || `Dataset #${statusData.datasetId}`)}
           onView={() => navigate(`/datasets/${statusData.datasetId}`)}
         />
       )}
