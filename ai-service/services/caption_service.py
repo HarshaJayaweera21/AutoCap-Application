@@ -12,6 +12,7 @@ from models.caption import CaptionModel, get_tokenizer, generate_caption_greedy,
 class CaptionService:
     def __init__(self):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        print(f"CaptionService initialized using device: {self.device}")
         self.baseline_encoder = None
         self.baseline_decoder = None
         self.baseline_vocab = None
