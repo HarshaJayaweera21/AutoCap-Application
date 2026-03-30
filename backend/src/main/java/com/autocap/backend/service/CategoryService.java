@@ -8,7 +8,9 @@ import com.autocap.backend.exception.NotFoundException;
 import com.autocap.backend.repository.DocCategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,6 +30,12 @@ public class CategoryService {
     }
 
     public CategoryResponseDTO createCategory(CreateCategoryRequest request) {
+        // Check for duplicate order index
+        if (request.getOrderIndex() != null && categoryRepository.existsByOrderIndex(request.getOrderIndex())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "A category with order " + request.getOrderIndex() + " already exists. Please choose a different order.");
+        }
+
         DocCategory category = new DocCategory();
         category.setName(request.getName());
         category.setOrderIndex(request.getOrderIndex());
@@ -39,6 +47,12 @@ public class CategoryService {
     public CategoryResponseDTO updateCategory(UUID id, UpdateCategoryRequest request) {
         DocCategory category = categoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Category not found with id: " + id));
+
+        // Check for duplicate order index (excluding current category)
+        if (request.getOrderIndex() != null && categoryRepository.existsByOrderIndexAndIdNot(request.getOrderIndex(), id)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "A category with order " + request.getOrderIndex() + " already exists. Please choose a different order.");
+        }
 
         category.setName(request.getName());
         category.setOrderIndex(request.getOrderIndex());
