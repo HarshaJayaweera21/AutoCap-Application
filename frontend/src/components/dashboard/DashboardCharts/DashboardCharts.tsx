@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend,
+  PieChart, Pie, Cell,
 } from 'recharts';
 import styles from './DashboardCharts.module.css';
 
@@ -46,7 +46,7 @@ export const DatasetTrendsChart: React.FC<DatasetTrendsChartProps> = ({ datasets
         </div>
       </div>
       <div className={styles.chartContainer}>
-        <ResponsiveContainer width="100%" height={220}>
+        <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} barCategoryGap="20%">
             <XAxis
               dataKey="day"
@@ -65,7 +65,7 @@ export const DatasetTrendsChart: React.FC<DatasetTrendsChartProps> = ({ datasets
                 fontFamily: 'Outfit',
               }}
               cursor={{ fill: 'rgba(255,255,255,0.04)' }}
-              formatter={(value: number) => [`${value.toLocaleString()} images`, 'Processed']}
+              formatter={(value: number | undefined) => [`${value?.toLocaleString() || 0} images`, 'Processed']}
             />
             <Bar dataKey="count" radius={[4, 4, 0, 0]} maxBarSize={42}>
               {chartData.map((_, index) => (

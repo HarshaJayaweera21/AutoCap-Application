@@ -13,7 +13,7 @@ import { JobProgressTracker } from '../../components/dashboard/JobProgressTracke
 import { StatsCard } from '../../components/dashboard/StatsCard/StatsCard';
 import { DatasetTrendsChart, ModelDistributionChart, SimilarityGauge } from '../../components/dashboard/DashboardCharts';
 import { uploadImages } from '../../api/uploadApi';
-import { getRecentDatasets, downloadDataset } from '../../api/datasetApi';
+import { getRecentDatasets, downloadDataset, getMyDatasets } from '../../api/datasetApi';
 import styles from './Dashboard.module.css';
 
 const initialState: DashboardFormState = {
@@ -89,10 +89,16 @@ export const Dashboard: React.FC = () => {
     refetchOnWindowFocus: false,
   });
 
+  const { data: allDatasets = [], isLoading: allDatasetsLoading, refetch: refetchAllDatasets } = useQuery({
+    queryKey: ['allDatasets'],
+    queryFn: getMyDatasets,
+    refetchOnWindowFocus: false,
+  });
+
   /* ── Computed stats ─────────────────────────────────────────────── */
   const stats = useMemo(() => {
-    const totalImages = recentDatasets.reduce((acc, d) => acc + (d.totalItems ?? 0), 0);
-    const withScore = recentDatasets.filter((d) => d.averageSimilarity != null);
+    const totalImages = allDatasets.reduce((acc, d) => acc + (d.totalItems ?? 0), 0);
+    const withScore = allDatasets.filter((d) => d.averageSimilarity != null);
     const avgScore =
       withScore.length > 0
         ? withScore.reduce((acc, d) => acc + (d.averageSimilarity ?? 0), 0) / withScore.length
@@ -115,11 +121,11 @@ export const Dashboard: React.FC = () => {
 
     return {
       totalImages,
-      totalDatasets: recentDatasets.length,
+      totalDatasets: allDatasets.length,
       avgScore,
       scoreTrend,
     };
-  }, [recentDatasets]);
+  }, [allDatasets, recentDatasets]);
 
   const displayedDatasets = useMemo(() => {
     return filterHighQuality 
@@ -160,7 +166,8 @@ export const Dashboard: React.FC = () => {
 
   const handleJobComplete = useCallback(() => {
     refetchDatasets();
-  }, [refetchDatasets]);
+    refetchAllDatasets();
+  }, [refetchDatasets, refetchAllDatasets]);
 
   const handleDownload = useCallback(async (ds: { id: number; name: string }) => {
     setDownloadingId(ds.id);
@@ -205,7 +212,7 @@ export const Dashboard: React.FC = () => {
           <StatsCard
             icon={<ImagesIcon />}
             label="Total Images Processed"
-            value={datasetsLoading ? '—' : stats.totalImages.toLocaleString()}
+            value={allDatasetsLoading ? '—' : stats.totalImages.toLocaleString()}
             badge={stats.totalImages > 0 ? `+${Math.min(12, Math.round(stats.totalImages / 100))}%` : undefined}
             badgeVariant="success"
             variant="primary"
@@ -213,7 +220,7 @@ export const Dashboard: React.FC = () => {
           <StatsCard
             icon={<DatabaseIcon />}
             label="Total Datasets Created"
-            value={datasetsLoading ? '—' : stats.totalDatasets}
+            value={allDatasetsLoading ? '—' : stats.totalDatasets}
             badge="Stable"
             badgeVariant="default"
             variant="primary"
@@ -222,7 +229,7 @@ export const Dashboard: React.FC = () => {
             icon={<ScoreIcon />}
             label="Avg Similarity Score"
             value={
-              datasetsLoading
+              allDatasetsLoading
                 ? '—'
                 : stats.avgScore != null
                 ? stats.avgScore.toFixed(2)
@@ -479,7 +486,7 @@ export const Dashboard: React.FC = () => {
               <h3 className={styles.recentDatasetsTitle}>
                 {filterHighQuality ? 'High-Quality Datasets' : 'Recent Datasets'}
               </h3>
-              <button className={styles.viewAllLink} onClick={() => navigate('/datasets')}>
+              <button className={styles.viewAllLink} onClick={() => navigate('/my-datasets')}>
                 View All Datasets
               </button>
             </div>
