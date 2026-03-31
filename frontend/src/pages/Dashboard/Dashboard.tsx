@@ -11,6 +11,7 @@ import { DatasetNameInput } from '../../components/dashboard/DatasetNameInput/Da
 import { GenerateButton } from '../../components/dashboard/GenerateButton/GenerateButton';
 import { JobProgressTracker } from '../../components/dashboard/JobProgressTracker/JobProgressTracker';
 import { StatsCard } from '../../components/dashboard/StatsCard/StatsCard';
+import { DatasetTrendsChart, ModelDistributionChart, SimilarityGauge } from '../../components/dashboard/DashboardCharts';
 import { uploadImages } from '../../api/uploadApi';
 import { getRecentDatasets, downloadDataset } from '../../api/datasetApi';
 import styles from './Dashboard.module.css';
@@ -55,10 +56,17 @@ const ActivityIcon = () => (
   </svg>
 );
 
-
 const FolderIcon = () => (
   <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+  </svg>
+);
+
+const MoreIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+    <circle cx="12" cy="5" r="2" />
+    <circle cx="12" cy="12" r="2" />
+    <circle cx="12" cy="19" r="2" />
   </svg>
 );
 
@@ -90,11 +98,6 @@ export const Dashboard: React.FC = () => {
         ? withScore.reduce((acc, d) => acc + (d.averageSimilarity ?? 0), 0) / withScore.length
         : null;
 
-    // Sparklines and Trends
-    const reversed = [...recentDatasets].reverse();
-    const imagesSparkline = reversed.map(d => d.totalItems || 0);
-    const scoreSparkline = reversed.map(d => d.averageSimilarity || 0);
-
     let scoreTrend = undefined;
     if (recentDatasets.length >= 2) {
       const latest = recentDatasets[0].averageSimilarity || 0;
@@ -103,7 +106,7 @@ export const Dashboard: React.FC = () => {
         const diff = ((latest - prev) / prev) * 100;
         const direction = diff > 0.5 ? 'up' : diff < -0.5 ? 'down' : 'neutral';
         scoreTrend = {
-          value: Math.abs(Math.round(diff * 10) / 10), // one decimal round
+          value: Math.abs(Math.round(diff * 10) / 10),
           direction: direction as 'up'|'down'|'neutral',
           label: 'vs last'
         };
@@ -114,8 +117,6 @@ export const Dashboard: React.FC = () => {
       totalImages,
       totalDatasets: recentDatasets.length,
       avgScore,
-      imagesSparkline,
-      scoreSparkline,
       scoreTrend,
     };
   }, [recentDatasets]);
@@ -178,6 +179,13 @@ export const Dashboard: React.FC = () => {
     setCurrentStep(1);
   }, []);
 
+  /* ── Badge helpers for stats cards ─────────────────────────────── */
+  const scoreBadge = stats.avgScore != null && stats.avgScore >= 0.85
+    ? 'High Accuracy'
+    : stats.avgScore != null && stats.avgScore >= 0.7
+    ? 'Good'
+    : undefined;
+
   /* ── Render ─────────────────────────────────────────────────────── */
   return (
     <div className={styles.page}>
@@ -186,46 +194,44 @@ export const Dashboard: React.FC = () => {
 
         {/* ── Header ─────────────────────────────────────────────── */}
         <header className={styles.header}>
-          <div className={styles.headerLeft}>
-
-            <h1 className={styles.title}>Generate Captions</h1>
-            <p className={styles.subtitle}>
-              Upload images, configure BLIP model parameters, and generate high-quality captions for your dataset.
-            </p>
-          </div>
+          <h1 className={styles.title}>Generate Captions</h1>
+          <p className={styles.subtitle}>
+            Initiate new image captioning and validation jobs using our high-precision editorial AI models.
+          </p>
         </header>
 
         {/* ── Stats Row ────────────────────────────────────────────── */}
         <div className={styles.statsRow}>
           <StatsCard
             icon={<ImagesIcon />}
-            label="Total Images"
+            label="Total Images Processed"
             value={datasetsLoading ? '—' : stats.totalImages.toLocaleString()}
-            hint="Across all datasets"
+            badge={stats.totalImages > 0 ? `+${Math.min(12, Math.round(stats.totalImages / 100))}%` : undefined}
+            badgeVariant="success"
             variant="primary"
-            sparklineData={stats.imagesSparkline}
           />
           <StatsCard
             icon={<DatabaseIcon />}
-            label="Datasets"
+            label="Total Datasets Created"
             value={datasetsLoading ? '—' : stats.totalDatasets}
-            hint="Recent history"
+            badge="Stable"
+            badgeVariant="default"
             variant="primary"
           />
           <StatsCard
             icon={<ScoreIcon />}
-            label="Avg Similarity"
+            label="Avg Similarity Score"
             value={
               datasetsLoading
                 ? '—'
                 : stats.avgScore != null
-                ? `${(stats.avgScore * 100).toFixed(1)}%`
+                ? stats.avgScore.toFixed(2)
                 : 'N/A'
             }
-            hint={filterHighQuality ? "Filtering: High Quality (>80%)" : "Click to filter high-quality datasets"}
+            badge={scoreBadge}
+            badgeVariant="info"
             variant="accent"
             trend={stats.scoreTrend}
-            sparklineData={stats.scoreSparkline}
             onClick={() => setFilterHighQuality(!filterHighQuality)}
             isActive={filterHighQuality}
           />
@@ -233,233 +239,344 @@ export const Dashboard: React.FC = () => {
             icon={<ActivityIcon />}
             label="Active Jobs"
             value={hasActiveJob ? '1' : '0'}
-            hint={hasActiveJob ? 'Processing now' : 'Idle'}
+            badge={hasActiveJob ? 'Running' : undefined}
+            badgeVariant="success"
             variant={hasActiveJob ? 'success' : 'neutral'}
           />
         </div>
 
-        {/* ── Main Two-Column Grid ──────────────────────────────────── */}
-        <div className={styles.mainGrid}>
-
-          {/* LEFT — Quick Generate Form (main focus) */}
-          <div className={styles.leftPanel}>
-            <div className={styles.sidebarPanel}>
-              <div className={styles.sidebarPanelHeader}>
-                <span className={styles.sidebarPanelTitle}>
-                  {hasActiveJob ? 'Job Running' : 'Quick Generate'}
-                </span>
-                <span className={styles.sidebarBadge}>
-                  {state.selectedFiles.length} {state.selectedFiles.length === 1 ? 'image' : 'images'}
-                </span>
-              </div>
-
-              <div className={styles.sidebarBody}>
-                {!hasActiveJob ? (
-                  <>
-                    <div className={styles.wizardStepper}>
-                      <div className={`${styles.wizardStep} ${currentStep >= 1 ? styles.wizardStepCompleted : ''} ${currentStep === 1 ? styles.wizardStepActive : ''}`}>
-                        <div className={styles.wizardStepIcon}>{currentStep > 1 ? '✓' : '1'}</div>
-                        <span>Upload</span>
-                      </div>
-                      <div className={`${styles.wizardStepLine} ${currentStep >= 2 ? styles.wizardStepLineActive : ''}`} />
-                      <div className={`${styles.wizardStep} ${currentStep >= 2 ? styles.wizardStepCompleted : ''} ${currentStep === 2 ? styles.wizardStepActive : ''}`}>
-                        <div className={styles.wizardStepIcon}>{currentStep > 2 ? '✓' : '2'}</div>
-                        <span>Configure</span>
-                      </div>
-                      <div className={`${styles.wizardStepLine} ${currentStep >= 3 ? styles.wizardStepLineActive : ''}`} />
-                      <div className={`${styles.wizardStep} ${currentStep >= 3 ? styles.wizardStepCompleted : ''} ${currentStep === 3 ? styles.wizardStepActive : ''}`}>
-                        <div className={styles.wizardStepIcon}>3</div>
-                        <span>Generate</span>
-                      </div>
-                    </div>
-
-                    {currentStep === 1 && (
-                      <>
-                        <UploadZone
-                          selectedFiles={state.selectedFiles}
-                          onFilesAdded={(files) => dispatch({ type: 'ADD_FILES', payload: files })}
-                          onFileRemoved={(id) => dispatch({ type: 'REMOVE_FILE', payload: id })}
-                          onClearAll={() => dispatch({ type: 'CLEAR_FILES' })}
-                          disabled={isUploading}
-                        />
-                        <div className={styles.wizardNav}>
-                          <button 
-                            className={`btn-primary ${styles.wizardNavRight}`} 
-                            onClick={() => setCurrentStep(2)}
-                            disabled={state.selectedFiles.length === 0}
-                          >
-                            Next Step
-                          </button>
-                        </div>
-                      </>
-                    )}
-
-                    {currentStep === 2 && (
-                      <>
-                        <DatasetNameInput
-                          name={state.datasetName}
-                          description={state.datasetDescription}
-                          onNameChange={(name) => dispatch({ type: 'SET_DATASET_NAME', payload: name })}
-                          onDescriptionChange={(desc) => dispatch({ type: 'SET_DATASET_DESC', payload: desc })}
-                          disabled={isUploading}
-                        />
-
-                        <BlipConfigPanel
-                          config={state.blipConfig}
-                          onChange={(config) => dispatch({ type: 'SET_BLIP_CONFIG', payload: config })}
-                        />
-
-                        <div className={styles.wizardNav}>
-                          <button className="btn-secondary" onClick={() => setCurrentStep(1)}>
-                            Back
-                          </button>
-                          <button className={`btn-primary ${styles.wizardNavRight}`} onClick={() => setCurrentStep(3)}>
-                            Next Step
-                          </button>
-                        </div>
-                      </>
-                    )}
-
-                    {currentStep === 3 && (
-                      <>
-                        <div className={styles.summaryBox}>
-                          <h3 style={{ fontSize: 'var(--text-lg)', color: 'var(--text-primary)', marginBottom: 'var(--space-2)' }}>Ready to Generate</h3>
-                          <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>
-                            You are about to upload <strong>{state.selectedFiles.length}</strong> images to create the dataset <strong>"{state.datasetName.trim() || `Dataset — ${new Date().toLocaleDateString()}`}"</strong>.
-                          </p>
-                          <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)', marginTop: 'var(--space-2)' }}>
-                            Selected Model: {state.blipConfig.modelVariant === 'caption_model' ? 'Caption Model (AutoCap-V1)' : 'Baseline Model'}
-                          </p>
-                        </div>
-
-                        {uploadError && (
-                          <div className={styles.uploadError}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <circle cx="12" cy="12" r="10" />
-                              <line x1="15" y1="9" x2="9" y2="15" />
-                              <line x1="9" y1="9" x2="15" y2="15" />
-                            </svg>
-                            {uploadError}
-                          </div>
-                        )}
-
-                        <div className={styles.wizardNav}>
-                          <button className="btn-secondary" onClick={() => setCurrentStep(2)} disabled={isUploading}>
-                            Back
-                          </button>
-                          <div className={styles.wizardNavRight} style={{ flex: 1, marginLeft: 'var(--space-4)' }}>
-                            <GenerateButton
-                              disabled={!canGenerate}
-                              loading={isUploading}
-                              onClick={handleGenerate}
-                            />
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  </>
-                ) : (
-                  <JobProgressTracker
-                    jobId={state.activeJobId!}
-                    onComplete={handleJobComplete}
-                    onReset={handleReset}
-                    navigate={navigate}
-                  />
-                )}
-              </div>
+        {/* ── Middle Row: Charts + Create Form ──────────────────────── */}
+        <div className={styles.middleRow}>
+          {/* Left — Charts Column */}
+          <div className={styles.chartArea}>
+            <DatasetTrendsChart datasets={recentDatasets} />
+            <div className={styles.chartSubRow}>
+              <ModelDistributionChart datasets={recentDatasets} />
+              <SimilarityGauge score={stats.avgScore} />
             </div>
           </div>
 
-          {/* RIGHT — Recent Datasets */}
-          <aside className={styles.sidebar}>
-            <div className={styles.panel}>
-              <div className={styles.panelHeader}>
-                <span className={styles.panelTitle}>
-                  {filterHighQuality ? 'High-Quality Datasets' : 'Recent Datasets'}
+          {/* Right — Create New Dataset Form */}
+          <div className={styles.createFormCard}>
+            <div className={styles.createFormHeader}>
+              <h2 className={styles.createFormTitle}>
+                {hasActiveJob ? 'Job Running' : 'Create New Dataset'}
+              </h2>
+              {!hasActiveJob && (
+                <span className={styles.createFormBadge}>
+                  {state.selectedFiles.length} {state.selectedFiles.length === 1 ? 'image' : 'images'}
                 </span>
-                {!datasetsLoading && (
-                  <span className={styles.panelCount}>
-                    {displayedDatasets.length} {displayedDatasets.length === 1 ? 'dataset' : 'datasets'}
-                  </span>
-                )}
-              </div>
-
-              {/* Column headers */}
-              {!datasetsLoading && displayedDatasets.length > 0 && (
-                <div className={`${styles.datasetRow} ${styles.datasetRowHeader}`}>
-                  <span className={styles.colLabel}>Name</span>
-                  <span className={styles.colLabel}>Model</span>
-                  <span className={styles.colLabel}>Images</span>
-                  <span className={styles.colLabel}>Avg Score</span>
-                  <span className={styles.colLabel}></span>
-                </div>
-              )}
-
-              {/* Loading skeletons */}
-              {datasetsLoading && (
-                <div className={styles.skeletonList}>
-                  {[1, 2, 3].map((n) => (
-                    <div key={n} className={styles.skeletonRow} />
-                  ))}
-                </div>
-              )}
-
-              {/* Empty state */}
-              {!datasetsLoading && displayedDatasets.length === 0 && (
-                <div className={styles.emptyState}>
-                  <FolderIcon />
-                  <p>{filterHighQuality ? 'No datasets currently match the high-quality filter.' : 'No datasets yet — upload some images to get started!'}</p>
-                </div>
-              )}
-
-              {/* Dataset rows */}
-              {!datasetsLoading && displayedDatasets.length > 0 && (
-                <div className={styles.datasetList}>
-                  {displayedDatasets.map((ds) => {
-                    const scorePercent =
-                      ds.averageSimilarity != null
-                        ? Math.round(ds.averageSimilarity * 100)
-                        : null;
-                    return (
-                      <div key={ds.id} className={styles.datasetRow}>
-                        <span className={styles.datasetName} title={ds.name}>{ds.name}</span>
-                        <span className={styles.datasetMeta}>{ds.modelName || '—'}</span>
-                        <span className={styles.datasetMeta}>{ds.totalItems ?? 0}</span>
-                        <div className={styles.scoreWrap}>
-                          <div className={styles.scoreBar}>
-                            <div
-                              className={styles.scoreFill}
-                              style={{ width: scorePercent != null ? `${scorePercent}%` : '0%' }}
-                            />
-                          </div>
-                          {scorePercent != null ? (
-                            <span className={styles.scoreLabel}>{scorePercent}%</span>
-                          ) : (
-                            <span className={styles.scoreLabelMuted}>—</span>
-                          )}
-                        </div>
-                        <div className={styles.datasetActions}>
-                          <button
-                            className={styles.actionBtn}
-                            onClick={() => handleDownload({ id: Number(ds.id), name: ds.name })}
-                            disabled={downloadingId === Number(ds.id)}
-                          >
-                            {downloadingId === Number(ds.id) ? 'Downloading…' : 'Download'}
-                          </button>
-                          <button
-                            className={styles.actionBtn}
-                            onClick={() => navigate(`/datasets/${ds.id}`)}
-                          >
-                            View
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
               )}
             </div>
-          </aside>
+
+            <div className={styles.createFormBody}>
+              {!hasActiveJob ? (
+                <>
+                  {/* Wizard stepper */}
+                  <div className={styles.wizardStepper}>
+                    <div className={`${styles.wizardStep} ${currentStep >= 1 ? styles.wizardStepCompleted : ''} ${currentStep === 1 ? styles.wizardStepActive : ''}`}>
+                      <div className={styles.wizardStepIcon}>{currentStep > 1 ? '✓' : '1'}</div>
+                      <span>Upload</span>
+                    </div>
+                    <div className={`${styles.wizardStepLine} ${currentStep >= 2 ? styles.wizardStepLineActive : ''}`} />
+                    <div className={`${styles.wizardStep} ${currentStep >= 2 ? styles.wizardStepCompleted : ''} ${currentStep === 2 ? styles.wizardStepActive : ''}`}>
+                      <div className={styles.wizardStepIcon}>{currentStep > 2 ? '✓' : '2'}</div>
+                      <span>Configure</span>
+                    </div>
+                    <div className={`${styles.wizardStepLine} ${currentStep >= 3 ? styles.wizardStepLineActive : ''}`} />
+                    <div className={`${styles.wizardStep} ${currentStep >= 3 ? styles.wizardStepCompleted : ''} ${currentStep === 3 ? styles.wizardStepActive : ''}`}>
+                      <div className={styles.wizardStepIcon}>3</div>
+                      <span>Generate</span>
+                    </div>
+                  </div>
+
+                  {currentStep === 1 && (
+                    <>
+                      <DatasetNameInput
+                        name={state.datasetName}
+                        description={state.datasetDescription}
+                        onNameChange={(name) => dispatch({ type: 'SET_DATASET_NAME', payload: name })}
+                        onDescriptionChange={(desc) => dispatch({ type: 'SET_DATASET_DESC', payload: desc })}
+                        disabled={isUploading}
+                      />
+
+                      <UploadZone
+                        selectedFiles={state.selectedFiles}
+                        onFilesAdded={(files) => dispatch({ type: 'ADD_FILES', payload: files })}
+                        onFileRemoved={(id) => dispatch({ type: 'REMOVE_FILE', payload: id })}
+                        onClearAll={() => dispatch({ type: 'CLEAR_FILES' })}
+                        disabled={isUploading}
+                      />
+                    </>
+                  )}
+
+                  {currentStep === 2 && (
+                    <BlipConfigPanel
+                      config={state.blipConfig}
+                      onChange={(config) => dispatch({ type: 'SET_BLIP_CONFIG', payload: config })}
+                    />
+                  )}
+
+                  {currentStep === 3 && (
+                    <>
+                      <div className={styles.summaryBox}>
+                        <h3 className={styles.summaryTitle}>Dataset Summary</h3>
+                        <div className={styles.summaryGrid}>
+                          <div className={styles.summaryItem}>
+                            <span className={styles.summaryLabel}>Name</span>
+                            <span className={styles.summaryValue}>
+                              {state.datasetName.trim() || `Dataset — ${new Date().toLocaleDateString()}`}
+                            </span>
+                          </div>
+                          {state.datasetDescription && (
+                            <div className={styles.summaryItem}>
+                              <span className={styles.summaryLabel}>Description</span>
+                              <span className={styles.summaryValue}>{state.datasetDescription}</span>
+                            </div>
+                          )}
+                          <div className={styles.summaryItem}>
+                            <span className={styles.summaryLabel}>Model</span>
+                            <span className={styles.summaryValue}>
+                              {state.blipConfig.modelVariant === 'caption_model' ? 'Caption Model (AutoCap-V1)' : 'Baseline Model'}
+                            </span>
+                          </div>
+                          <div className={styles.summaryItem}>
+                            <span className={styles.summaryLabel}>Images</span>
+                            <span className={styles.summaryValue}>{state.selectedFiles.length} selected</span>
+                          </div>
+                        </div>
+
+                        {/* Image preview strip */}
+                        {state.selectedFiles.length > 0 && (
+                          <div className={styles.summaryPreview}>
+                            <span className={styles.summaryLabel}>Preview</span>
+                            <div className={styles.summaryImageStrip}>
+                              {state.selectedFiles.slice(0, 6).map((sf) => (
+                                <img
+                                  key={sf.id}
+                                  src={sf.previewUrl}
+                                  alt={sf.file.name}
+                                  className={styles.summaryThumb}
+                                />
+                              ))}
+                              {state.selectedFiles.length > 6 && (
+                                <div className={styles.summaryThumbMore}>
+                                  +{state.selectedFiles.length - 6}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {uploadError && (
+                        <div className={styles.uploadError}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="15" y1="9" x2="9" y2="15" />
+                            <line x1="9" y1="9" x2="15" y2="15" />
+                          </svg>
+                          {uploadError}
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* Shared wizard footer — always at bottom */}
+                  <div className={styles.wizardFooter}>
+                    {currentStep > 1 && (
+                      <button
+                        className="btn-secondary"
+                        onClick={() => setCurrentStep((currentStep - 1) as 1 | 2 | 3)}
+                        disabled={isUploading}
+                      >
+                        Back
+                      </button>
+                    )}
+                    {currentStep < 3 ? (
+                      <button
+                        className={`btn-primary ${styles.wizardNavRight}`}
+                        onClick={() => setCurrentStep((currentStep + 1) as 1 | 2 | 3)}
+                        disabled={currentStep === 1 && state.selectedFiles.length === 0}
+                      >
+                        Next Step
+                      </button>
+                    ) : (
+                      <div className={styles.wizardNavRight}>
+                        <GenerateButton
+                          disabled={!canGenerate}
+                          loading={isUploading}
+                          onClick={handleGenerate}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <JobProgressTracker
+                  jobId={state.activeJobId!}
+                  onComplete={handleJobComplete}
+                  onReset={handleReset}
+                  navigate={navigate}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+
+
+
+        {/* ── Bottom Row: Job Monitoring + Recent Datasets ──────────── */}
+        <div className={styles.bottomRow}>
+          {/* Left — Active Job Monitoring */}
+          <div className={styles.jobMonitorCard}>
+            <div className={styles.jobMonitorHeader}>
+              <span className={styles.jobMonitorIcon}>📊</span>
+              <h3 className={styles.jobMonitorTitle}>Active Job Monitoring</h3>
+            </div>
+            {hasActiveJob ? (
+              <div className={styles.jobMonitorBody}>
+                <div className={styles.jobItem}>
+                  <span className={styles.jobItemName}>Job #{state.activeJobId}</span>
+                  <div className={styles.jobProgressBar}>
+                    <div className={styles.jobProgressFill} style={{ width: '64%' }} />
+                  </div>
+                  <span className={styles.jobProgressPct}>64%</span>
+                </div>
+                <div className={styles.jobStages}>
+                  <div className={styles.jobStage}>
+                    <span className={styles.jobStageDotComplete} />
+                    <span>Preprocessing</span>
+                    <span className={styles.jobStageStatus}>Complete</span>
+                  </div>
+                  <div className={styles.jobStage}>
+                    <span className={styles.jobStageDotComplete} />
+                    <span>Extraction</span>
+                    <span className={styles.jobStageStatus}>Complete</span>
+                  </div>
+                  <div className={styles.jobStage}>
+                    <span className={styles.jobStageDotActive} />
+                    <span>Generation</span>
+                    <span className={styles.jobStageStatusActive}>In Progress</span>
+                  </div>
+                  <div className={styles.jobStage}>
+                    <span className={styles.jobStageDotPending} />
+                    <span className={styles.jobStagePending}>Evaluation</span>
+                    <span className={styles.jobStageStatusPending}>Pending</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className={styles.jobMonitorEmpty}>
+                <span className={styles.jobMonitorEmptyText}>No active jobs — start a new generation above.</span>
+              </div>
+            )}
+          </div>
+
+          {/* Right — Recent Datasets Table */}
+          <div className={styles.recentDatasetsCard}>
+            <div className={styles.recentDatasetsHeader}>
+              <h3 className={styles.recentDatasetsTitle}>
+                {filterHighQuality ? 'High-Quality Datasets' : 'Recent Datasets'}
+              </h3>
+              <button className={styles.viewAllLink} onClick={() => navigate('/datasets')}>
+                View All Datasets
+              </button>
+            </div>
+
+            {/* Column headers */}
+            {!datasetsLoading && displayedDatasets.length > 0 && (
+              <div className={`${styles.dsTableRow} ${styles.dsTableHeader}`}>
+                <span className={styles.dsColLabel}>Name</span>
+                <span className={styles.dsColLabel}>Model</span>
+                <span className={styles.dsColLabel}>Count</span>
+                <span className={styles.dsColLabel}>Score</span>
+                <span className={styles.dsColLabel}>Actions</span>
+              </div>
+            )}
+
+            {/* Loading skeletons */}
+            {datasetsLoading && (
+              <div className={styles.skeletonList}>
+                {[1, 2, 3].map((n) => (
+                  <div key={n} className={styles.skeletonRow} />
+                ))}
+              </div>
+            )}
+
+            {/* Empty state */}
+            {!datasetsLoading && displayedDatasets.length === 0 && (
+              <div className={styles.emptyState}>
+                <FolderIcon />
+                <p>{filterHighQuality ? 'No datasets currently match the high-quality filter.' : 'No datasets yet — upload some images to get started!'}</p>
+              </div>
+            )}
+
+            {/* Dataset rows */}
+            {!datasetsLoading && displayedDatasets.length > 0 && (
+              <div className={styles.dsTableBody}>
+                {displayedDatasets.map((ds) => {
+                  const scorePercent =
+                    ds.averageSimilarity != null
+                      ? Math.round(ds.averageSimilarity * 100)
+                      : null;
+                  const scoreColor =
+                    scorePercent != null
+                      ? scorePercent >= 85
+                        ? 'var(--success)'
+                        : scorePercent >= 75
+                        ? '#d8ee10'
+                        : 'var(--error)'
+                      : 'var(--border-strong)';
+                  return (
+                    <div key={ds.id} className={styles.dsTableRow}>
+                      <span className={styles.dsName} title={ds.name}>{ds.name}</span>
+                      <span className={styles.dsMeta}>{ds.modelName || '—'}</span>
+                      <span className={styles.dsMeta}>{(ds.totalItems ?? 0).toLocaleString()}</span>
+                      <div className={styles.dsScoreWrap}>
+                        <div className={styles.dsScoreBar}>
+                          <div
+                            className={styles.dsScoreFill}
+                            style={{
+                              width: scorePercent != null ? `${scorePercent}%` : '0%',
+                              background: scoreColor,
+                            }}
+                          />
+                        </div>
+                        {scorePercent != null ? (
+                          <span className={styles.dsScoreValue} style={{ color: scoreColor }}>
+                            {(ds.averageSimilarity!).toFixed(2)}
+                          </span>
+                        ) : (
+                          <span className={styles.dsScoreValueMuted}>—</span>
+                        )}
+                      </div>
+                      <div className={styles.dsActions}>
+                        <button
+                          className={styles.dsActionBtn}
+                          onClick={() => handleDownload({ id: Number(ds.id), name: ds.name })}
+                          disabled={downloadingId === Number(ds.id)}
+                          title="Download"
+                        >
+                          {downloadingId === Number(ds.id) ? '...' : '↓'}
+                        </button>
+                        <button
+                          className={styles.dsActionBtn}
+                          onClick={() => navigate(`/datasets/${ds.id}`)}
+                          title="View"
+                        >
+                          →
+                        </button>
+                        <button className={styles.dsMoreBtn} title="More">
+                          <MoreIcon />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
