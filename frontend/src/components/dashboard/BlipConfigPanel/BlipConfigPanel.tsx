@@ -185,7 +185,7 @@ export const BlipConfigPanel: React.FC<BlipConfigPanelProps> = ({ config, onChan
                 </div>
               </div>
           ) : (
-            <>
+            <div className={styles.advancedGrid}>
               {PARAMS.map((param) => (
                 <div 
                   key={param.key} 
@@ -193,7 +193,7 @@ export const BlipConfigPanel: React.FC<BlipConfigPanelProps> = ({ config, onChan
                     config.modelVariant === 'base_line_model' && param.key !== 'modelVariant' 
                       ? styles.paramRowDisabled 
                       : ''
-                  }`}
+                  } ${param.key === 'modelVariant' ? styles.paramRowFull : ''}`}
                 >
                   <div className={styles.paramLabel}>
                     <span>{param.label}</span>
@@ -250,7 +250,7 @@ export const BlipConfigPanel: React.FC<BlipConfigPanelProps> = ({ config, onChan
                   </div>
                 </div>
               ))}
-            </>
+            </div>
           )}
 
           <button className={styles.resetBtn} onClick={handleReset} type="button">

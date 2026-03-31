@@ -351,7 +351,7 @@ export const Dashboard: React.FC = () => {
                           <div className={styles.summaryPreview}>
                             <span className={styles.summaryLabel}>Preview</span>
                             <div className={styles.summaryImageStrip}>
-                              {state.selectedFiles.slice(0, 6).map((sf) => (
+                              {state.selectedFiles.slice(0, 19).map((sf) => (
                                 <img
                                   key={sf.id}
                                   src={sf.previewUrl}
@@ -359,9 +359,9 @@ export const Dashboard: React.FC = () => {
                                   className={styles.summaryThumb}
                                 />
                               ))}
-                              {state.selectedFiles.length > 6 && (
+                              {state.selectedFiles.length > 19 && (
                                 <div className={styles.summaryThumbMore}>
-                                  +{state.selectedFiles.length - 6}
+                                  +{state.selectedFiles.length - 19}
                                 </div>
                               )}
                             </div>
