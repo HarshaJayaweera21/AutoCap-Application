@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HiOutlineEye, HiOutlineEyeSlash } from 'react-icons/hi2';
 import './Register.css';
 
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
@@ -190,10 +189,13 @@ function Register() {
         }
     };
 
-    const RuleItem = ({ passed, label }: { passed: boolean; label: string }) => (
-        <li className={passed ? 'rule-pass' : 'rule-fail'}>
-            <span className="rule-icon">{passed ? '✓' : '✗'}</span> {label}
-        </li>
+    const ReqItem = ({ passed, label }: { passed: boolean; label: string }) => (
+        <div className={`req-item ${passed ? 'req-pass' : 'req-fail'}`}>
+            <span className="material-symbols-outlined">
+                {passed ? 'check_circle' : 'radio_button_unchecked'}
+            </span>
+            {label}
+        </div>
     );
 
     return (
@@ -205,168 +207,251 @@ function Register() {
                     {toast}
                 </div>
             )}
-            <div className="register-container">
-                <div className="register-card">
-                    <h2>Sign Up to AutoCap</h2>
 
-                    <form onSubmit={handleSubmit}>
-                        {/* First Name & Last Name side by side */}
-                        <div className="form-row">
-                            <div className="form-group">
-                                <label htmlFor="firstName">First Name</label>
-                                <input
-                                    id="firstName"
-                                    name="firstName"
-                                    type="text"
-                                    placeholder="First name"
-                                    value={formData.firstName}
-                                    onChange={handleChange}
-                                    required
-                                />
+            <div className="register-page">
+                {/* ---- Left: Brand Panel ---- */}
+                <section className="register-brand-panel">
+                    <div className="register-brand-content">
+                        <div className="register-brand-logo">AutoCap</div>
+
+                        <h1 className="register-brand-title">
+                            Create your AutoCap account
+                        </h1>
+                        <p className="register-brand-description">
+                            Join thousands of creators using AI to generated automated captions in seconds.
+                        </p>
+
+                        <div className="register-features">
+                            <div className="register-feature">
+                                <div className="register-feature-icon">
+                                    <span className="material-symbols-outlined">auto_awesome</span>
+                                </div>
+                                <div>
+                                    <h3>AI-Powered Precision</h3>
+                                    <p>99% accuracy</p>
+                                </div>
                             </div>
-                            <div className="form-group">
-                                <label htmlFor="lastName">Last Name</label>
-                                <input
-                                    id="lastName"
-                                    name="lastName"
-                                    type="text"
-                                    placeholder="Last name"
-                                    value={formData.lastName}
-                                    onChange={handleChange}
-                                    required
-                                />
+                            <div className="register-feature">
+                                <div className="register-feature-icon">
+                                    <span className="material-symbols-outlined">speed</span>
+                                </div>
+                                <div>
+                                    <h3>Instant Turnaround</h3>
+                                    <p>Get your captions in less than 30 seconds.</p>
+                                </div>
                             </div>
                         </div>
+                    </div>
 
-                        {/* Username */}
-                        <div className="form-group">
-                            <label htmlFor="username">Username</label>
-                            <input
-                                id="username"
-                                name="username"
-                                type="text"
-                                placeholder="Choose a username"
-                                value={formData.username}
-                                onChange={handleChange}
-                                required
-                            />
-                            {usernameExists === true && (
-                                <p className="field-error">Username already taken, please choose another</p>
-                            )}
+                    {/* Background Image */}
+                    <div className="register-brand-bg">
+                        <img
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6d4hh8gkDGRJafwNGrHT3tFnjCWTZNkpSrZ9uF2xUUvDjny1TMzLnkLVb0NglatQ7HZNIbj8XDuhvW5ZTsFeQp5Y0Rz0iksaJZpzKde-hdk5Hr8cXTRLHeCOiaG5lYlm3wwIxvTtzpeJ05Fm_YvtGu63eTzr7pO3i2PXtGOJ2VPPEIO5_9sgNl2XWVnLd46JNizQuj61nWPvG-SPOKJaWl0L546SCz4VLLvC_reM9th5E3FSj0l6k6WcQCGP6O6uDucK57DSu5C3o"
+                            alt="Abstract flowing 3D ribbons"
+                        />
+                    </div>
+                </section>
+
+                {/* ---- Right: Form Panel ---- */}
+                <section className="register-form-panel">
+                    <div className="register-form-wrapper">
+                        {/* Mobile branding */}
+                        <div className="register-mobile-brand">
+                            <span>AutoCap</span>
                         </div>
 
-                        {/* Email */}
-                        <div className="form-group">
-                            <label htmlFor="email">Email</label>
-                            <input
-                                id="email"
-                                name="email"
-                                type="email"
-                                placeholder="Enter your email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                required
-                            />
-                            {emailExists === true && (
-                                <p className="field-error">Email already exists</p>
-                            )}
-                        </div>
+                        <div className="register-card">
+                            <div className="register-card-header">
+                                <h2>Get Started</h2>
+                                <p>Fill in your details to create your premium workspace.</p>
+                            </div>
 
-                        {/* Password with Visibility Toggle */}
-                        <div className="form-group">
-                            <label htmlFor="password">Password</label>
-                            <div className="password-wrapper">
-                                <input
-                                    id="password"
-                                    name="password"
-                                    type={showPassword ? 'text' : 'password'}
-                                    placeholder="Create a password"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    required
-                                />
+                            {/* Error message */}
+                            {error && <p className="error-message">{error}</p>}
+
+                            <form className="register-form" onSubmit={handleSubmit}>
+                                {/* First Name & Last Name */}
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="firstName">First Name</label>
+                                        <input
+                                            id="firstName"
+                                            name="firstName"
+                                            type="text"
+                                            placeholder="John"
+                                            value={formData.firstName}
+                                            onChange={handleChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="lastName">Last Name</label>
+                                        <input
+                                            id="lastName"
+                                            name="lastName"
+                                            type="text"
+                                            placeholder="Doe"
+                                            value={formData.lastName}
+                                            onChange={handleChange}
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Username & Date of Birth */}
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="username">Username</label>
+                                        <div className="username-input-wrapper">
+                                            <span className="username-prefix">@</span>
+                                            <input
+                                                id="username"
+                                                name="username"
+                                                type="text"
+                                                placeholder="johndoe"
+                                                value={formData.username}
+                                                onChange={handleChange}
+                                                required
+                                            />
+                                        </div>
+                                        {usernameExists === true && (
+                                            <p className="field-error">Username already taken, please choose another</p>
+                                        )}
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="dateOfBirth">Date of Birth</label>
+                                        <input
+                                            id="dateOfBirth"
+                                            name="dateOfBirth"
+                                            type="date"
+                                            value={formData.dateOfBirth}
+                                            onChange={handleChange}
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Email */}
+                                <div className="form-group">
+                                    <label htmlFor="email">Email Address</label>
+                                    <input
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        placeholder="name@example.com"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                    {emailExists === true && (
+                                        <p className="field-error">Email already exists</p>
+                                    )}
+                                </div>
+
+                                {/* Password */}
+                                <div className="form-group">
+                                    <label htmlFor="password">Password</label>
+                                    <div className="password-wrapper">
+                                        <input
+                                            id="password"
+                                            name="password"
+                                            type={showPassword ? 'text' : 'password'}
+                                            placeholder="••••••••"
+                                            value={formData.password}
+                                            onChange={handleChange}
+                                            required
+                                        />
+                                        <button
+                                            type="button"
+                                            className="toggle-password"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                        >
+                                            <span className="material-symbols-outlined">
+                                                {showPassword ? 'visibility' : 'visibility_off'}
+                                            </span>
+                                        </button>
+                                    </div>
+                                    {/* Password validation rules */}
+                                    {passwordTouched && (
+                                        <div className="password-requirements">
+                                            <ReqItem passed={passwordRules.minLength} label="8+ Characters" />
+                                            <ReqItem passed={passwordRules.hasUpper} label="Uppercase" />
+                                            <ReqItem passed={passwordRules.hasLower} label="Lowercase" />
+                                            <ReqItem passed={passwordRules.hasNumber} label="One number" />
+                                            <ReqItem passed={passwordRules.hasSpecial} label="Special char" />
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Confirm Password */}
+                                <div className="form-group">
+                                    <label htmlFor="confirmPassword">Confirm Password</label>
+                                    <div className="password-wrapper">
+                                        <input
+                                            id="confirmPassword"
+                                            type={showConfirmPassword ? 'text' : 'password'}
+                                            placeholder="••••••••"
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            required
+                                        />
+                                        <button
+                                            type="button"
+                                            className="toggle-password"
+                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                                        >
+                                            <span className="material-symbols-outlined">
+                                                {showConfirmPassword ? 'visibility' : 'visibility_off'}
+                                            </span>
+                                        </button>
+                                    </div>
+                                    {confirmPassword && formData.password && confirmPassword !== formData.password && (
+                                        <p className="password-mismatch">Passwords do not match</p>
+                                    )}
+                                </div>
+
+                                {/* Terms */}
+                                <div className="terms-row">
+                                    <input type="checkbox" id="terms" required />
+                                    <label htmlFor="terms">
+                                        I agree to the{' '}
+                                        <a href="#">Terms of Service</a> and{' '}
+                                        <a href="#">Privacy Policy</a>.
+                                    </label>
+                                </div>
+
+                                {/* Submit */}
                                 <button
-                                    type="button"
-                                    className="toggle-password"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                    type="submit"
+                                    className="register-btn"
+                                    disabled={loading || isFormBlocked}
                                 >
-                                    {showPassword ? <HiOutlineEye /> : <HiOutlineEyeSlash />}
+                                    {loading ? 'Signing Up...' : 'Sign Up'}
                                 </button>
-                            </div>
-                            {/* Real-time password rules */}
-                            {passwordTouched && (
-                                <ul className="password-rules">
-                                    <RuleItem passed={passwordRules.minLength} label="At least 8 characters" />
-                                    <RuleItem passed={passwordRules.hasUpper} label="At least 1 uppercase letter" />
-                                    <RuleItem passed={passwordRules.hasLower} label="At least 1 lowercase letter" />
-                                    <RuleItem passed={passwordRules.hasNumber} label="At least 1 number" />
-                                    <RuleItem passed={passwordRules.hasSpecial} label="At least 1 special character (@$!%*?&)" />
-                                </ul>
-                            )}
+                            </form>
+
+                            {/* Footer */}
+                            <footer className="register-footer">
+                                <p>
+                                    Already have an account?
+                                    <a href="/login" onClick={(e) => { e.preventDefault(); navigate('/login'); }}>
+                                        Sign In
+                                    </a>
+                                </p>
+                            </footer>
                         </div>
 
-                        {/* Confirm Password */}
-                        <div className="form-group">
-                            <label htmlFor="confirmPassword">Confirm Password</label>
-                            <div className="password-wrapper">
-                                <input
-                                    id="confirmPassword"
-                                    type={showConfirmPassword ? 'text' : 'password'}
-                                    placeholder="Re-enter your password"
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    required
-                                />
-                                <button
-                                    type="button"
-                                    className="toggle-password"
-                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                    aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
-                                >
-                                    {showConfirmPassword ? <HiOutlineEye /> : <HiOutlineEyeSlash />}
-                                </button>
-                            </div>
-                            {/* Inline mismatch hint */}
-                            {confirmPassword && formData.password && confirmPassword !== formData.password && (
-                                <p className="password-mismatch">Passwords do not match</p>
-                            )}
+                        {/* Testimonial quote */}
+                        <div className="register-testimonial">
+                            <p>
+                                "The most intuitive captioning tool I've ever used. Essential for my workflow."
+
+                            </p>
                         </div>
-
-                        {/* Date of Birth */}
-                        <div className="form-group">
-                            <label htmlFor="dateOfBirth">Date of Birth</label>
-                            <input
-                                id="dateOfBirth"
-                                name="dateOfBirth"
-                                type="date"
-                                value={formData.dateOfBirth}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-
-                        {/* Error Message */}
-                        {error && <p className="error-message">{error}</p>}
-
-                        {/* Submit Button */}
-                        <button
-                            type="submit"
-                            className="register-btn"
-                            disabled={loading || isFormBlocked}
-                        >
-                            {loading ? 'Signing Up...' : 'Sign Up'}
-                        </button>
-                    </form>
-
-                    {/* Login Link */}
-                    <p className="login-link">
-                        Already have an account?{' '}
-                        <a href="/login" onClick={(e) => { e.preventDefault(); navigate('/login'); }}>
-                            Sign In
-                        </a>
-                    </p>
-                </div>
+                    </div>
+                </section>
             </div>
         </>
     );

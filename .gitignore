@@ -4,7 +4,9 @@ frontend/dist/
 
 # Java
 backend/target/
+*.jar
 *.log
+*.log.*
 
 # Python
 ai-service/venv/
@@ -18,6 +20,18 @@ __pycache__/
 # OS
 .DS_Store
 Thumbs.db
+
+# Other
+*.tar
+*.tar.*
+*.exe
+*.msi
+*.deb
+*.zip
+*.tgz
+*.sig
+
+# Project-specific
 VisionCaption_Dashboard_Module_Spec.pdf
 ui-guidelines.md
 dashboard_module_spec.md
