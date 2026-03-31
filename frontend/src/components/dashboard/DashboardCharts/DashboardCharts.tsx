@@ -89,7 +89,7 @@ interface ModelDistributionChartProps {
   datasets: DatasetInfo[];
 }
 
-const DONUT_COLORS = ['#6b7cff', '#3e3e47'];
+const DONUT_COLORS = ['#6b7cff', '#ffb74d', '#4fc3f7', '#81c784'];
 
 export const ModelDistributionChart: React.FC<ModelDistributionChartProps> = ({ datasets }) => {
   // Count datasets per model
@@ -155,66 +155,24 @@ interface SimilarityGaugeProps {
 }
 
 export const SimilarityGauge: React.FC<SimilarityGaugeProps> = ({ score }) => {
-  const pct = score != null ? score * 100 : 0;
+  const pct = score != null ? Math.min(100, Math.max(0, score * 100)) : 0;
   const displayPct = score != null ? `${pct.toFixed(1)}%` : 'N/A';
-
-  // SVG arc calculation for gauge
-  const radius = 70;
-  const cx = 90;
-  const cy = 90;
-  const startAngle = 180;
-  const endAngle = 0;
-  const totalArc = 180; // degrees
-  const fillAngle = (pct / 100) * totalArc;
-
-  const polarToCartesian = (cx: number, cy: number, r: number, angleDeg: number) => {
-    const rad = (angleDeg * Math.PI) / 180;
-    return { x: cx + r * Math.cos(rad), y: cy - r * Math.sin(rad) };
-  };
-
-  const describeArc = (cx: number, cy: number, r: number, startAngle: number, endAngle: number) => {
-    const start = polarToCartesian(cx, cy, r, startAngle);
-    const end = polarToCartesian(cx, cy, r, endAngle);
-    const largeArc = startAngle - endAngle > 180 ? 1 : 0;
-    return `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArc} 0 ${end.x} ${end.y}`;
-  };
-
-  const bgArc = describeArc(cx, cy, radius, startAngle, endAngle);
-  const fillArc = describeArc(cx, cy, radius, startAngle, startAngle - fillAngle);
 
   return (
     <div className={styles.cardSmall}>
       <h3 className={styles.cardTitle}>Similarity Gauge</h3>
-      <div className={styles.gaugeContainer}>
-        <svg viewBox="0 0 180 110" className={styles.gaugeSvg}>
-          {/* Background arc */}
-          <path
-            d={bgArc}
-            fill="none"
-            stroke="#2a2a3e"
-            strokeWidth="14"
-            strokeLinecap="round"
-          />
-          {/* Filled arc */}
-          {score != null && (
-            <path
-              d={fillArc}
-              fill="none"
-              stroke="url(#gaugeGradient)"
-              strokeWidth="14"
-              strokeLinecap="round"
-            />
-          )}
-          <defs>
-            <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#3a3f6b" />
-              <stop offset="100%" stopColor="#6b7cff" />
-            </linearGradient>
-          </defs>
-        </svg>
-        <div className={styles.gaugeValue}>{displayPct}</div>
+      <div className={styles.meterContainer}>
+        <div className={styles.meterValue}>{displayPct}</div>
+        <div className={styles.meterTrack}>
+          <div className={styles.meterFill} style={{ width: `${score != null ? pct : 0}%` }} />
+        </div>
+        <div className={styles.meterScale}>
+          <span>0%</span>
+          <span>50%</span>
+          <span>100%</span>
+        </div>
         <span className={styles.gaugeLabel}>
-          Average coherence<br />across all generated<br />meta-tags.
+          Average coherence across<br />all generated meta-tags.
         </span>
       </div>
     </div>
