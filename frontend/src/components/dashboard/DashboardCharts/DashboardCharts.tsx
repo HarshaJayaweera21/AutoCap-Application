@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell,
 } from 'recharts';
 import styles from './DashboardCharts.module.css';
@@ -23,36 +23,89 @@ interface DatasetTrendsChartProps {
 }
 
 export const DatasetTrendsChart: React.FC<DatasetTrendsChartProps> = ({ datasets }) => {
-  // Build day-of-week buckets from recent datasets
-  const dayLabels = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
-  const buckets = dayLabels.map(() => 0);
+  const [timeRange, setTimeRange] = useState<'7D' | '30D'>('7D');
 
-  // Distribute dataset image counts across days for visualization
-  const reversed = [...datasets].reverse();
-  reversed.forEach((ds, i) => {
-    const idx = i % 7;
-    buckets[idx] += ds.totalItems ?? 0;
-  });
+  const chartData = useMemo(() => {
+    const days = timeRange === '7D' ? 7 : 30;
+    const now = new Date();
+    // Neutralize to start of day for accurate comparison
+    now.setHours(0, 0, 0, 0);
 
-  const chartData = dayLabels.map((day, i) => ({ day, count: buckets[i] }));
+    interface TrendData {
+      dateString: string;
+      label: string;
+      count: number;
+    }
+    const data: TrendData[] = [];
+
+    // Create buckets for the last N days (including today)
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const dateString = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+      // Formatting label
+      const label = timeRange === '7D'
+        ? d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()
+        : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+      data.push({
+        dateString,
+        label,
+        count: 0
+      });
+    }
+
+    // Aggregate datasets
+    datasets.forEach(ds => {
+      if (!ds.createdAt) return;
+
+      const dDate = new Date(ds.createdAt);
+      const dsDateString = `${dDate.getFullYear()}-${String(dDate.getMonth() + 1).padStart(2, '0')}-${String(dDate.getDate()).padStart(2, '0')}`;
+
+      const bucket = data.find(b => b.dateString === dsDateString);
+      if (bucket) {
+        bucket.count += (ds.totalItems || 0);
+      }
+    });
+
+    return data;
+  }, [datasets, timeRange]);
 
   return (
     <div className={styles.card}>
       <div className={styles.cardHeader}>
         <h3 className={styles.cardTitle}>Dataset Trends</h3>
         <div className={styles.toggleGroup}>
-          <button className={`${styles.toggleBtn} ${styles.toggleBtnActive}`}>7D</button>
-          <button className={styles.toggleBtn}>30D</button>
+          <button 
+            className={`${styles.toggleBtn} ${timeRange === '7D' ? styles.toggleBtnActive : ''}`}
+            onClick={() => setTimeRange('7D')}
+          >
+            7D
+          </button>
+          <button 
+            className={`${styles.toggleBtn} ${timeRange === '30D' ? styles.toggleBtnActive : ''}`}
+            onClick={() => setTimeRange('30D')}
+          >
+            30D
+          </button>
         </div>
       </div>
       <div className={styles.chartContainer}>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} barCategoryGap="20%">
+          <AreaChart data={chartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+            <defs>
+              <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#6b7cff" stopOpacity={0.4}/>
+                <stop offset="95%" stopColor="#6b7cff" stopOpacity={0}/>
+              </linearGradient>
+            </defs>
             <XAxis
-              dataKey="day"
+              dataKey="label"
               axisLine={false}
               tickLine={false}
               tick={{ fill: '#98979d', fontSize: 11, fontFamily: 'Outfit' }}
+              minTickGap={timeRange === '30D' ? 15 : 0}
             />
             <YAxis hide />
             <Tooltip
@@ -64,19 +117,20 @@ export const DatasetTrendsChart: React.FC<DatasetTrendsChartProps> = ({ datasets
                 fontSize: '13px',
                 fontFamily: 'Outfit',
               }}
-              cursor={{ fill: 'rgba(255,255,255,0.04)' }}
+              cursor={{ stroke: 'rgba(255,255,255,0.06)', strokeWidth: 1, strokeDasharray: '4 4' }}
+              labelFormatter={(label) => timeRange === '7D' ? label : label}
               formatter={(value: number | undefined) => [`${value?.toLocaleString() || 0} images`, 'Processed']}
             />
-            <Bar dataKey="count" radius={[4, 4, 0, 0]} maxBarSize={42}>
-              {chartData.map((_, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={index === chartData.length - 2 ? '#6b7cff' : '#3a3f6b'}
-                  fillOpacity={0.45 + (index / chartData.length) * 0.55}
-                />
-              ))}
-            </Bar>
-          </BarChart>
+            <Area 
+              type="monotone" 
+              dataKey="count" 
+              stroke="#6b7cff" 
+              strokeWidth={3}
+              fillOpacity={1} 
+              fill="url(#colorCount)" 
+              activeDot={{ r: 6, fill: '#6b7cff', stroke: '#1f1e29', strokeWidth: 2 }}
+            />
+          </AreaChart>
         </ResponsiveContainer>
       </div>
     </div>
