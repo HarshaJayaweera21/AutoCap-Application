@@ -10,6 +10,13 @@ export const getRecentDatasets = async (
   return data;
 };
 
+export const getMyDatasets = async (): Promise<RecentDataset[]> => {
+  const { data } = await api.get<RecentDataset[]>('/api/datasets/my');
+  // Both return compatible structures for stats counting, though MyDatasetDto has extra fields.
+  // We can treat them as RecentDataset or any array with totalItems and averageSimilarity.
+  return data;
+};
+
 export const downloadDataset = async (
   datasetId: number,
   datasetName: string,

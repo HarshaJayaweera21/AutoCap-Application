@@ -1,0 +1,11 @@
+Installl the required packages for the AI service before running the application:
+
+fastapi
+uvicorn
+pydantic
+requests
+transformers
+Pillow
+python-multipart
+torch
+torchvision

@@ -1,4 +1,5 @@
 import React from 'react';
+import styles from './GenerateButton.module.css';
 
 interface GenerateButtonProps {
   disabled: boolean;
@@ -13,26 +14,11 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({
 }) => {
   return (
     <button
-      className="btn-primary"
+      className={styles.btn}
       onClick={onClick}
       disabled={disabled || loading}
-      style={{
-        width: '100%',
-        padding: 'var(--space-4) var(--space-6)',
-        fontSize: 'var(--text-base)',
-        fontWeight: 'var(--weight-semibold)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 'var(--space-3)',
-        borderRadius: 'var(--radius-md)',
-        background: disabled
-          ? 'var(--border-strong)'
-          : 'var(--primary)',
-        boxShadow: !disabled && !loading ? 'var(--shadow-glow-primary)' : 'none',
-      }}
     >
-      {loading && (
+      {loading ? (
         <svg
           className="animate-spin"
           width="20"
@@ -46,8 +32,14 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({
         >
           <path d="M21 12a9 9 0 1 1-6.219-8.56" />
         </svg>
+      ) : (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M13 2L3 14h9l-1 10 10-12h-9l1-10z" />
+        </svg>
       )}
-      {loading ? 'Generating...' : 'Generate Captions'}
+      <span className={styles.label}>
+        {loading ? 'Generating...' : 'GENERATE CAPTIONS'}
+      </span>
     </button>
   );
 };

@@ -76,7 +76,6 @@ const PARAMS: ParamDef[] = [
 ];
 
 export const BlipConfigPanel: React.FC<BlipConfigPanelProps> = ({ config, onChange }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
 
   const [isAdvancedMode, setIsAdvancedMode] = useState(false);
@@ -111,14 +110,9 @@ export const BlipConfigPanel: React.FC<BlipConfigPanelProps> = ({ config, onChan
 
   return (
     <div className={styles.container}>
-      <button
-        className={styles.header}
-        onClick={() => setIsOpen(!isOpen)}
-        type="button"
-      >
+      <div className={styles.header}>
         <div className={styles.headerLeft}>
           <svg
-            className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`}
             width="20"
             height="20"
             viewBox="0 0 24 24"
@@ -128,15 +122,15 @@ export const BlipConfigPanel: React.FC<BlipConfigPanelProps> = ({ config, onChan
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <polyline points="9 18 15 12 9 6" />
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
           </svg>
           <span className={styles.headerTitle}>Model Configuration</span>
         </div>
         <span className={styles.headerBadge}>{config.modelVariant === 'caption_model' ? 'Caption' : 'Baseline'}</span>
-      </button>
+      </div>
 
-      {isOpen && (
-        <div className={styles.body}>
+      <div className={styles.body}>
           <div className={styles.modeToggle}>
             <button 
               className={`${styles.modeTab} ${!isAdvancedMode ? styles.modeTabActive : ''}`}
@@ -191,7 +185,7 @@ export const BlipConfigPanel: React.FC<BlipConfigPanelProps> = ({ config, onChan
                 </div>
               </div>
           ) : (
-            <>
+            <div className={styles.advancedGrid}>
               {PARAMS.map((param) => (
                 <div 
                   key={param.key} 
@@ -199,7 +193,7 @@ export const BlipConfigPanel: React.FC<BlipConfigPanelProps> = ({ config, onChan
                     config.modelVariant === 'base_line_model' && param.key !== 'modelVariant' 
                       ? styles.paramRowDisabled 
                       : ''
-                  }`}
+                  } ${param.key === 'modelVariant' ? styles.paramRowFull : ''}`}
                 >
                   <div className={styles.paramLabel}>
                     <span>{param.label}</span>
@@ -256,7 +250,7 @@ export const BlipConfigPanel: React.FC<BlipConfigPanelProps> = ({ config, onChan
                   </div>
                 </div>
               ))}
-            </>
+            </div>
           )}
 
           <button className={styles.resetBtn} onClick={handleReset} type="button">
@@ -274,7 +268,6 @@ export const BlipConfigPanel: React.FC<BlipConfigPanelProps> = ({ config, onChan
             </div>
           )}
         </div>
-      )}
     </div>
   );
 };
