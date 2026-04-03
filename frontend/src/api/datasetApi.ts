@@ -10,6 +10,13 @@ export const getRecentDatasets = async (
   return data;
 };
 
+export const getMyDatasets = async (): Promise<RecentDataset[]> => {
+  const { data } = await api.get<RecentDataset[]>('/api/datasets/my');
+  // Both return compatible structures for stats counting, though MyDatasetDto has extra fields.
+  // We can treat them as RecentDataset or any array with totalItems and averageSimilarity.
+  return data;
+};
+
 export const downloadDataset = async (
   datasetId: number,
   datasetName: string,
@@ -17,10 +24,10 @@ export const downloadDataset = async (
   const response = await api.get(`/api/datasets/${datasetId}/download`, {
     responseType: 'blob',
   });
-  const url = window.URL.createObjectURL(new Blob([response.data]));
+  const url = window.URL.createObjectURL(response.data);
   const link = document.createElement('a');
   link.href = url;
-  link.setAttribute('download', `dataset-${datasetName}-${datasetId}.zip`);
+  link.setAttribute('download', `dataset-${datasetName.replace(/\s+/g, '_')}-${datasetId}.zip`);
   document.body.appendChild(link);
   link.click();
   link.remove();

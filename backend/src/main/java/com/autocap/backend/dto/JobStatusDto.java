@@ -15,6 +15,7 @@ public class JobStatusDto {
     private int totalCount;
     private String errorMessage;
     private Long datasetId;
+    private Double averageSimilarity;
 
     // Dataset Configuration stored in-memory during processing
     private com.autocap.backend.entity.User user;

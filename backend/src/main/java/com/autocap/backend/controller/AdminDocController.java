@@ -27,14 +27,14 @@ public class AdminDocController {
 
     @PutMapping("/{id}")
     public ResponseEntity<DocResponseDTO> updateDoc(
-            @PathVariable UUID id,
+            @PathVariable("id") UUID id,
             @Valid @RequestBody UpdateDocRequest request) {
         DocResponseDTO updated = docService.updateDoc(id, request);
         return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteDoc(@PathVariable UUID id) {
+    public ResponseEntity<Void> deleteDoc(@PathVariable("id") UUID id) {
         docService.deleteDoc(id);
         return ResponseEntity.noContent().build();
     }

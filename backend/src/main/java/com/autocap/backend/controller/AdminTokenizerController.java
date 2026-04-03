@@ -30,7 +30,7 @@ public class AdminTokenizerController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+    public ResponseEntity<Void> delete(@PathVariable("id") UUID id) {
         tokenizerService.deleteTokenizer(id);
         return ResponseEntity.noContent().build();
     }

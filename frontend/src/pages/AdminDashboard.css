@@ -5,7 +5,7 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    background: #f9fafb;
+    background: var(--bg-base);
 }
 
 /* ===== Welcome Banner ===== */
@@ -41,15 +41,15 @@
     gap: 1.25rem;
     padding: 1.5rem 1.75rem;
     border-radius: 14px;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-strong);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .stat-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
 /* Left color accent border */
@@ -77,18 +77,18 @@
 }
 
 .stat-card__icon-wrapper--total {
-    background: #ede9fe;
-    color: #6366f1;
+    background: rgba(99, 102, 241, 0.15);
+    color: #818cf8;
 }
 
 .stat-card__icon-wrapper--active {
-    background: #d1fae5;
-    color: #059669;
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
 }
 
 .stat-card__icon-wrapper--deactive {
-    background: #fee2e2;
-    color: #dc2626;
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
 }
 
 .stat-card__icon {
@@ -106,7 +106,7 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 700;
     font-size: 1.85rem;
-    color: #111827;
+    color: var(--text-primary);
     line-height: 1;
 }
 
@@ -114,7 +114,7 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 500;
     font-size: 0.85rem;
-    color: #9ca3af;
+    color: var(--text-muted);
     letter-spacing: 0.3px;
     text-transform: uppercase;
 }
@@ -131,7 +131,7 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 700;
     font-size: 1.35rem;
-    color: #111827;
+    color: var(--text-primary);
     margin: 0.5rem 0 1.25rem;
     letter-spacing: -0.3px;
     display: flex;
@@ -163,16 +163,16 @@
     gap: 1rem;
     padding: 1.4rem 1.5rem;
     border-radius: 14px;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-strong);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     transition: transform 0.22s ease, box-shadow 0.22s ease;
     cursor: default;
 }
 
 .intel-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
 /* color accents */
@@ -204,23 +204,23 @@
 }
 
 .intel-card__icon-wrapper--neutral {
-    background: #ede9fe;
-    color: #6366f1;
+    background: rgba(99, 102, 241, 0.15);
+    color: #818cf8;
 }
 
 .intel-card__icon-wrapper--green {
-    background: #d1fae5;
-    color: #059669;
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
 }
 
 .intel-card__icon-wrapper--red {
-    background: #ffedd5;
-    color: #ea580c;
+    background: rgba(249, 115, 22, 0.15);
+    color: #f97316;
 }
 
 .intel-card__icon-wrapper--purple {
-    background: #ede9fe;
-    color: #7c3aed;
+    background: rgba(139, 92, 246, 0.15);
+    color: #a78bfa;
 }
 
 .intel-card__icon {
@@ -237,7 +237,7 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 700;
     font-size: 1.7rem;
-    color: #111827;
+    color: var(--text-primary);
     line-height: 1.1;
 }
 
@@ -245,7 +245,7 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 500;
     font-size: 0.78rem;
-    color: #9ca3af;
+    color: var(--text-muted);
     letter-spacing: 0.3px;
     text-transform: uppercase;
 }
@@ -264,23 +264,23 @@
 }
 
 .change-badge--up {
-    background: #d1fae5;
-    color: #059669;
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
 }
 
 .change-badge--down {
-    background: #fee2e2;
-    color: #dc2626;
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
 }
 
 .change-badge--neutral {
-    background: #f3f4f6;
-    color: #6b7280;
+    background: rgba(152, 151, 157, 0.15);
+    color: var(--text-muted);
 }
 
 .change-badge--new {
-    background: #dbeafe;
-    color: #2563eb;
+    background: rgba(99, 102, 241, 0.15);
+    color: #818cf8;
 }
 
 /* ── Row 2 & 3: Two-panel Layout ── */
@@ -293,11 +293,11 @@
 }
 
 .intel-panel {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-strong);
     border-radius: 14px;
     padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .intel-panel--compact {
@@ -309,7 +309,7 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 600;
     font-size: 0.95rem;
-    color: #374151;
+    color: var(--text-secondary);
     margin: 0 0 1rem;
     letter-spacing: 0.1px;
 }
@@ -330,7 +330,7 @@
     align-items: center;
     justify-content: center;
     height: 280px;
-    color: #9ca3af;
+    color: var(--text-muted);
     font-family: 'Outfit', sans-serif;
     font-size: 0.9rem;
 }
@@ -340,14 +340,14 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 700;
     font-size: 1.5rem;
-    fill: #111827;
+    fill: var(--text-primary);
 }
 
 .donut-center-label {
     font-family: 'Outfit', sans-serif;
     font-weight: 500;
     font-size: 0.75rem;
-    fill: #9ca3af;
+    fill: var(--text-muted);
 }
 
 /* Donut legend */
@@ -365,7 +365,7 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 500;
     font-size: 0.82rem;
-    color: #6b7280;
+    color: var(--text-secondary);
 }
 
 .donut-legend__dot {
@@ -396,9 +396,9 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 800;
     font-size: 3rem;
-    color: #4f46e5;
+    color: #818cf8;
     line-height: 1;
-    background: linear-gradient(135deg, #4f46e5 0%, #818cf8 100%);
+    background: linear-gradient(135deg, #6366f1 0%, #a78bfa 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -408,7 +408,7 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 600;
     font-size: 0.85rem;
-    color: #6b7280;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -422,7 +422,7 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 700;
     font-size: 1.6rem;
-    color: #374151;
+    color: var(--text-primary);
     line-height: 1;
 }
 
@@ -430,7 +430,7 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 500;
     font-size: 0.8rem;
-    color: #9ca3af;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.4px;
 }

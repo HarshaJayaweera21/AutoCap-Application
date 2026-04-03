@@ -48,46 +48,71 @@ function ForgotPassword() {
     };
 
     return (
-        <div className="forgot-container">
+        <div className="forgot-page">
+            {/* Brand Logo */}
+            <div className="forgot-brand">
+                <div className="forgot-brand-icon">
+                    <span className="material-symbols-outlined">auto_awesome</span>
+                </div>
+                <span className="forgot-brand-name">AutoCap</span>
+            </div>
+
+            {/* Card */}
             <div className="forgot-card">
-                <h2>Forgot Password</h2>
-                <p className="forgot-subtitle">
-                    Enter your email address and we'll generate a password reset link.
-                </p>
+                <div className="forgot-card-header">
+                    <h1>Forgot Password</h1>
+                    <p>Enter your email address to receive a password reset link.</p>
+                </div>
 
                 {!success ? (
-                    <form onSubmit={handleSubmit}>
+                    <form className="forgot-form" onSubmit={handleSubmit}>
                         <div className="form-group">
-                            <label htmlFor="email">Email</label>
-                            <input
-                                id="email"
-                                type="email"
-                                placeholder="Enter your email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                            />
+                            <label htmlFor="email">Email Address</label>
+                            <div className="forgot-input-wrapper">
+                                <span className="input-icon material-symbols-outlined">mail</span>
+                                <input
+                                    id="email"
+                                    type="email"
+                                    placeholder="name@company.com"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                />
+                            </div>
                         </div>
 
                         {error && <p className="error-message">{error}</p>}
 
                         <button type="submit" className="forgot-btn" disabled={loading}>
-                            {loading ? 'Sending...' : 'Send Reset Link'}
+                            <span>{loading ? 'Sending...' : 'Send Reset Link'}</span>
+                            {!loading && <span className="material-symbols-outlined">arrow_forward</span>}
                         </button>
                     </form>
                 ) : (
-                    <div className="success-block">
+                    <div className="forgot-success">
+                        <div className="success-icon">✉️</div>
                         <p className="success-message">
                             Password reset link has been sent. Please check your email to reset your password.
                         </p>
                     </div>
                 )}
 
-                <p className="back-link">
+                {/* Back to Sign In */}
+                <div className="forgot-back-link">
                     <a href="/login" onClick={(e) => { e.preventDefault(); navigate('/login'); }}>
-                        ← Back to Login
+                        <span className="material-symbols-outlined">arrow_back</span>
+                        Back to Sign In
                     </a>
-                </p>
+                </div>
+            </div>
+
+            {/* Footer */}
+            <div className="forgot-footer">
+                <p className="forgot-footer-label">Secured by AutoCap Org</p>
+                <div className="forgot-footer-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                </div>
             </div>
         </div>
     );

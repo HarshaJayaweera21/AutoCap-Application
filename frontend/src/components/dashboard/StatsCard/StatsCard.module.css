@@ -1,15 +1,17 @@
 .card {
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: var(--space-4);
+  flex-direction: column;
+  gap: var(--space-3);
   background: var(--bg-surface);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
-  padding: var(--space-5) var(--space-6);
+  padding: var(--space-5) var(--space-5);
   transition:
     border-color var(--transition-base),
     transform var(--transition-base),
     box-shadow var(--transition-base);
+  min-height: 120px;
 }
 
 .card:hover {
@@ -18,9 +20,16 @@
   box-shadow: var(--shadow-md);
 }
 
+/* Top row: icon left, badge right */
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .iconWrap {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
@@ -48,50 +57,63 @@
   color: var(--text-muted);
 }
 
-.body {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
+/* Badge */
+.badge {
+  font-size: 11px;
+  font-weight: var(--weight-medium);
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.02em;
 }
 
+.badge_default {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-muted);
+}
+
+.badge_success {
+  background: rgba(137, 235, 121, 0.12);
+  color: var(--success);
+}
+
+.badge_accent {
+  background: rgba(232, 74, 52, 0.12);
+  color: var(--error);
+}
+
+.badge_info {
+  background: rgba(25, 75, 255, 0.12);
+  color: var(--primary-lighter);
+}
+
+/* Value */
 .value {
-  font-size: var(--text-display);
-  font-weight: var(--weight-medium);
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
   line-height: 1.1;
   letter-spacing: -0.5px;
 }
 
-.value_primary {
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.value_accent {
-  background: var(--gradient-accent);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.value_success {
-  color: var(--success);
-}
-
-.value_neutral {
-  color: var(--text-primary);
-}
-
+/* Label */
 .label {
   font-size: var(--text-sm);
   color: var(--text-muted);
   font-weight: var(--weight-regular);
 }
 
-.hint {
-  font-size: var(--text-xs);
-  color: var(--text-placeholder);
-  margin-top: 2px;
+/* Interactive & Active */
+.interactive {
+  cursor: pointer;
+  user-select: none;
+}
+
+.interactive:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.activeFilter {
+  border-color: var(--accent);
+  box-shadow: 0 0 15px rgba(216, 238, 16, 0.25);
 }
