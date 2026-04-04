@@ -156,3 +156,59 @@ def generate_caption_greedy(model, image, tokenizer, max_length=50, min_length=5
         generated_ids = outputs[0][1:]
         caption = tokenizer.decode(generated_ids, skip_special_tokens=True)
         return caption
+
+
+def generate_multiple_captions(model, image, tokenizer, num_captions=4, max_length=50, min_length=5, temperature=0.7, num_beams=4, repetition_penalty=1.2, top_p=0.9):
+    """
+    Generate multiple diverse captions for an image using sampling.
+
+    Args:
+        model: The CaptionModel instance.
+        image: Image tensor (1, C, H, W) on the correct device.
+        tokenizer: GPT2Tokenizer instance.
+        num_captions: Number of candidate captions to generate.
+        Other args: Standard generation parameters.
+
+    Returns:
+        List of caption strings.
+    """
+    model.eval()
+    with torch.no_grad():
+        img_feat = model.cnn(image)
+        visual_tokens = model.qformer(img_feat)
+        visual_tokens = model.proj(visual_tokens)
+
+        encoder_mask = torch.ones(
+            visual_tokens.size()[:-1],
+            dtype=torch.long,
+            device=image.device
+        )
+
+        start_token_id = tokenizer.bos_token_id or tokenizer.eos_token_id
+        input_ids = torch.tensor([[start_token_id]], device=image.device)
+
+        # Ensure num_beams >= num_captions (HuggingFace requirement)
+        effective_beams = max(num_beams, num_captions)
+
+        outputs = model.llm.generate(
+            input_ids=input_ids,
+            encoder_hidden_states=visual_tokens,
+            encoder_attention_mask=encoder_mask,
+            max_new_tokens=max_length,
+            min_length=min_length,
+            temperature=temperature,
+            num_beams=effective_beams,
+            num_return_sequences=num_captions,
+            repetition_penalty=repetition_penalty,
+            top_p=top_p,
+            pad_token_id=tokenizer.eos_token_id,
+            do_sample=True
+        )
+
+        captions = []
+        for i in range(num_captions):
+            generated_ids = outputs[i][1:]  # Strip the start token
+            caption = tokenizer.decode(generated_ids, skip_special_tokens=True)
+            captions.append(caption.strip())
+
+        return captions
