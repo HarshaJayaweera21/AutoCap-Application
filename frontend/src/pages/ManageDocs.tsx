@@ -117,6 +117,7 @@ function ManageDocs() {
             {showForm && (
                 <DocForm
                     doc={editingDoc}
+                    existingDocs={docs}
                     onSaved={handleFormSaved}
                     onCancel={handleFormCancel}
                 />

@@ -31,6 +31,10 @@ function ManageTags() {
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newTagName.trim()) return;
+        if (newTagName.length > 100) {
+            setError('Tag name cannot exceed 100 characters.');
+            return;
+        }
         setSaving(true);
         setError('');
         try {
@@ -62,13 +66,20 @@ function ManageTags() {
 
             {/* Create form */}
             <form onSubmit={handleCreate} style={formStyle}>
-                <input
-                    style={inputStyle}
-                    value={newTagName}
-                    onChange={e => setNewTagName(e.target.value)}
-                    placeholder="New tag name..."
-                    required
-                />
+                <div style={{ flex: 1, position: 'relative' }}>
+                    <input
+                        style={{
+                            ...inputStyle,
+                            ...(newTagName.length > 100 ? { borderColor: '#ff6b6b' } : {}),
+                        }}
+                        value={newTagName}
+                        onChange={e => { setNewTagName(e.target.value); setError(''); }}
+                        placeholder="New tag name..."
+                        maxLength={100}
+                        required
+                    />
+                    <span style={charCountStyle}>{newTagName.length}/100</span>
+                </div>
                 <button type="submit" disabled={saving} style={btnStyle}>
                     {saving ? '...' : '+ Add Tag'}
                 </button>
@@ -130,6 +141,16 @@ const inputStyle: React.CSSProperties = {
     color: '#e0e0ff',
     fontSize: '0.9rem',
     outline: 'none',
+    width: '100%',
+    boxSizing: 'border-box' as const,
+};
+
+const charCountStyle: React.CSSProperties = {
+    position: 'absolute' as const,
+    right: '8px',
+    bottom: '-16px',
+    fontSize: '0.7rem',
+    color: 'rgba(255,255,255,0.35)',
 };
 
 const btnStyle: React.CSSProperties = {
