@@ -5,7 +5,6 @@ from typing import List, Optional
 from services.caption_service import caption_service
 import requests
 import os
-import random
 
 app = FastAPI()
 
@@ -60,8 +59,8 @@ async def generate_caption_api(
             "repetition_penalty": repetitionPenalty,
             "top_p": topP
         }
-        caption = caption_service.get_caption(contents, modelVariant, **kwargs)
-        return {"caption": caption}
+        caption, similarity_score = caption_service.get_caption(contents, modelVariant, **kwargs)
+        return {"caption": caption, "similarityScore": similarity_score}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -89,9 +88,7 @@ def process_job_background(job_request: JobRequest):
                 "top_p": job_request.topP
             }
             contents = response.content
-            caption_text = caption_service.get_caption(contents, job_request.modelVariant, **kwargs)
-            
-            similarity_score = round(random.uniform(0.85, 0.95), 2)
+            caption_text, similarity_score = caption_service.get_caption(contents, job_request.modelVariant, **kwargs)
             
             # Match FastApiCallbackDto.CaptionResultDto
             results.append({

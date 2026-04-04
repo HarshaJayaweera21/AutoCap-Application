@@ -7,7 +7,11 @@ import torch
 from PIL import Image
 from fastapi import HTTPException
 from models.baseline import EncoderCNN, DecoderRNN, generate_caption, toTensor
-from models.caption import CaptionModel, get_tokenizer, generate_caption_greedy, caption_transform
+from models.caption import CaptionModel, get_tokenizer, generate_caption_greedy, generate_multiple_captions, caption_transform
+from models.clip_evaluator import ClipEvaluator
+
+# Number of candidate captions to generate for multi-caption models
+NUM_CANDIDATE_CAPTIONS = 4
 
 class CaptionService:
     def __init__(self):
@@ -19,9 +23,12 @@ class CaptionService:
         
         self.caption_model = None
         self.tokenizer = None
+
+        self.clip_evaluator = None
         
         self._load_baseline_model()
         self._load_caption_model()
+        self._load_clip_model()
 
     def _load_baseline_model(self):
         try:
@@ -49,9 +56,9 @@ class CaptionService:
             
             self.baseline_encoder.eval()
             self.baseline_decoder.eval()
-            print("Model loaded successfully.")
+            print("Baseline model loaded successfully.")
         except Exception as e:
-            print(f"Error loading model: {e}")
+            print(f"Error loading baseline model: {e}")
             self.baseline_encoder = None
             self.baseline_decoder = None
 
@@ -74,14 +81,32 @@ class CaptionService:
             print(f"Error loading caption_model: {e}")
             self.caption_model = None
 
-    def get_caption(self, image_bytes: bytes, model_variant: str = "caption_model", **kwargs) -> str:
+    def _load_clip_model(self):
+        try:
+            self.clip_evaluator = ClipEvaluator(self.device)
+        except Exception as e:
+            print(f"Error loading CLIP model: {e}")
+            self.clip_evaluator = None
+
+    def get_caption(self, image_bytes: bytes, model_variant: str = "caption_model", **kwargs) -> tuple:
+        """
+        Generate caption(s) for an image and evaluate with CLIP.
+        
+        For baseline model: generates 1 caption (greedy), scores with CLIP.
+        For caption_model: generates 4 candidates, CLIP picks the best.
+        
+        Returns:
+            Tuple of (caption_text: str, similarity_score: float)
+        """
+        # Open the image once for CLIP evaluation later
+        pil_image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+
         if model_variant in ["base_line_model", "baseline_model"]:
             if self.baseline_encoder is None or self.baseline_decoder is None:
                 raise HTTPException(status_code=503, detail="Baseline model is not loaded.")
                 
             try:
-                image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-                image_tensor = toTensor(image)
+                image_tensor = toTensor(pil_image)
                 
                 caption, _ = generate_caption(
                     self.baseline_encoder, 
@@ -90,7 +115,15 @@ class CaptionService:
                     self.baseline_vocab, 
                     self.device
                 )
-                return caption
+
+                # Score single caption with CLIP
+                similarity_score = 0.0
+                if self.clip_evaluator is not None:
+                    scores = self.clip_evaluator.score_captions(pil_image, [caption])
+                    similarity_score = round(scores[0], 4)
+                    print(f"  Baseline caption CLIP score: {similarity_score:.4f}")
+
+                return (caption, similarity_score)
             except Exception as e:
                 raise HTTPException(status_code=500, detail=f"Error generating baseline caption: {e}")
         else:
@@ -98,16 +131,27 @@ class CaptionService:
                 raise HTTPException(status_code=503, detail="Caption model is not loaded.")
                 
             try:
-                image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-                image_tensor = caption_transform(image).unsqueeze(0).to(self.device)
+                image_tensor = caption_transform(pil_image).unsqueeze(0).to(self.device)
                 
-                caption = generate_caption_greedy(
+                # Generate multiple candidate captions
+                candidates = generate_multiple_captions(
                     self.caption_model,
                     image_tensor,
                     self.tokenizer,
+                    num_captions=NUM_CANDIDATE_CAPTIONS,
                     **kwargs
                 )
-                return caption
+                
+                print(f"  Generated {len(candidates)} candidate captions")
+
+                # Use CLIP to select the best caption
+                if self.clip_evaluator is not None and len(candidates) > 0:
+                    best_caption, similarity_score = self.clip_evaluator.select_best(pil_image, candidates)
+                    return (best_caption, similarity_score)
+                else:
+                    # Fallback: return first candidate if CLIP is not available
+                    print("  Warning: CLIP not available, returning first candidate")
+                    return (candidates[0] if candidates else "", 0.0)
             except Exception as e:
                 raise HTTPException(status_code=500, detail=f"Error generating caption: {e}")
 
