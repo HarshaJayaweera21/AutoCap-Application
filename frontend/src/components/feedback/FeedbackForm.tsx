@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useFeedback } from '../../hooks/useFeedback';
 import { FeedbackType, Feedback, FeedbackUpdateInput } from '../../types/feedback';
 import Header from '../Header';
-import './feedback.css';
+import './FeedbackForm.css';
 
 interface FeedbackFormProps {
     onSuccess?: () => void;
@@ -92,151 +92,224 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSuccess, onCancel, feedba
         }
     };
 
+    // Auto-dismiss success overlay after 3 seconds
+    useEffect(() => {
+        if (!successMessage) return;
+        const timer = setTimeout(() => setSuccessMessage(''), 3000);
+        return () => clearTimeout(timer);
+    }, [successMessage]);
+
     return (
         <>
             <Header />
-            <div className="fb-module-container">
-            <div className="fb-card" style={{ maxWidth: '600px', margin: '0 auto' }}>
-                <h1 className="fb-h1">
-                    {currentFeedback ? 'Update Feedback' : 'Submit Feedback'}
-                </h1>
 
-                {/* Backend error */}
-                {error && (
-                    <div className="fb-text fb-subtext" style={{ color: 'var(--fb-error)', marginBottom: '1rem' }}>
-                        {error}
+            {/* Success Overlay */}
+            {successMessage && (
+                <div className="fbform-success-overlay">
+                    <div className="fbform-success-content">
+                        <div className="fbform-success-icon-wrap">
+                            <span className="material-symbols-outlined">check_circle</span>
+                        </div>
+                        <h2 className="fbform-success-title">Thank You</h2>
+                        <p className="fbform-success-desc">{successMessage}</p>
                     </div>
-                )}
+                </div>
+            )}
 
-                {/* Success message */}
-                {successMessage && (
-                    <div className="fb-text fb-subtext" style={{ color: 'lightgreen', marginBottom: '1rem' }}>
-                        {successMessage}
-                    </div>
-                )}
+            <div className="fbform-page">
+                {/* ---- Left: Brand Panel ---- */}
+                <section className="fbform-brand">
+                    <div className="fbform-brand-content">
+                        {/* Community Voice badge */}
+                        <div className="fbform-badge">
+                            <span className="fbform-badge-dot" />
+                            <span className="fbform-badge-text">Community Voice</span>
+                        </div>
 
-                <form onSubmit={handleSubmit}>
+                        <h1 className="fbform-hero">
+                            Give Us Your <br />
+                            <span className="fbform-hero-gradient">Feedback</span>
+                        </h1>
 
-                    {/* Feedback Type */}
-                    <div className="fb-input-group">
-                        <label className="fb-label">Feedback Type</label>
-                        <select
-                            className="fb-select"
-                            value={type}
-                            onChange={e => setType(e.target.value as FeedbackType)}
-                        >
-                            {types.map(t => (
-                                <option key={t} value={t}>{t}</option>
-                            ))}
-                        </select>
-                    </div>
+                        <p className="fbform-brand-desc">
+                            Your insights drive the evolution of AutoCap's AI. Help us refine
+                            the precision of our neural networks and editorial suite.
+                        </p>
 
-                    {/* Subject */}
-                    <div className="fb-input-group">
-                        <label className="fb-label">Subject</label>
-                        <input
-                            type="text"
-                            className="fb-input"
-                            placeholder="Brief summary..."
-                            value={subject}
-                            onChange={e => setSubject(e.target.value)}
-                            maxLength={120}
-                        />
-                    </div>
-
-                    {/* Message */}
-                    <div className="fb-input-group">
-                        <label className="fb-label">
-                            Message <span style={{ color: 'var(--fb-error)' }}>*</span>
-                        </label>
-
-                        <textarea
-                            className={`fb-textarea ${messageError ? 'fb-error-border' : ''}`}
-                            rows={5}
-                            placeholder="Please provide details..."
-                            value={message}
-                            onChange={e => {
-                                setMessage(e.target.value);
-
-                                // Clear error when typing
-                                if (e.target.value.trim()) {
-                                    setMessageError('');
-                                }
-                            }}
-                        />
-
-                        {/* Error message */}
-                        {messageError && (
-                            <div
-                                className="fb-subtext"
-                                style={{ color: 'var(--fb-error)', marginTop: '0.5rem' }}
-                            >
-                                {messageError}
+                        <div className="fbform-stats">
+                            <div>
+                                <div className="fbform-stat-value">99.4%</div>
+                                <div className="fbform-stat-label">Uptime</div>
                             </div>
-                        )}
-
-                        {/* Character count */}
-                        <div className="fb-subtext" style={{ marginTop: '0.3rem' }}>
-                            {message.length}/500 characters
+                            <div>
+                                <div className="fbform-stat-value">2.4M</div>
+                                <div className="fbform-stat-label">Captions</div>
+                            </div>
                         </div>
                     </div>
+                </section>
 
-                    {/* Rating */}
-                    <div className="fb-input-group">
-                        <label className="fb-label">Rating (Optional)</label>
-                        <div className="fb-stars" style={{ gap: '0.5rem' }}>
-                            {[1, 2, 3, 4, 5].map(star => (
-                                <span
-                                    key={star}
-                                    className={`fb-star ${star <= rating ? 'active' : ''}`}
-                                    onClick={() => setRating(star)}
-                                    style={{ fontSize: '32px', cursor: 'pointer' }}
-                                >
-                                    ★
-                                </span>
-                            ))}
+                {/* ---- Right: Form Panel ---- */}
+                <section className="fbform-panel">
+                    <div className="fbform-wrapper">
+                        <div className="fbform-card">
+                            <form className="fbform-form" onSubmit={handleSubmit}>
 
-                            {rating > 0 && (
-                                <span
-                                    className="fb-subtext"
-                                    style={{ cursor: 'pointer', marginLeft: '1rem', alignSelf: 'center' }}
-                                    onClick={() => setRating(0)}
-                                >
-                                    Clear
+                                {/* Backend error */}
+                                {error && (
+                                    <div className="fbform-error-banner">{error}</div>
+                                )}
+
+                                {/* Star Rating */}
+                                <div className="fbform-group">
+                                    <span className="fbform-label">Overall Experience</span>
+                                    <div className="fbform-stars">
+                                        <div className="fbform-stars-group">
+                                            {[1, 2, 3, 4, 5].map(star => (
+                                                <button
+                                                    key={star}
+                                                    type="button"
+                                                    className={`fbform-star-btn ${star <= rating ? 'active' : ''}`}
+                                                    onClick={() => setRating(star)}
+                                                    aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
+                                                >
+                                                    <span
+                                                        className="material-symbols-outlined"
+                                                        style={{
+                                                            fontVariationSettings: star <= rating
+                                                                ? "'FILL' 1"
+                                                                : "'FILL' 1"
+                                                        }}
+                                                    >
+                                                        star
+                                                    </span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <span className="fbform-stars-hint">
+                                            Select your satisfaction level
+                                        </span>
+                                    </div>
+                                    {rating > 0 && (
+                                        <button
+                                            type="button"
+                                            className="fbform-stars-clear"
+                                            onClick={() => setRating(0)}
+                                        >
+                                            Clear rating
+                                        </button>
+                                    )}
+                                </div>
+
+                                {/* Feedback Category */}
+                                <div className="fbform-group">
+                                    <label className="fbform-label" htmlFor="fb-category">
+                                        Feedback Category
+                                    </label>
+                                    <select
+                                        id="fb-category"
+                                        value={type}
+                                        onChange={e => setType(e.target.value as FeedbackType)}
+                                    >
+                                        {types.map(t => (
+                                            <option key={t} value={t}>{t}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* Subject Line */}
+                                <div className="fbform-group">
+                                    <label className="fbform-label" htmlFor="fb-subject">
+                                        Subject Line
+                                    </label>
+                                    <input
+                                        id="fb-subject"
+                                        type="text"
+                                        placeholder="Briefly describe your feedback..."
+                                        value={subject}
+                                        onChange={e => setSubject(e.target.value)}
+                                        maxLength={120}
+                                    />
+                                </div>
+
+                                {/* Detailed Message */}
+                                <div className="fbform-group">
+                                    <div className="fbform-label-row">
+                                        <label className="fbform-label" htmlFor="fb-message">
+                                            Detailed Message
+                                        </label>
+                                        <span className="fbform-charcount">
+                                            {message.length} / 500
+                                        </span>
+                                    </div>
+                                    <textarea
+                                        id="fb-message"
+                                        className={messageError ? 'fbform-error-border' : ''}
+                                        placeholder="Tell us more about your experience..."
+                                        rows={6}
+                                        value={message}
+                                        onChange={e => {
+                                            setMessage(e.target.value);
+                                            if (e.target.value.trim()) {
+                                                setMessageError('');
+                                            }
+                                        }}
+                                    />
+                                    {messageError && (
+                                        <div className="fbform-field-error">{messageError}</div>
+                                    )}
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="fbform-submit-row">
+                                    {onCancel && (
+                                        <button
+                                            type="button"
+                                            className="fbform-cancel-btn"
+                                            onClick={onCancel}
+                                            disabled={loading}
+                                        >
+                                            Cancel
+                                        </button>
+                                    )}
+                                    <button
+                                        type="submit"
+                                        className="fbform-submit-btn"
+                                        disabled={loading}
+                                    >
+                                        <span className="fbform-btn-text">
+                                            {loading
+                                                ? (currentFeedback ? 'Updating...' : 'Submitting...')
+                                                : (currentFeedback ? 'Update Feedback' : 'Submit Feedback')}
+                                        </span>
+                                        {!loading && (
+                                            <span className="material-symbols-outlined">send</span>
+                                        )}
+                                    </button>
+                                </div>
+
+                            </form>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="fbform-footer">
+                            <div className="fbform-footer-info">
+                                <div className="fbform-footer-icon">
+                                    <span className="material-symbols-outlined">security</span>
+                                </div>
+                                <span className="fbform-footer-text">
+                                    All feedback is anonymized before processing by our research teams.
                                 </span>
-                            )}
+                            </div>
+                            <div className="fbform-footer-links">
+                                <a href="#">Privacy</a>
+                                <a href="#">Terms</a>
+                                <a href="#">Direct Support</a>
+                            </div>
                         </div>
                     </div>
-
-                    {/* Buttons */}
-                    <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                        {onCancel && (
-                            <button
-                                type="button"
-                                onClick={onCancel}
-                                className="fb-btn fb-btn-secondary"
-                                style={{ flex: 1 }}
-                                disabled={loading}
-                            >
-                                Cancel
-                            </button>
-                        )}
-
-                        <button
-                            type="submit"
-                            className="fb-btn fb-btn-primary"
-                            style={{ flex: 1 }}
-                            disabled={loading} // allow click even if empty
-                        >
-                            {loading
-                                ? (currentFeedback ? 'Updating...' : 'Submitting...')
-                                : (currentFeedback ? 'Update Feedback' : 'Submit Feedback')}
-                        </button>
-                    </div>
-
-                </form>
+                </section>
             </div>
-        </div>
         </>
     );
 };
