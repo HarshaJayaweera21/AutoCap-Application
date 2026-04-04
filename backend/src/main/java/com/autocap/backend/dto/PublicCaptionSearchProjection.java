@@ -3,6 +3,7 @@ package com.autocap.backend.dto;
 public interface PublicCaptionSearchProjection {
     Long getCaptionId();
     Long getImageId();
+    String getFilePath();
     String getOriginalName();
     String getCaptionText();
     Double getSimilarityScore();
