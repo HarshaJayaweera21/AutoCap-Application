@@ -18,6 +18,125 @@
     border-bottom: 1px solid rgba(67, 70, 86, 0.1);
 }
 
+/* Light Theme Header Override */
+.app-header.light {
+    background: rgba(255, 255, 255, 0.85);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.app-header.light .hdr-brand {
+    color: #1a1a1a;
+}
+
+.app-header.light .hdr-nav-link {
+    color: #4b5563;
+}
+
+.app-header.light .hdr-nav-link:hover {
+    color: #111827;
+}
+
+.app-header.light .hdr-nav-link.active {
+    color: #194bff;
+}
+
+.app-header.light .material-symbols-outlined,
+.app-header.light .hdr-expand-icon {
+    color: #4b5563;
+}
+
+.app-header.light .hdr-profile-trigger:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.app-header.light .hdr-avatar {
+    background: rgba(25, 75, 255, 0.1);
+    border: 1px solid rgba(25, 75, 255, 0.2);
+}
+
+.app-header.light .hdr-avatar-initials {
+    color: #194bff;
+}
+
+/* Light Theme Dropdown Overrides */
+.app-header.light .hdr-dropdown {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.app-header.light .hdr-dropdown-user {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.app-header.light .hdr-dropdown-name {
+    color: #1a1a1a;
+}
+
+.app-header.light .hdr-dropdown-email {
+    color: #4b5563;
+}
+
+.app-header.light .hdr-dropdown-sep {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.app-header.light .hdr-dropdown-item {
+    color: #374151;
+}
+
+.app-header.light .hdr-dropdown-item:hover {
+    background: rgba(0, 0, 0, 0.04);
+    color: #111827;
+}
+
+.app-header.light .hdr-dropdown-item .material-symbols-outlined {
+    opacity: 0.8;
+}
+
+.app-header.light .hdr-dropdown-logout-btn {
+    color: #dc2626;
+}
+
+.app-header.light .hdr-dropdown-logout-btn:hover {
+    background: rgba(220, 38, 38, 0.08);
+    color: #b91c1c;
+}
+
+/* Theme Toggle Button Styles */
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #b9c3ff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1.1rem;
+}
+
+.theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+    color: #f6f6f6;
+}
+
+.app-header.light .theme-toggle {
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: #4b5563;
+}
+
+.app-header.light .theme-toggle:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: #1a1a1a;
+}
+
 /* ---------- Left Section: Brand + Nav ---------- */
 .hdr-left {
     display: flex;
