@@ -1,432 +1,726 @@
-.my-datasets {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background-color: var(--bg-base);
+/* ===== My Datasets Page - Dark Theme ===== */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap');
+
+:root {
+    --mds-surface: #14121a;
+    --mds-surface-container-lowest: #0f0d15;
+    --mds-surface-container-low: #1d1a23;
+    --mds-surface-container: #211e27;
+    --mds-surface-container-high: #2b2931;
+    --mds-surface-container-highest: #36333c;
+    
+    --mds-on-surface: #e6e0ec;
+    --mds-on-surface-variant: #c4c5d9;
+    --mds-outline: #8e8fa3;
+    --mds-outline-variant: #434656;
+    
+    --mds-primary: #b9c3ff;
+    --mds-primary-container: #194bff;
+    
+    --mds-tertiary: #7bdc6c;
+    --mds-tertiary-container: #07740e;
+    
+    --mds-error: #ffb4ab;
+    --mds-on-error: #690005;
+    --mds-brand-error: #E84A34;
 }
 
-.my-datasets__main {
-  flex: 1;
-  width: 100%;
-  margin: 0 auto;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+.mds-page {
+    background-color: var(--mds-surface);
+    color: var(--mds-on-surface);
+    font-family: 'Manrope', sans-serif;
+    min-height: 100vh;
+    width: 100%;
 }
 
-.my-datasets__header {
-  background-color: var(--bg-surface);
-  padding: 1.5rem 2rem;
-  border-radius: 12px;
-  border: 1px solid var(--border-subtle);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+.mds-container {
+    padding: 4rem 3rem 3rem;
+    width: 100%;
 }
 
-.my-datasets__header-text h2 {
-  font-size: 1.5rem;
-  color: var(--text-primary);
-  margin: 0 0 0.25rem 0;
-  font-weight: 600;
+/* ---------- Header ---------- */
+.mds-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 3rem;
+    text-align: center;
 }
 
-.my-datasets__header-text p {
-  color: var(--text-muted);
-  margin: 0;
-  font-size: 0.95rem;
+.mds-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--mds-on-surface);
+    letter-spacing: -0.025em;
+    margin: 0 0 0.5rem 0;
 }
 
-.my-datasets__content {
-  background-color: var(--bg-surface);
-  border-radius: 12px;
-  border: 1px solid var(--border-strong);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-  overflow: hidden;
-  padding: 1.5rem;
+.mds-subtitle {
+    font-size: 0.875rem;
+    color: var(--mds-on-surface-variant);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    margin: 0;
 }
 
-/* Empty state */
-.my-datasets__empty {
-  text-align: center;
-  padding: 4rem 2rem;
-  color: var(--text-muted);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
+/* ---------- Stats Grid ---------- */
+.mds-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
 }
 
-.my-datasets__empty svg {
-  opacity: 0.4;
-  margin-bottom: 0.5rem;
+@media (min-width: 768px) {
+    .mds-stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
-.my-datasets__empty h3 {
-  color: var(--text-secondary);
-  font-size: 1.2rem;
-  margin: 0;
+.mds-stat-card {
+    background-color: var(--mds-surface-container-low);
+    padding: 1.5rem;
+    border: 1px solid rgba(67, 70, 86, 0.1);
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
 }
 
-.my-datasets__empty p {
-  margin: 0;
-  font-size: 0.95rem;
+.mds-stat-icon-wrap {
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
 }
 
-/* Table */
-.my-datasets__table {
-  width: 100%;
-  border-collapse: collapse;
+.mds-stat-icon-wrap.total { background-color: var(--mds-surface-container-highest); }
+.mds-stat-icon-wrap.public { background-color: rgba(7, 116, 14, 0.2); }
+.mds-stat-icon-wrap.private { background-color: rgba(142, 143, 163, 0.1); } /* outline/10 */
+
+.mds-stat-icon { font-size: 1.5rem; }
+.mds-stat-icon.total { color: var(--mds-primary); }
+.mds-stat-icon.public { color: var(--mds-tertiary); }
+.mds-stat-icon.private { color: var(--mds-on-surface-variant); }
+
+.mds-stat-value {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1.875rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+.mds-stat-value.total { color: var(--mds-on-surface); }
+.mds-stat-value.public { color: var(--mds-tertiary); }
+.mds-stat-value.private { color: var(--mds-on-surface-variant); }
+
+.mds-stat-label {
+    font-size: 0.875rem;
+    color: var(--mds-outline);
+    font-weight: 500;
+    margin-top: 0.125rem;
 }
 
-.my-datasets__table th,
-.my-datasets__table td {
-  padding: 1rem;
-  text-align: left;
-  border-bottom: 1px solid var(--border-strong);
-  vertical-align: middle;
+/* ---------- Table Controls ---------- */
+.mds-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    align-items: center;
+    justify-content: space-between;
 }
 
-.my-datasets__table th {
-  font-weight: 600;
-  color: var(--text-secondary);
-  background-color: var(--bg-surface);
-  border-bottom: 2px solid var(--border-strong);
-  white-space: nowrap;
+@media (min-width: 768px) {
+    .mds-controls {
+        flex-direction: row;
+    }
 }
 
-.my-datasets__table tr {
-  transition: background-color 0.15s ease;
+.mds-search {
+    position: relative;
+    width: 100%;
 }
 
-.my-datasets__table tr:hover {
-  background-color: var(--bg-raised);
+@media (min-width: 768px) {
+    .mds-search {
+        width: 24rem;
+    }
 }
 
-.my-datasets__name {
-  color: var(--text-primary);
-  font-weight: 500;
+.mds-search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--mds-outline);
+    font-size: 1.25rem;
 }
 
-.my-datasets__score {
-  font-size: 1rem;
-  color: var(--text-primary);
-  font-weight: 500;
+.mds-search-input {
+    width: 100%;
+    background-color: var(--mds-surface-container-highest);
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem 0.75rem 2.75rem;
+    color: var(--mds-on-surface);
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.875rem;
+    outline: none;
+    transition: box-shadow 0.2s;
 }
 
-.my-datasets__items-count {
-  color: var(--text-primary);
-  font-weight: 500;
+.mds-search-input:focus {
+    box-shadow: 0 0 0 2px var(--mds-primary-container);
 }
 
-.my-datasets__date {
-  color: var(--text-secondary);
-  white-space: nowrap;
+.mds-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
 }
 
-.my-datasets__format {
-  color: var(--text-primary);
-  font-weight: 500;
-  text-transform: uppercase;
-  font-size: 0.85rem;
-  letter-spacing: 0.5px;
+@media (min-width: 768px) {
+    .mds-filter-group {
+        width: auto;
+    }
 }
+
+.mds-filter-label {
+    color: var(--mds-outline);
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.mds-filter-wrap {
+    position: relative;
+    width: 100%;
+}
+
+.mds-filter {
+    background-color: var(--mds-surface-container-low);
+    border: 1px solid rgba(67, 70, 86, 0.2);
+    border-radius: 0.5rem;
+    padding: 0.625rem 2.5rem 0.625rem 1rem;
+    color: var(--mds-on-surface);
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.875rem;
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+}
+
+.mds-filter:focus {
+    border-color: var(--mds-primary);
+}
+
+.mds-filter-arrow {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--mds-outline);
+    pointer-events: none;
+}
+
+/* ---------- Table Layout ---------- */
+.mds-table-wrapper {
+    background-color: var(--mds-surface-container-low);
+    border-radius: 0.75rem;
+    border: 1px solid #28272F;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+}
+
+.mds-table-scroll {
+    overflow-x: auto;
+}
+
+.mds-table-scroll::-webkit-scrollbar { height: 6px; }
+.mds-table-scroll::-webkit-scrollbar-track { background: var(--mds-surface-container-low); }
+.mds-table-scroll::-webkit-scrollbar-thumb { background: var(--mds-outline-variant); border-radius: 3px; }
+
+.mds-table {
+    width: 100%;
+    text-align: left;
+    border-collapse: collapse;
+    white-space: nowrap;
+}
+
+.mds-table thead tr {
+    background-color: rgba(43, 41, 49, 0.5);
+    border-bottom: 1px solid rgba(67, 70, 86, 0.1);
+}
+
+.mds-table th {
+    padding: 1rem 1.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--mds-outline);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.mds-table tbody tr {
+    transition: background-color 0.2s;
+    border-bottom: 1px solid rgba(67, 70, 86, 0.1);
+}
+
+.mds-table tbody tr:hover {
+    background-color: rgba(43, 41, 49, 0.3);
+}
+
+.mds-table td {
+    padding: 1.25rem 1.5rem;
+    font-size: 0.875rem;
+    vertical-align: middle;
+}
+
+/* Specific Cells */
+.mds-cell-name {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.mds-cell-name .material-symbols-outlined {
+    color: var(--mds-primary);
+    font-size: 1.25rem;
+}
+.mds-cell-name .mds-dataset-name {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    color: var(--mds-on-surface);
+}
+
+.mds-cell-mono {
+    font-family: monospace;
+    color: var(--mds-on-surface-variant);
+}
+
+.mds-cell-variant { color: var(--mds-on-surface-variant); }
+.mds-cell-muted { color: var(--mds-outline); }
 
 /* Badges */
-.my-datasets__badge {
-  padding: 0.3rem 0.85rem;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  display: inline-block;
-  text-align: center;
-  min-width: 75px;
+.mds-badge-public {
+    background-color: rgba(7, 116, 14, 0.1);
+    color: var(--mds-tertiary);
+    border: 1px solid rgba(123, 220, 108, 0.2);
+    padding: 0.25rem 0.625rem;
+    border-radius: 0.25rem;
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-.my-datasets__badge.public {
-  background-color: rgba(25, 75, 255, 0.15);
-  color: var(--primary);
-  border: 1px solid rgba(25, 75, 255, 0.3);
+.mds-badge-private {
+    background-color: rgba(142, 143, 163, 0.1);
+    color: var(--mds-on-surface-variant);
+    border: 1px solid rgba(67, 70, 86, 0.2);
+    padding: 0.25rem 0.625rem;
+    border-radius: 0.25rem;
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-.my-datasets__badge.private {
-  background-color: rgba(152, 151, 157, 0.15);
-  color: var(--text-secondary);
-  border: 1px solid rgba(152, 151, 157, 0.3);
+.mds-badge-format {
+    background-color: var(--mds-surface-container-highest);
+    color: var(--mds-outline);
+    border: 1px solid rgba(67, 70, 86, 0.2);
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.625rem;
+    font-weight: 700;
 }
 
-/* Action icons */
-.my-datasets__actions {
-  display: flex;
-  gap: 0.5rem;
+/* Actions */
+.mds-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.my-datasets__action-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1.15rem;
-  transition: all 0.2s ease;
-  border: 1px solid var(--border-strong);
-  background-color: var(--bg-raised);
+.mds-btn-action {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: #1F1E29;
+    border: 1px solid rgba(67, 70, 86, 0.2);
+    color: #C5C4C7;
 }
 
-.my-datasets__action-icon.edit {
-  color: var(--text-secondary);
+.mds-btn-action:hover {
+    background-color: var(--mds-surface-container-high);
 }
 
-.my-datasets__action-icon.edit:hover {
-  background-color: var(--primary);
-  color: var(--text-primary);
-  border-color: var(--primary);
-  transform: translateY(-1px);
+.mds-btn-action.danger {
+    background-color: transparent;
+    border-color: rgba(232, 74, 52, 0.3);
+    color: var(--mds-brand-error);
 }
 
-.my-datasets__action-icon.delete {
-  color: var(--text-secondary);
+.mds-btn-action.danger:hover {
+    background-color: rgba(232, 74, 52, 0.1);
 }
 
-.my-datasets__action-icon.delete:hover {
-  background-color: var(--error);
-  color: white;
-  border-color: var(--error);
-  transform: translateY(-1px);
+/* Empty State / Loading */
+.mds-empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--mds-outline);
 }
 
-/* ===== Modal Overlay ===== */
-.my-datasets__modal-overlay {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.85);
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  animation: myDsFadeIn 0.2s ease forwards;
+/* ---------- Pagination (Matches User Management logic for table footers) ---------- */
+.mds-pagination {
+    background-color: var(--mds-surface-container-low);
+    padding: 1rem 1.5rem;
+    border-top: 1px solid rgba(67, 70, 86, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
-@keyframes myDsFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.mds-pagination-text {
+    font-size: 0.875rem;
+    color: var(--mds-outline);
 }
 
-/* Dialog */
-.my-datasets__dialog {
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border-strong);
-  border-radius: 16px;
-  width: 100%;
-  max-width: 520px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-  overflow: hidden;
-  animation: myDsDialogPop 0.25s ease forwards;
+.mds-pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
 }
 
-@keyframes myDsDialogPop {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+.mds-page-btn {
+    width: 2.25rem;
+    height: 2.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.25rem;
+    border: 1px solid rgba(67, 70, 86, 0.2);
+    color: var(--mds-outline);
+    background-color: transparent;
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
-.my-datasets__dialog-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--border-strong);
+.mds-page-btn:hover:not(:disabled):not(.active) {
+    background-color: var(--mds-surface-container-high);
 }
 
-.my-datasets__dialog-header h3 {
-  margin: 0;
-  font-size: 1.15rem;
-  color: var(--text-primary);
-  font-weight: 600;
+.mds-page-btn.active {
+    background-color: var(--mds-primary-container);
+    color: #ffffff;
+    border-color: transparent;
 }
 
-.my-datasets__modal-close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  font-size: 1rem;
-  background: transparent;
-  color: var(--text-muted);
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: all 0.2s ease;
+.mds-page-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
 }
 
-.my-datasets__modal-close:hover {
-  color: var(--text-primary);
-  background-color: var(--bg-raised);
+/* ---------- Modals ---------- */
+.mds-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
 }
 
-.my-datasets__dialog-body {
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
+.mds-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(15, 13, 21, 0.9);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
-.my-datasets__form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+.mds-modal-content {
+    position: relative;
+    width: 100%;
+    z-index: 101;
+    overflow: hidden;
+    animation: mds-popIn 0.2s ease-out forwards;
 }
 
-.my-datasets__form-group label {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-secondary);
+@keyframes mds-popIn {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-.my-datasets__form-input {
-  padding: 0.75rem 1rem;
-  font-size: 0.95rem;
-  font-family: inherit;
-  color: var(--text-primary);
-  background-color: var(--bg-base);
-  border: 1px solid var(--border-strong);
-  border-radius: 10px;
-  transition: border-color 0.2s ease;
+/* Edit Dataset Modal (Large) */
+.mds-modal-edit {
+    max-width: 42rem;
+    background-color: var(--mds-surface-container-high);
+    border-radius: 0.75rem;
+    border: 1px solid rgba(67, 70, 86, 0.2);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
 }
 
-.my-datasets__form-input:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(25, 75, 255, 0.2);
+.mds-modal-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba(67, 70, 86, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.my-datasets__form-textarea {
-  padding: 0.75rem 1rem;
-  font-size: 0.95rem;
-  font-family: inherit;
-  color: var(--text-primary);
-  background-color: var(--bg-base);
-  border: 1px solid var(--border-strong);
-  border-radius: 10px;
-  resize: vertical;
-  min-height: 80px;
-  transition: border-color 0.2s ease;
+.mds-modal-header h2 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--mds-on-surface);
+    margin: 0 0 0.25rem 0;
 }
 
-.my-datasets__form-textarea:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(25, 75, 255, 0.2);
+.mds-modal-header p {
+    font-size: 0.75rem;
+    color: var(--mds-outline);
+    margin: 0;
 }
 
-.my-datasets__toggle-group {
-  display: flex;
-  gap: 0;
-  border-radius: 10px;
-  overflow: hidden;
-  border: 1px solid var(--border-strong);
+.mds-modal-close {
+    background: transparent;
+    border: none;
+    color: var(--mds-outline);
+    cursor: pointer;
+    transition: color 0.2s;
+    display: flex;
 }
 
-.my-datasets__toggle-btn {
-  flex: 1;
-  padding: 0.65rem 1rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  background-color: var(--bg-base);
-  color: var(--text-secondary);
-  border: none;
-  border-right: 1px solid var(--border-strong);
+.mds-modal-close:hover {
+    color: var(--mds-on-surface);
 }
 
-.my-datasets__toggle-btn:last-child {
-  border-right: none;
+.mds-modal-body {
+    padding: 2rem;
 }
 
-.my-datasets__toggle-btn.active {
-  background-color: var(--primary);
-  color: var(--text-primary);
-  font-weight: 600;
+.mds-grid-form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem 2rem;
 }
 
-.my-datasets__toggle-btn:hover:not(.active) {
-  background-color: var(--bg-raised);
+.mds-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
-.my-datasets__delete-warning {
-  color: var(--text-secondary);
-  font-size: 1rem;
-  line-height: 1.6;
-  margin: 0;
+.mds-label {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-.my-datasets__delete-warning strong {
-  color: var(--error);
+.mds-label.readonly { color: var(--mds-outline); }
+.mds-label.editable { color: var(--mds-primary); }
+
+.mds-edit-input {
+    background-color: var(--mds-surface-container-highest);
+    border: none;
+    border-radius: 0.25rem;
+    padding: 0.75rem 1rem;
+    color: var(--mds-on-surface);
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.875rem;
+    outline: none;
+    box-shadow: 0 0 0 0 transparent;
+    transition: box-shadow 0.2s;
 }
 
-.my-datasets__dialog-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  padding: 1rem 1.5rem;
-  border-top: 1px solid var(--border-strong);
-  background-color: var(--bg-raised);
+.mds-edit-input:focus {
+    box-shadow: 0 0 0 2px rgba(185, 195, 255, 0.5);
 }
 
-.my-datasets__dialog-btn {
-  padding: 0.65rem 1.25rem;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: none;
+textarea.mds-edit-input {
+    resize: vertical;
+    min-height: 80px;
 }
 
-.my-datasets__dialog-btn.cancel {
-  background-color: var(--bg-surface);
-  color: var(--text-secondary);
-  border: 1px solid var(--border-strong);
+/* Toggle Group for Public/Private */
+.mds-toggle-group {
+    display: flex;
+    border-radius: 0.25rem;
+    overflow: hidden;
+    background-color: var(--mds-surface-container-highest);
 }
 
-.my-datasets__dialog-btn.cancel:hover {
-  background-color: var(--bg-elevated);
-  color: var(--text-primary);
+.mds-toggle-btn {
+    flex: 1;
+    padding: 0.75rem;
+    background: transparent;
+    color: var(--mds-outline);
+    border: none;
+    font-size: 0.875rem;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
-.my-datasets__dialog-btn.save {
-  background-color: var(--primary);
-  color: var(--text-primary);
-  box-shadow: 0 2px 8px rgba(25, 75, 255, 0.3);
+.mds-toggle-btn.active {
+    background-color: var(--mds-primary);
+    color: var(--mds-surface-container-highest);
 }
 
-.my-datasets__dialog-btn.save:hover:not(:disabled) {
-  background-color: #3b66ff;
-  transform: translateY(-1px);
+.mds-modal-footer {
+    padding: 1.5rem 2rem;
+    background-color: var(--mds-surface-container);
+    border-top: 1px solid rgba(67, 70, 86, 0.1);
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
 }
 
-.my-datasets__dialog-btn.danger {
-  background-color: var(--error);
-  color: white;
-  box-shadow: 0 2px 8px rgba(232, 74, 52, 0.3);
+.mds-btn-cancel {
+    padding: 0.625rem 1.5rem;
+    background: transparent;
+    border: none;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--mds-outline);
+    cursor: pointer;
+    transition: color 0.2s;
 }
 
-.my-datasets__dialog-btn.danger:hover:not(:disabled) {
-  background-color: #ff5e48;
-  transform: translateY(-1px);
+.mds-btn-cancel:hover {
+    color: var(--mds-on-surface);
 }
 
-.my-datasets__dialog-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
+.mds-btn-save {
+    padding: 0.625rem 2rem;
+    background-color: var(--mds-primary-container);
+    color: var(--mds-on-primary-container);
+    border: none;
+    border-radius: 0.5rem;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mds-btn-save:hover {
+    box-shadow: 0 0 15px rgba(25, 75, 255, 0.4);
+}
+.mds-btn-save:active {
+    transform: scale(0.95);
+}
+
+/* Confirm modal (small) */
+.mds-modal-confirm {
+    max-width: 28rem;
+    background-color: var(--mds-surface-container-high);
+    border-radius: 0.75rem;
+    border: 1px solid rgba(67, 70, 86, 0.2);
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
+    text-align: center;
+}
+
+.mds-confirm-body {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.mds-confirm-icon-wrap {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    background-color: rgba(147, 0, 10, 0.2);
+}
+
+.mds-confirm-icon-wrap .material-symbols-outlined {
+    font-size: 2.25rem;
+    color: var(--mds-error);
+}
+
+.mds-confirm-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--mds-on-surface);
+    margin: 0 0 0.75rem 0;
+}
+
+.mds-confirm-desc {
+    font-size: 0.875rem;
+    color: var(--mds-on-surface-variant);
+    line-height: 1.6;
+    margin: 0 0 2rem 0;
+}
+
+.mds-confirm-actions {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.mds-btn-confirm {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: var(--mds-error);
+    color: var(--mds-on-error);
+}
+
+.mds-btn-confirm:hover { opacity: 0.9; }
+.mds-btn-confirm:active { transform: scale(0.98); }
+
+.mds-btn-confirm-cancel {
+    width: 100%;
+    padding: 0.75rem;
+    background: transparent;
+    color: var(--mds-on-surface-variant);
+    font-weight: 600;
+    font-size: 0.875rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mds-btn-confirm-cancel:hover { background-color: var(--mds-surface-variant); }
+.mds-btn-confirm-cancel:active { transform: scale(0.98); }
+
+.mds-confirm-bar {
+    height: 0.25rem;
+    width: 100%;
+    background-color: var(--mds-error);
 }
