@@ -69,7 +69,7 @@ public interface CaptionRepository extends JpaRepository<Caption, Long> {
     // ── Row 4: Public Dataset Search ──
 
     @Query(value = """
-            SELECT c.id AS "captionId", i.id AS "imageId", i.original_name AS "originalName",
+            SELECT c.id AS "captionId", i.id AS "imageId", i.file_path AS "filePath", i.original_name AS "originalName",
                    c.caption_text AS "captionText", c.similarity_score AS "similarityScore",
                    i.is_flagged AS "isFlagged", c.is_edited AS "isEdited"
             FROM datasets d
@@ -93,7 +93,7 @@ public interface CaptionRepository extends JpaRepository<Caption, Long> {
             org.springframework.data.domain.Pageable pageable);
 
     @Query(value = """
-            SELECT c.id AS "captionId", i.id AS "imageId", i.original_name AS "originalName",
+            SELECT c.id AS "captionId", i.id AS "imageId", i.file_path AS "filePath", i.original_name AS "originalName",
                    c.caption_text AS "captionText", c.similarity_score AS "similarityScore",
                    i.is_flagged AS "isFlagged", c.is_edited AS "isEdited"
             FROM datasets d
@@ -105,7 +105,7 @@ public interface CaptionRepository extends JpaRepository<Caption, Long> {
     List<com.autocap.backend.dto.PublicCaptionSearchProjection> findCaptionsByIds(@Param("captionIds") List<Long> captionIds);
 
     @Query(value = """
-            SELECT c.id AS "captionId", i.id AS "imageId", i.original_name AS "originalName",
+            SELECT c.id AS "captionId", i.id AS "imageId", i.file_path AS "filePath", i.original_name AS "originalName",
                    c.caption_text AS "captionText", c.similarity_score AS "similarityScore",
                    i.is_flagged AS "isFlagged", c.is_edited AS "isEdited"
             FROM datasets d
