@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Header from '../../components/Header';
 import api from '../../api/axiosInstance';
-import { HiOutlineArrowsPointingOut, HiOutlinePencilSquare } from 'react-icons/hi2';
-import { HiOutlineX } from 'react-icons/hi';
 import './DatasetExplorer.css';
 
 interface DatasetItem {
@@ -21,6 +19,7 @@ const ITEMS_PER_PAGE = 10;
 export const DatasetExplorer: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const [items, setItems] = useState<DatasetItem[]>([]);
     const [loading, setLoading] = useState(true);
@@ -62,7 +61,11 @@ export const DatasetExplorer: React.FC = () => {
     }, [fetchItems]);
 
     const handleBack = () => {
-        navigate('/dashboard');
+        if (location.state && location.state.from) {
+            navigate(location.state.from);
+        } else {
+            navigate('/dashboard');
+        }
     };
 
     const handleCheckboxChange = (captionId: number) => {
@@ -153,125 +156,132 @@ export const DatasetExplorer: React.FC = () => {
         fetchItems(page);
     };
 
+    const generatePageNumbers = () => {
+        const pages = [];
+        // Math to figure out bounds
+        let start = Math.max(0, currentPage - 1);
+        let end = Math.min(totalPages - 1, currentPage + 1);
+        if (currentPage === 0) end = Math.min(2, totalPages - 1);
+        if (currentPage === totalPages - 1) start = Math.max(0, totalPages - 3);
+        
+        for (let i = start; i <= end; i++) {
+            pages.push(i);
+        }
+        return pages;
+    };
+
     const hasSelections = selectedIds.size > 0;
 
     return (
-        <div className="dataset-explorer">
+        <div className="mds-page">
             <Header />
-            <main className="dataset-explorer__main">
-                <div className="dataset-explorer__header">
-                    <div className="dataset-explorer__header-left">
-                        <button className="dataset-explorer__back-btn" onClick={handleBack} title="Go back to Dashboard">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <line x1="19" y1="12" x2="5" y2="12"></line>
-                                <polyline points="12 19 5 12 12 5"></polyline>
-                            </svg>
-                        </button>
-                        <div className="dataset-explorer__header-text">
-                            <h2>Dataset Explorer</h2>
-                            <p>Manage, edit, and organize items within your dataset.</p>
-                        </div>
+            <main className="mds-container">
+                <div className="mds-explorer-header">
+                    <button className="mds-back-btn" onClick={handleBack} title="Go back to Dashboard">
+                        <span className="material-symbols-outlined">arrow_back</span>
+                        Back
+                    </button>
+                    <div>
+                        <h2 className="mds-title">Dataset Explorer</h2>
+                        <p className="mds-subtitle">Manage, edit, and organize items within your dataset.</p>
                     </div>
                 </div>
 
-                <div className="dataset-explorer__results-container">
+                <div className="mds-table-wrapper">
                     {loading ? (
-                        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>Loading dataset items...</div>
+                        <div className="mds-empty">Loading dataset items...</div>
                     ) : items.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>No items found in this dataset.</div>
+                        <div className="mds-empty">No items found in this dataset.</div>
                     ) : (
                         <>
-                            <div style={{ overflowX: 'auto' }}>
-                                <table className="dataset-explorer__table">
+                            <div className="mds-table-scroll">
+                                <table className="mds-table">
                                     <thead>
                                         <tr>
                                             <th style={{ width: '40px' }}>
                                                 <input 
                                                     type="checkbox" 
-                                                    className="dataset-explorer__checkbox"
+                                                    className="mds-checkbox"
                                                     checked={selectedIds.size === items.length && items.length > 0}
                                                     onChange={handleSelectAll}
                                                 />
                                             </th>
-                                            <th style={{ width: '100px' }}>Image ID</th>
                                             <th>Image</th>
                                             <th>Caption</th>
-                                            <th style={{ width: '100px' }}>Similarity</th>
-                                            <th style={{ width: '120px' }}>Edit Status</th>
-                                            <th style={{ width: '120px' }}>Flag Status</th>
-                                            <th style={{ width: '80px' }}>Actions</th>
+                                            <th style={{ width: '100px', textAlign: 'center' }}>Similarity</th>
+                                            <th style={{ width: '120px', textAlign: 'center' }}>Edit Status</th>
+                                            <th style={{ width: '120px', textAlign: 'center' }}>Flag Status</th>
+                                            <th style={{ width: '80px', textAlign: 'center' }}>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {items.map(item => {
                                             const isSelected = selectedIds.has(item.captionId);
                                             return (
-                                                <tr key={item.captionId} className={isSelected ? 'selected-row' : ''}>
+                                                <tr key={item.captionId} className={isSelected ? 'selected' : ''}>
                                                     <td>
                                                         <input 
                                                             type="checkbox" 
-                                                            className="dataset-explorer__checkbox"
+                                                            className="mds-checkbox"
                                                             checked={isSelected}
                                                             onChange={() => handleCheckboxChange(item.captionId)}
                                                         />
                                                     </td>
-                                                    <td style={{ color: 'var(--text-secondary)' }}>#{item.imageId}</td>
                                                     <td>
                                                         {item.imageUrl ? (
                                                             <div 
-                                                                className="dataset-explorer__img-wrapper dataset-explorer__img--clickable"
+                                                                className="mds-img-wrapper"
                                                                 onClick={() => setPreviewImage(item.imageUrl as string)}
                                                             >
                                                                 <img 
                                                                     src={item.imageUrl} 
                                                                     alt={`Image ${item.imageId}`} 
-                                                                    className="dataset-explorer__img"
                                                                     onError={(e) => {
-                                                                        (e.target as HTMLImageElement).src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80" fill="%231b1b1b"><rect width="120" height="80"/></svg>';
+                                                                        (e.target as HTMLImageElement).src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80" fill="%2336333c"><rect width="120" height="80"/></svg>';
                                                                     }}
                                                                 />
-                                                                <div className="dataset-explorer__img-overlay">
-                                                                    <HiOutlineArrowsPointingOut />
+                                                                <div className="mds-img-overlay">
+                                                                    <span className="material-symbols-outlined">zoom_out_map</span>
                                                                 </div>
                                                             </div>
                                                         ) : (
-                                                            <div className="dataset-explorer__no-img">No Image</div>
+                                                            <div className="mds-no-img">No Image</div>
                                                         )}
                                                     </td>
                                                     <td>
-                                                        <p className="dataset-explorer__caption-text">{item.captionText}</p>
+                                                        <p className="mds-caption-text">{item.captionText}</p>
                                                     </td>
-                                                    <td>
+                                                    <td style={{ textAlign: 'center' }}>
                                                         {item.similarityScore !== null ? (
-                                                            <span className="dataset-explorer__score">
-                                                                {item.similarityScore.toFixed(4)}
-                                                            </span>
+                                                            <span className="mds-score">{item.similarityScore.toFixed(4)}</span>
                                                         ) : (
-                                                            <span className="dataset-explorer__score" style={{ color: 'var(--text-muted)' }}>—</span>
+                                                            <span className="mds-score" style={{ color: 'var(--mds-outline)' }}>—</span>
                                                         )}
                                                     </td>
-                                                    <td>
+                                                    <td style={{ textAlign: 'center' }}>
                                                         {item.isEdited ? (
-                                                            <span className="dataset-explorer__flag okay">Yes</span>
+                                                            <span className="mds-badge-okay">Yes</span>
                                                         ) : (
-                                                            <span className="dataset-explorer__flag neutral">No</span>
+                                                            <span className="mds-badge-neutral">No</span>
                                                         )}
                                                     </td>
-                                                    <td>
+                                                    <td style={{ textAlign: 'center' }}>
                                                         {item.isFlagged ? (
-                                                            <span className="dataset-explorer__flag flagged">Flagged</span>
+                                                            <span className="mds-badge-flagged">Flagged</span>
                                                         ) : (
-                                                            <span className="dataset-explorer__flag okay">Not Flagged</span>
+                                                            <span className="mds-badge-okay">Not Flagged</span>
                                                         )}
                                                     </td>
                                                     <td>
-                                                        <button 
-                                                            className="dataset-explorer__edit-btn"
-                                                            onClick={() => openEditModal(item.captionId, item.captionText)}
-                                                            title="Edit Caption"
-                                                        >
-                                                            <HiOutlinePencilSquare />
-                                                        </button>
+                                                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                                            <button 
+                                                                className="mds-edit-btn"
+                                                                onClick={() => openEditModal(item.captionId, item.captionText)}
+                                                                title="Edit Caption"
+                                                            >
+                                                                <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>edit</span>
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             );
@@ -281,36 +291,45 @@ export const DatasetExplorer: React.FC = () => {
                             </div>
 
                             {/* Pagination */}
-                            {totalPages > 1 && (
-                                <div className="dataset-explorer__pagination">
-                                    <button 
-                                        className="dataset-explorer__page-btn"
-                                        disabled={currentPage === 0}
-                                        onClick={() => goToPage(currentPage - 1)}
-                                    >
-                                        Previous
-                                    </button>
-                                    <div className="dataset-explorer__page-numbers">
-                                        {Array.from({ length: totalPages }, (_, i) => (
-                                            <button
-                                                key={i}
-                                                className={`dataset-explorer__page-num ${currentPage === i ? 'active' : ''}`}
-                                                onClick={() => goToPage(i)}
+                            {totalPages > 0 && (
+                                <div className="mds-pagination">
+                                    <span className="mds-pagination-text">
+                                        Showing {(currentPage * ITEMS_PER_PAGE) + 1} to {Math.min((currentPage + 1) * ITEMS_PER_PAGE, totalElements)} of {totalElements} results
+                                    </span>
+                                    <div className="mds-pagination-controls">
+                                        <button 
+                                            className="mds-page-btn" 
+                                            disabled={currentPage === 0}
+                                            onClick={() => goToPage(currentPage - 1)}
+                                        >
+                                            <span className="material-symbols-outlined">chevron_left</span>
+                                        </button>
+
+                                        {generatePageNumbers().map(p => (
+                                            <button 
+                                                key={p} 
+                                                className={`mds-page-btn ${p === currentPage ? 'active' : ''}`}
+                                                onClick={() => goToPage(p)}
                                             >
-                                                {i + 1}
+                                                {p + 1}
                                             </button>
                                         ))}
+
+                                        {totalPages > 3 && currentPage < totalPages - 2 && (
+                                            <>
+                                                <span style={{ color: 'var(--mds-outline)', padding: '0 0.5rem' }}>...</span>
+                                                <button className="mds-page-btn" onClick={() => goToPage(totalPages - 1)}>{totalPages}</button>
+                                            </>
+                                        )}
+
+                                        <button 
+                                            className="mds-page-btn" 
+                                            disabled={currentPage >= totalPages - 1}
+                                            onClick={() => goToPage(currentPage + 1)}
+                                        >
+                                            <span className="material-symbols-outlined">chevron_right</span>
+                                        </button>
                                     </div>
-                                    <button 
-                                        className="dataset-explorer__page-btn"
-                                        disabled={currentPage >= totalPages - 1}
-                                        onClick={() => goToPage(currentPage + 1)}
-                                    >
-                                        Next
-                                    </button>
-                                    <span className="dataset-explorer__page-info">
-                                        {totalElements} total items
-                                    </span>
                                 </div>
                             )}
                         </>
@@ -320,65 +339,71 @@ export const DatasetExplorer: React.FC = () => {
 
             {/* Floating delete button */}
             {hasSelections && (
-                <div className="dataset-explorer__floating-actions">
+                <div className="mds-floating-bar">
+                    <span className="mds-floating-text">{selectedIds.size} items selected</span>
                     <button 
-                        className="dataset-explorer__action-btn delete"
+                        className="mds-floating-btn"
                         onClick={openDeleteModal}
                         disabled={isDeleting}
                     >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                            <line x1="10" y1="11" x2="10" y2="17"></line>
-                            <line x1="14" y1="11" x2="14" y2="17"></line>
-                        </svg>
-                        {`Delete Selected (${selectedIds.size})`}
+                        <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>delete</span>
+                        Delete Options
                     </button>
                 </div>
             )}
 
-            {/* Image Preview Modal */}
+            {/* Image Preview Modal (isolated simple overlay) */}
             {previewImage && (
-                <div className="dataset-explorer__modal-overlay" onClick={() => setPreviewImage(null)}>
-                    <div className="dataset-explorer__modal-content" onClick={e => e.stopPropagation()}>
+                <div className="mds-modal-overlay" onClick={() => setPreviewImage(null)} style={{ zIndex: 3000 }}>
+                    <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
                         <button 
-                            className="dataset-explorer__modal-close" 
+                            className="mds-modal-close" 
+                            style={{ position: 'absolute', top: '-2.5rem', right: '0', color: '#fff' }}
                             onClick={() => setPreviewImage(null)}
-                            aria-label="Close"
                         >
-                            <HiOutlineX />
+                            <span className="material-symbols-outlined">close</span>
                         </button>
-                        <img src={previewImage} alt="Fullscreen preview" />
+                        <img src={previewImage} alt="Fullscreen preview" className="mds-preview-img" />
                     </div>
                 </div>
             )}
 
             {/* Edit Caption Modal */}
             {editModalOpen && (
-                <div className="dataset-explorer__modal-overlay" onClick={closeEditModal}>
-                    <div className="dataset-explorer__dialog" onClick={e => e.stopPropagation()}>
-                        <div className="dataset-explorer__dialog-header">
-                            <h3>Edit Caption</h3>
-                            <button className="dataset-explorer__modal-close" onClick={closeEditModal} aria-label="Close">
-                                <HiOutlineX />
+                <div className="mds-modal-overlay">
+                    <div className="mds-modal-backdrop" onClick={closeEditModal} style={{ zIndex: -1 }}></div>
+                    <div className="mds-modal-content mds-modal-edit" onClick={e => e.stopPropagation()}>
+                        <div className="mds-modal-header">
+                            <div>
+                                <h2>Edit Caption Target</h2>
+                                <p>Provide manual adjustments for image tagging interpretation.</p>
+                            </div>
+                            <button className="mds-modal-close" onClick={closeEditModal}>
+                                <span className="material-symbols-outlined">close</span>
                             </button>
                         </div>
-                        <div className="dataset-explorer__dialog-body">
-                            <textarea
-                                className="dataset-explorer__edit-textarea"
-                                value={editCaptionText}
-                                onChange={(e) => setEditCaptionText(e.target.value)}
-                                rows={5}
-                            />
+                        <div className="mds-modal-body">
+                            <form className="mds-grid-form" onSubmit={e => { e.preventDefault(); handleSaveCaption(); }}>
+                                <div className="mds-field">
+                                    <label className="mds-label editable">Revised Prompt Metadata</label>
+                                    <textarea
+                                        className="mds-edit-input"
+                                        value={editCaptionText}
+                                        onChange={(e) => setEditCaptionText(e.target.value)}
+                                        placeholder="Add relevant metadata text..."
+                                    />
+                                </div>
+                                <button type="submit" style={{ display: 'none' }}></button>
+                            </form>
                         </div>
-                        <div className="dataset-explorer__dialog-footer">
-                            <button className="dataset-explorer__dialog-btn cancel" onClick={closeEditModal}>Cancel</button>
+                        <div className="mds-modal-footer">
+                            <button className="mds-btn-cancel" onClick={closeEditModal}>Discard</button>
                             <button 
-                                className="dataset-explorer__dialog-btn save" 
+                                className="mds-btn-save" 
                                 onClick={handleSaveCaption}
                                 disabled={isSaving}
                             >
-                                {isSaving ? 'Saving...' : 'Save Changes'}
+                                {isSaving ? 'Processing...' : 'Merge Correction'}
                             </button>
                         </div>
                     </div>
@@ -387,29 +412,27 @@ export const DatasetExplorer: React.FC = () => {
 
             {/* Delete Confirmation Modal */}
             {deleteModalOpen && (
-                <div className="dataset-explorer__modal-overlay" onClick={closeDeleteModal}>
-                    <div className="dataset-explorer__dialog" onClick={e => e.stopPropagation()}>
-                        <div className="dataset-explorer__dialog-header">
-                            <h3>Confirm Deletion</h3>
-                            <button className="dataset-explorer__modal-close" onClick={closeDeleteModal} aria-label="Close">
-                                <HiOutlineX />
-                            </button>
-                        </div>
-                        <div className="dataset-explorer__dialog-body">
-                            <p className="dataset-explorer__delete-warning">
-                                Are you sure you want to delete <strong>{selectedIds.size}</strong> item{selectedIds.size > 1 ? 's' : ''}? This action cannot be undone.
+                <div className="mds-modal-overlay">
+                    <div className="mds-modal-backdrop" onClick={closeDeleteModal} style={{ zIndex: -1 }}></div>
+                    <div className="mds-modal-content mds-modal-confirm" onClick={e => e.stopPropagation()}>
+                        <div className="mds-confirm-body">
+                            <div className="mds-confirm-icon-wrap">
+                                <span className="material-symbols-outlined">warning</span>
+                            </div>
+                            <h2 className="mds-confirm-title">Confirm Destructive Action</h2>
+                            <p className="mds-confirm-desc">
+                                Are you sure you wish to delete <strong>{selectedIds.size}</strong> annotated item{selectedIds.size > 1 ? 's' : ''}? These will be purged from index buffers permanently.
                             </p>
+                            <div className="mds-confirm-actions">
+                                <button className="mds-btn-confirm" onClick={handleConfirmDelete} disabled={isDeleting}>
+                                    {isDeleting ? 'Erasing...' : 'Confirm Destruction'}
+                                </button>
+                                <button className="mds-btn-confirm-cancel" onClick={closeDeleteModal}>
+                                    Cancel Return
+                                </button>
+                            </div>
                         </div>
-                        <div className="dataset-explorer__dialog-footer">
-                            <button className="dataset-explorer__dialog-btn cancel" onClick={closeDeleteModal}>Cancel</button>
-                            <button 
-                                className="dataset-explorer__dialog-btn danger" 
-                                onClick={handleConfirmDelete}
-                                disabled={isDeleting}
-                            >
-                                {isDeleting ? 'Deleting...' : 'Delete'}
-                            </button>
-                        </div>
+                        <div className="mds-confirm-bar"></div>
                     </div>
                 </div>
             )}

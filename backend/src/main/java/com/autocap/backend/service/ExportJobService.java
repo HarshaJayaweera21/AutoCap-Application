@@ -30,7 +30,7 @@ public class ExportJobService {
     private final Map<String, Path> jobFiles = new ConcurrentHashMap<>();
     private final ExecutorService executorService = Executors.newFixedThreadPool(5);
     
-    private static final String SUPABASE_BASE = "https://mztbiewiqjnairxnurfk.supabase.co/storage/v1/object/public/Images/";
+
 
     public String startExportJob(List<Long> captionIds) {
         String jobId = UUID.randomUUID().toString();
@@ -76,18 +76,19 @@ public class ExportJobService {
                 updateStatus(jobId, "DOWNLOADING_IMAGES", 15, "Downloading 0 / " + total + " images");
                 
                 for (PublicCaptionSearchProjection item : items) {
-                    if (item.getOriginalName() != null) {
-                        String imageUrl = SUPABASE_BASE + item.getOriginalName();
+                    if (item.getFilePath() != null) {
+                        String imageUrl = item.getFilePath();
                         
                         try {
                             byte[] imageBytes = restTemplate.getForObject(imageUrl, byte[].class);
                             if (imageBytes != null) {
-                                zos.putNextEntry(new ZipEntry("images/" + item.getOriginalName()));
+                                String entryName = item.getOriginalName() != null ? item.getOriginalName() : "image_" + item.getImageId() + ".jpg";
+                                zos.putNextEntry(new ZipEntry("images/" + entryName));
                                 zos.write(imageBytes);
                                 zos.closeEntry();
                                 
                                 String cleanCaption = item.getCaptionText() != null ? item.getCaptionText().replace("\"", "\"\"") : "";
-                                csvContent.append("\"").append(item.getOriginalName()).append("\",\"")
+                                csvContent.append("\"").append(entryName).append("\",\"")
                                           .append(cleanCaption).append("\"\n");
                             }
                         } catch (Exception e) {

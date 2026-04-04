@@ -37,7 +37,7 @@ public class DatasetService {
     private final com.autocap.backend.repository.CaptionRepository captionRepository;
     private final com.autocap.backend.repository.ImageRepository imageRepository;
     
-    private static final String SUPABASE_STORAGE_BASE_URL = "https://mztbiewiqjnairxnurfk.supabase.co/storage/v1/object/public/Images/";
+
 
     /**
      * Returns the most recent datasets for a given user.
@@ -163,7 +163,7 @@ public class DatasetService {
                 .map(projection -> com.autocap.backend.dto.PublicCaptionSearchDto.builder()
                         .captionId(projection.getCaptionId())
                         .imageId(projection.getImageId())
-                        .imageUrl((projection.getOriginalName() != null) ? SUPABASE_STORAGE_BASE_URL + projection.getOriginalName() : null)
+                        .imageUrl(projection.getFilePath())
                         .captionText(projection.getCaptionText())
                         .similarityScore(projection.getSimilarityScore())
                         .isFlagged(projection.getIsFlagged())

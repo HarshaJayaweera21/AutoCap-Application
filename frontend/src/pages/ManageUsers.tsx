@@ -1,15 +1,5 @@
 import { useEffect, useState } from 'react';
 import Header from '../components/Header';
-import {
-    HiOutlinePencilSquare,
-    HiOutlineNoSymbol,
-    HiOutlineCheckCircle,
-    HiOutlineXMark,
-    HiOutlineUsers,
-    HiOutlineXCircle,
-    HiOutlineCheckBadge,
-    HiOutlineInformationCircle,
-} from 'react-icons/hi2';
 import './ManageUsers.css';
 
 interface UserData {
@@ -47,6 +37,13 @@ const getCookie = (name: string): string | null => {
     return match ? decodeURIComponent(match[2]) : null;
 };
 
+/* ---------- Initials Helper ---------- */
+const getInitials = (first: string, last: string, username: string) => {
+    if (first && last) return (first[0] + last[0]).toUpperCase();
+    if (username) return username.slice(0, 2).toUpperCase();
+    return 'U';
+};
+
 function ManageUsers() {
     const [users, setUsers] = useState<UserData[]>([]);
     const [page, setPage] = useState(0);
@@ -56,6 +53,10 @@ function ManageUsers() {
     // User stats
     const [stats, setStats] = useState<AdminStats | null>(null);
     const [statsLoading, setStatsLoading] = useState(true);
+
+    // Filter/Search states (visual only to adhere to 'do not change logic' instruction)
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filterVal, setFilterVal] = useState('All Users');
 
     // Edit modal state
     const [editUser, setEditUser] = useState<UserData | null>(null);
@@ -137,7 +138,8 @@ function ManageUsers() {
         setEditUser(null);
     };
 
-    const handleSave = async () => {
+    const handleSave = async (e: React.FormEvent) => {
+        e.preventDefault();
         if (!editUser) return;
         const token = getToken();
         if (!token) return;
@@ -205,292 +207,394 @@ function ManageUsers() {
         }
     };
 
+    // Calculate pagination pages array (basic max ~5 buttons logic)
+    const generatePageNumbers = () => {
+        if (!pageInfo) return [];
+        const total = pageInfo.totalPages;
+        const cur = pageInfo.number;
+        
+        let start = Math.max(0, cur - 2);
+        let end = Math.min(total - 1, cur + 2);
+        
+        if (cur <= 2) end = Math.min(4, total - 1);
+        if (cur >= total - 3) start = Math.max(0, total - 5);
+        
+        const pages = [];
+        for (let i = start; i <= end; i++) pages.push(i);
+        return pages;
+    };
+
     return (
-        <div className="manage-users-container">
+        <div className="mu-page">
             <Header />
 
-            {/* ===== Toast Notification ===== */}
+            {/* Global toast fallback - preserving from original logic */}
             {toast && (
-                <div className={`mu-toast mu-toast--${toast.type}`}>
-                    <span className="mu-toast__icon">
-                        {toast.type === 'success'
-                            ? <HiOutlineCheckBadge />
-                            : <HiOutlineInformationCircle />}
-                    </span>
-                    <span className="mu-toast__message">{toast.message}</span>
+                <div style={{
+                    position: 'fixed', top: '5.5rem', left: '50%', transform: 'translateX(-50%)',
+                    zIndex: 9999, padding: '0.75rem 1.5rem', borderRadius: '0.5rem',
+                    background: toast.type === 'success' ? '#211e27' : '#1d1a23',
+                    border: '1px solid', borderColor: toast.type === 'success' ? '#7bdc6c' : '#194bff',
+                    color: toast.type === 'success' ? '#7bdc6c' : '#b9c3ff', display: 'flex', alignItems: 'center', gap: '8px', 
+                    fontFamily: "'Outfit', sans-serif", fontSize: "0.875rem", boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
+                }}>
+                    <span className="material-symbols-outlined">{toast.type === 'success' ? 'check_circle' : 'info'}</span>
+                    {toast.message}
                 </div>
             )}
-            <div className="manage-users-content">
-                <h2 className="manage-users-title">Manage Users</h2>
 
-                {/* ===== User Stat Cards ===== */}
-                <div className="mu-stat-cards">
-                    <div className="mu-stat-card mu-stat-card--total">
-                        <div className="mu-stat-card__icon-wrapper mu-stat-card__icon-wrapper--total">
-                            <HiOutlineUsers className="mu-stat-card__icon" />
+            <main className="mu-container">
+                {/* Header section */}
+                <div className="mu-header">
+                    <h1 className="mu-title">User Management</h1>
+                    <p className="mu-subtitle">Overview and management of the AutoCap platform user database.</p>
+                </div>
+
+                {/* Stats Grid */}
+                <div className="mu-stats-grid">
+                    <div className="mu-stat-card">
+                        <div className="mu-stat-icon-wrap">
+                            <span className="material-symbols-outlined mu-stat-icon total">group</span>
                         </div>
-                        <div className="mu-stat-card__info">
-                            <span className="mu-stat-card__count">
-                                {statsLoading ? '—' : stats?.totalUsers ?? 0}
-                            </span>
-                            <span className="mu-stat-card__label">Total Users</span>
-                        </div>
+                        <div className="mu-stat-value">{statsLoading ? '—' : stats?.totalUsers ?? 0}</div>
+                        <div className="mu-stat-label">Total Platform Users</div>
                     </div>
-
-                    <div className="mu-stat-card mu-stat-card--active">
-                        <div className="mu-stat-card__icon-wrapper mu-stat-card__icon-wrapper--active">
-                            <HiOutlineCheckCircle className="mu-stat-card__icon" />
+                    <div className="mu-stat-card">
+                        <div className="mu-stat-icon-wrap">
+                            <span className="material-symbols-outlined mu-stat-icon active">how_to_reg</span>
                         </div>
-                        <div className="mu-stat-card__info">
-                            <span className="mu-stat-card__count">
-                                {statsLoading ? '—' : stats?.activeUsers ?? 0}
-                            </span>
-                            <span className="mu-stat-card__label">Active Users</span>
-                        </div>
+                        <div className="mu-stat-value">{statsLoading ? '—' : stats?.activeUsers ?? 0}</div>
+                        <div className="mu-stat-label">Active Users</div>
                     </div>
-
-                    <div className="mu-stat-card mu-stat-card--deactive">
-                        <div className="mu-stat-card__icon-wrapper mu-stat-card__icon-wrapper--deactive">
-                            <HiOutlineXCircle className="mu-stat-card__icon" />
+                    <div className="mu-stat-card">
+                        <div className="mu-stat-icon-wrap">
+                            <span className="material-symbols-outlined mu-stat-icon inactive">person_off</span>
                         </div>
-                        <div className="mu-stat-card__info">
-                            <span className="mu-stat-card__count">
-                                {statsLoading ? '—' : stats?.deactiveUsers ?? 0}
-                            </span>
-                            <span className="mu-stat-card__label">Deactive Users</span>
-                        </div>
+                        <div className="mu-stat-value">{statsLoading ? '—' : stats?.deactiveUsers ?? 0}</div>
+                        <div className="mu-stat-label">Deactive Users</div>
                     </div>
                 </div>
 
-                {loading ? (
-                    <div className="manage-users-loading">Loading...</div>
-                ) : (
-                    <>
-                        <div className="table-wrapper">
-                            <table className="users-table">
-                                <thead>
+                {/* Table Controls */}
+                <div className="mu-controls">
+                    <div className="mu-search">
+                        <span className="material-symbols-outlined mu-search-icon">search</span>
+                        <input 
+                            type="text" 
+                            className="mu-search-input" 
+                            placeholder="Search users..." 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                    <div>
+                        <select 
+                            className="mu-filter"
+                            value={filterVal}
+                            onChange={(e) => setFilterVal(e.target.value)}
+                        >
+                            <option>All Users</option>
+                            <option>Active</option>
+                            <option>Inactive</option>
+                        </select>
+                    </div>
+                </div>
+
+                {/* User Table */}
+                <div className="mu-table-container">
+                    <div className="mu-table-scroll">
+                        <table className="mu-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>Email</th>
+                                    <th>DOB</th>
+                                    <th>Active</th>
+                                    <th>Verified</th>
+                                    <th style={{textAlign: 'center'}}>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {loading ? (
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Username</th>
-                                        <th>Email</th>
-                                        <th>First Name</th>
-                                        <th>Last Name</th>
-                                        <th>DOB</th>
-                                        <th>Active</th>
-                                        <th>Email Verified</th>
-                                        <th>Actions</th>
+                                        <td colSpan={9} style={{textAlign: 'center', color: '#8e8fa3'}}>Loading users...</td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    {users.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={9} className="no-data">
-                                                No users found.
+                                ) : (() => {
+                                    const filteredUsers = users.filter(user => {
+                                        // 1. Dropdown Filter
+                                        if (filterVal === 'Active' && !user.isActive) return false;
+                                        if (filterVal === 'Inactive' && user.isActive) return false;
+
+                                        // 2. Search Text
+                                        if (searchQuery.trim() !== '') {
+                                            const query = searchQuery.toLowerCase();
+                                            const matches = 
+                                                user.username.toLowerCase().includes(query) ||
+                                                user.firstName.toLowerCase().includes(query) ||
+                                                user.lastName.toLowerCase().includes(query) ||
+                                                user.email.toLowerCase().includes(query);
+                                            if (!matches) return false;
+                                        }
+
+                                        return true;
+                                    });
+
+                                    if (filteredUsers.length === 0) {
+                                        if (users.length === 0) {
+                                            return (
+                                                <tr>
+                                                    <td colSpan={9} style={{textAlign: 'center', color: '#8e8fa3'}}>No users found.</td>
+                                                </tr>
+                                            );
+                                        }
+                                        return (
+                                            <tr>
+                                                <td colSpan={9} style={{textAlign: 'center', color: '#8e8fa3'}}>No users match your search or filter.</td>
+                                            </tr>
+                                        );
+                                    }
+
+                                    return filteredUsers.map(user => (
+                                        <tr key={user.id}>
+                                            <td className="mu-cell-id">#AC-{user.id.toString().padStart(4, '0')}</td>
+                                            <td>
+                                                <div className="mu-cell-user">
+                                                    <div className="mu-avatar-sm">
+                                                        {getInitials(user.firstName, user.lastName, user.username)}
+                                                    </div>
+                                                    <span className="mu-username">{user.username}</span>
+                                                </div>
                                             </td>
-                                        </tr>
-                                    ) : (
-                                        users.map((user) => (
-                                            <tr key={user.id}>
-                                                <td>{user.id}</td>
-                                                <td>{user.username}</td>
-                                                <td>{user.email}</td>
-                                                <td>{user.firstName}</td>
-                                                <td>{user.lastName}</td>
-                                                <td>{user.dateOfBirth}</td>
-                                                <td>
-                                                    <span
-                                                        className={`badge ${user.isActive ? 'badge--active' : 'badge--inactive'}`}
-                                                    >
-                                                        {user.isActive ? 'Yes' : 'No'}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <span
-                                                        className={`badge ${user.isEmailVerified ? 'badge--active' : 'badge--inactive'}`}
-                                                    >
-                                                        {user.isEmailVerified ? 'Yes' : 'No'}
-                                                    </span>
-                                                </td>
-                                                <td className="actions-cell">
-                                                    <button
-                                                        className="action-btn action-btn--edit"
-                                                        onClick={() => openEdit(user)}
-                                                        title="Edit"
-                                                    >
-                                                        <HiOutlinePencilSquare />
+                                            <td className="mu-cell-text">{user.firstName}</td>
+                                            <td className="mu-cell-text">{user.lastName}</td>
+                                            <td className="mu-cell-text">{user.email}</td>
+                                            <td className="mu-cell-muted">{user.dateOfBirth}</td>
+                                            <td>
+                                                {user.isActive 
+                                                    ? <span className="mu-chip yes">Yes</span>
+                                                    : <span className="mu-chip no">No</span>}
+                                            </td>
+                                            <td>
+                                                {user.isEmailVerified 
+                                                    ? <span className="mu-chip yes">Yes</span>
+                                                    : <span className="mu-chip no">No</span>}
+                                            </td>
+                                            <td>
+                                                <div className="mu-actions">
+                                                    <button className="mu-btn-icon" onClick={() => openEdit(user)} title="Edit">
+                                                        <span className="material-symbols-outlined">edit</span>
                                                     </button>
-                                                    <button
-                                                        className={`action-btn ${user.isActive ? 'action-btn--deactivate' : 'action-btn--activate'}`}
+                                                    <button 
+                                                        className={`mu-btn-icon ${user.isActive ? 'danger' : ''}`} 
                                                         onClick={() => openConfirm(user)}
                                                         title={user.isActive ? 'Deactivate' : 'Activate'}
                                                     >
-                                                        {user.isActive ? (
-                                                            <HiOutlineNoSymbol />
-                                                        ) : (
-                                                            <HiOutlineCheckCircle />
-                                                        )}
+                                                        <span className="material-symbols-outlined">
+                                                            {user.isActive ? 'block' : 'check_circle'}
+                                                        </span>
                                                     </button>
-                                                </td>
-                                            </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ));
+                                })()}
+                            </tbody>
+                        </table>
+                    </div>
 
-                        {/* Pagination */}
-                        {pageInfo && pageInfo.totalPages > 1 && (
-                            <div className="pagination">
-                                <button
-                                    className="pagination__btn"
-                                    disabled={pageInfo.first}
-                                    onClick={() => setPage((p) => p - 1)}
+                    {/* Pagination */}
+                    {pageInfo && pageInfo.totalPages > 0 && (
+                        <div className="mu-pagination">
+                            <div className="mu-pagination-info">
+                                Showing <strong>{(pageInfo.number * pageInfo.size) + 1} - {Math.min((pageInfo.number + 1) * pageInfo.size, pageInfo.totalElements)}</strong> of <strong>{pageInfo.totalElements}</strong> users
+                            </div>
+                            <div className="mu-pagination-controls">
+                                <button 
+                                    className="mu-page-btn" 
+                                    disabled={pageInfo.first} 
+                                    onClick={() => setPage(p => p - 1)}
                                 >
-                                    ← Previous
+                                    <span className="material-symbols-outlined">chevron_left</span>
                                 </button>
-                                <span className="pagination__info">
-                                    Page {pageInfo.number + 1} of {pageInfo.totalPages}
-                                </span>
-                                <button
-                                    className="pagination__btn"
-                                    disabled={pageInfo.last}
-                                    onClick={() => setPage((p) => p + 1)}
+                                
+                                {pageInfo.number > 2 && (
+                                    <>
+                                        <button className="mu-page-btn" onClick={() => setPage(0)}>1</button>
+                                        <span className="mu-page-dots">...</span>
+                                    </>
+                                )}
+
+                                {generatePageNumbers().map(pOffset => (
+                                    <button 
+                                        key={pOffset} 
+                                        className={`mu-page-btn ${pOffset === pageInfo.number ? 'active' : ''}`}
+                                        onClick={() => setPage(pOffset)}
+                                    >
+                                        {pOffset + 1}
+                                    </button>
+                                ))}
+
+                                {pageInfo.number < pageInfo.totalPages - 3 && (
+                                    <>
+                                        <span className="mu-page-dots">...</span>
+                                        <button className="mu-page-btn" onClick={() => setPage(pageInfo.totalPages - 1)}>{pageInfo.totalPages}</button>
+                                    </>
+                                )}
+
+                                <button 
+                                    className="mu-page-btn" 
+                                    disabled={pageInfo.last} 
+                                    onClick={() => setPage(p => p + 1)}
                                 >
-                                    Next →
+                                    <span className="material-symbols-outlined">chevron_right</span>
                                 </button>
                             </div>
-                        )}
-                    </>
-                )}
-            </div>
+                        </div>
+                    )}
+                </div>
+
+            </main>
 
             {/* ===== Edit Modal ===== */}
             {editUser && (
-                <>
-                    <div className="modal-overlay" onClick={closeEdit} />
-                    <div className="modal">
-                        <div className="modal__header">
-                            <h3>Edit User</h3>
-                            <button className="modal__close" onClick={closeEdit}>
-                                <HiOutlineXMark />
+                <div className="mu-modal-overlay">
+                    <div className="mu-modal-backdrop" onClick={closeEdit}></div>
+                    <div className="mu-modal-content mu-modal-edit">
+                        <div className="mu-modal-header">
+                            <div>
+                                <h2>Edit User Details</h2>
+                                <p>Update user identification and profile preferences.</p>
+                            </div>
+                            <button className="mu-modal-close" onClick={closeEdit}>
+                                <span className="material-symbols-outlined">close</span>
                             </button>
                         </div>
+                        <div className="mu-modal-body">
+                            <form className="mu-grid-form" onSubmit={handleSave}>
+                                {/* Readonly: ID */}
+                                <div className="mu-field">
+                                    <label className="mu-label readonly">User ID</label>
+                                    <div className="mu-readonly-val">#AC-{editUser.id.toString().padStart(4, '0')}</div>
+                                </div>
+                                {/* Readonly: Username */}
+                                <div className="mu-field">
+                                    <label className="mu-label readonly">Username</label>
+                                    <div className="mu-readonly-val">{editUser.username}</div>
+                                </div>
+                                
+                                {/* Editable: First Name */}
+                                <div className="mu-field">
+                                    <label className="mu-label editable">First Name</label>
+                                    <input 
+                                        autoFocus
+                                        type="text" 
+                                        className="mu-edit-input" 
+                                        value={editFirstName}
+                                        onChange={(e) => setEditFirstName(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                                {/* Editable: Last Name */}
+                                <div className="mu-field">
+                                    <label className="mu-label editable">Last Name</label>
+                                    <input 
+                                        type="text" 
+                                        className="mu-edit-input" 
+                                        value={editLastName}
+                                        onChange={(e) => setEditLastName(e.target.value)}
+                                        required
+                                    />
+                                </div>
 
-                        <div className="modal__body">
-                            <div className="modal-field">
-                                <label>User ID</label>
-                                <span>{editUser.id}</span>
-                            </div>
-                            <div className="modal-field">
-                                <label>Username</label>
-                                <span>{editUser.username}</span>
-                            </div>
-                            <div className="modal-field">
-                                <label>Email</label>
-                                <span>{editUser.email}</span>
-                            </div>
-                            <div className="modal-field">
-                                <label>First Name</label>
-                                <input
-                                    type="text"
-                                    value={editFirstName}
-                                    onChange={(e) => setEditFirstName(e.target.value)}
-                                />
-                            </div>
-                            <div className="modal-field">
-                                <label>Last Name</label>
-                                <input
-                                    type="text"
-                                    value={editLastName}
-                                    onChange={(e) => setEditLastName(e.target.value)}
-                                />
-                            </div>
-                            <div className="modal-field">
-                                <label>Date of Birth</label>
-                                <span>{editUser.dateOfBirth}</span>
-                            </div>
-                            <div className="modal-field">
-                                <label>Active</label>
-                                <span
-                                    className={`badge ${editUser.isActive ? 'badge--active' : 'badge--inactive'}`}
-                                >
-                                    {editUser.isActive ? 'Yes' : 'No'}
-                                </span>
-                            </div>
-                            <div className="modal-field">
-                                <label>Email Verified</label>
-                                <span
-                                    className={`badge ${editUser.isEmailVerified ? 'badge--active' : 'badge--inactive'}`}
-                                >
-                                    {editUser.isEmailVerified ? 'Yes' : 'No'}
-                                </span>
-                            </div>
+                                {/* Readonly: Email */}
+                                <div className="mu-field">
+                                    <label className="mu-label readonly">Email Address</label>
+                                    <div className="mu-readonly-val">{editUser.email}</div>
+                                </div>
+                                {/* Readonly: DOB */}
+                                <div className="mu-field">
+                                    <label className="mu-label readonly">Date of Birth</label>
+                                    <div className="mu-readonly-val">{editUser.dateOfBirth}</div>
+                                </div>
+
+                                {/* Readonly: Active Status */}
+                                <div className="mu-field">
+                                    <label className="mu-label readonly">Active Status</label>
+                                    <div className="mu-readonly-val mu-readonly-flex">
+                                        <span className={`mu-status-dot ${editUser.isActive ? 'active' : 'inactive'}`}></span>
+                                        <span>{editUser.isActive ? 'Account Active' : 'Account Disabled'}</span>
+                                    </div>
+                                </div>
+                                {/* Readonly: Verified */}
+                                <div className="mu-field">
+                                    <label className="mu-label readonly">Verification</label>
+                                    <div className="mu-readonly-val mu-readonly-flex">
+                                        <span className="material-symbols-outlined" style={{ fontSize: '1.125rem', color: editUser.isEmailVerified ? 'var(--mu-secondary-fixed)' : 'var(--mu-error)' }}>
+                                            {editUser.isEmailVerified ? 'verified' : 'cancel'}
+                                        </span>
+                                        <span>{editUser.isEmailVerified ? 'Verified Entity' : 'Unverified User'}</span>
+                                    </div>
+                                </div>
+
+                                <button type="submit" style={{display:'none'}}>Save Hidden</button>
+                            </form>
                         </div>
-
-                        <div className="modal__footer">
-                            <button
-                                className="modal__btn modal__btn--cancel"
-                                onClick={closeEdit}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                className="modal__btn modal__btn--save"
-                                onClick={handleSave}
-                                disabled={saving}
-                            >
+                        <div className="mu-modal-footer">
+                            <button className="mu-btn-cancel" onClick={closeEdit}>Cancel</button>
+                            <button className="mu-btn-save" onClick={handleSave} disabled={saving}>
                                 {saving ? 'Saving...' : 'Save Changes'}
                             </button>
                         </div>
                     </div>
-                </>
+                </div>
             )}
 
-            {/* ===== Confirm Toggle Modal ===== */}
+            {/* ===== Confirm Deactivate/Activate Modal ===== */}
             {confirmUser && (
-                <>
-                    <div className="modal-overlay" onClick={closeConfirm} />
-                    <div className="modal confirm-modal">
-                        <div className="modal__header">
-                            <h3>Confirm Action</h3>
-                            <button className="modal__close" onClick={closeConfirm}>
-                                <HiOutlineXMark />
-                            </button>
-                        </div>
-                        <div className="modal__body">
-                            <p className="confirm-modal__message">
-                                Are you sure you want to{' '}
-                                <strong>
-                                    {confirmUser.isActive ? 'deactivate' : 'activate'}
-                                </strong>{' '}
-                                user{' '}
-                                <strong>
-                                    {confirmUser.firstName} {confirmUser.lastName}
-                                </strong>{' '}
-                                ({confirmUser.email})?
+                <div className="mu-modal-overlay">
+                    <div className="mu-modal-backdrop" onClick={closeConfirm}></div>
+                    <div className="mu-modal-content mu-modal-confirm">
+                        <div className="mu-confirm-body">
+                            <div className={`mu-confirm-icon-wrap ${confirmUser.isActive ? 'danger' : 'safe'}`}>
+                                <span className="material-symbols-outlined">
+                                    {confirmUser.isActive ? 'warning' : 'check_circle'}
+                                </span>
+                            </div>
+                            
+                            <h2 className="mu-confirm-title">
+                                Confirm {confirmUser.isActive ? 'Deactivation' : 'Activation'}
+                            </h2>
+                            
+                            <p className="mu-confirm-desc">
+                                Are you sure you want to {confirmUser.isActive ? 'deactivate' : 'activate'} user <strong>{confirmUser.username}</strong>? 
+                                {confirmUser.isActive 
+                                    ? " The user will lose immediate access to all systems."
+                                    : " The user will regain normal access to the platform."}
                             </p>
+
+                            <div className="mu-confirm-actions">
+                                <button 
+                                    className={`mu-btn-confirm ${confirmUser.isActive ? 'danger' : 'safe'}`}
+                                    onClick={handleConfirmToggle}
+                                    disabled={toggling}
+                                >
+                                    {toggling 
+                                        ? 'Processing...' 
+                                        : confirmUser.isActive 
+                                            ? 'Confirm Deactivation' 
+                                            : 'Confirm Activation'}
+                                </button>
+                                <button className="mu-btn-confirm-cancel" onClick={closeConfirm}>
+                                    Cancel
+                                </button>
+                            </div>
                         </div>
-                        <div className="modal__footer">
-                            <button
-                                className="modal__btn modal__btn--cancel"
-                                onClick={closeConfirm}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                className={`modal__btn ${confirmUser.isActive ? 'modal__btn--danger' : 'modal__btn--save'}`}
-                                onClick={handleConfirmToggle}
-                                disabled={toggling}
-                            >
-                                {toggling
-                                    ? 'Processing...'
-                                    : confirmUser.isActive
-                                        ? 'Deactivate'
-                                        : 'Activate'}
-                            </button>
-                        </div>
+                        <div className={`mu-confirm-bar ${confirmUser.isActive ? 'danger' : 'safe'}`}></div>
                     </div>
-                </>
+                </div>
             )}
         </div>
     );

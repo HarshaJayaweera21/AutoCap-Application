@@ -15,20 +15,14 @@ public class PublicSearchService {
 
     private final CaptionRepository captionRepository;
     
-    private static final String SUPABASE_STORAGE_BASE_URL = "https://mztbiewiqjnairxnurfk.supabase.co/storage/v1/object/public/Images/";
-
     public PagedResponse<PublicCaptionSearchDto> searchPublicCaptions(String query, Pageable pageable) {
         Page<PublicCaptionSearchProjection> projectionPage = captionRepository.searchPublicCaptions(query, pageable);
         
         Page<PublicCaptionSearchDto> dtoPage = projectionPage.map(projection -> {
-            String imageUrl = null;
-            if (projection.getOriginalName() != null) {
-                imageUrl = SUPABASE_STORAGE_BASE_URL + projection.getOriginalName();
-            }
             return PublicCaptionSearchDto.builder()
                     .captionId(projection.getCaptionId())
                     .imageId(projection.getImageId())
-                    .imageUrl(imageUrl)
+                    .imageUrl(projection.getFilePath())
                     .captionText(projection.getCaptionText())
                     .similarityScore(projection.getSimilarityScore())
                     .isFlagged(projection.getIsFlagged())
