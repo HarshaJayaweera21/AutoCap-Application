@@ -3,6 +3,7 @@ import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell,
 } from 'recharts';
+import { useTheme } from '../../../context/ThemeContext';
 import styles from './DashboardCharts.module.css';
 
 /* ─── Types ──────────────────────────────────────────────────── */
@@ -24,6 +25,9 @@ interface DatasetTrendsChartProps {
 
 export const DatasetTrendsChart: React.FC<DatasetTrendsChartProps> = ({ datasets }) => {
   const [timeRange, setTimeRange] = useState<'7D' | '30D'>('7D');
+  const { theme } = useTheme();
+
+  const isLight = theme === 'light';
 
   const chartData = useMemo(() => {
     const days = timeRange === '7D' ? 7 : 30;
@@ -104,20 +108,21 @@ export const DatasetTrendsChart: React.FC<DatasetTrendsChartProps> = ({ datasets
               dataKey="label"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: '#98979d', fontSize: 11, fontFamily: 'Outfit' }}
+              tick={{ fill: isLight ? '#64748b' : '#98979d', fontSize: 11, fontFamily: 'Outfit' }}
               minTickGap={timeRange === '30D' ? 15 : 0}
             />
             <YAxis hide />
             <Tooltip
               contentStyle={{
-                background: '#1f1e29',
-                border: '1px solid #3e3e47',
+                background: isLight ? '#ffffff' : '#1f1e29',
+                border: `1px solid ${isLight ? 'rgba(0,0,0,0.1)' : '#3e3e47'}`,
                 borderRadius: '8px',
-                color: '#f6f6f6',
+                color: isLight ? '#0f172a' : '#f6f6f6',
                 fontSize: '13px',
                 fontFamily: 'Outfit',
+                boxShadow: isLight ? '0 4px 12px rgba(0,0,0,0.1)' : 'none',
               }}
-              cursor={{ stroke: 'rgba(255,255,255,0.06)', strokeWidth: 1, strokeDasharray: '4 4' }}
+              cursor={{ stroke: isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.06)', strokeWidth: 1, strokeDasharray: '4 4' }}
               labelFormatter={(label) => timeRange === '7D' ? label : label}
               formatter={(value: number | undefined) => [`${value?.toLocaleString() || 0} images`, 'Processed']}
             />
@@ -128,7 +133,7 @@ export const DatasetTrendsChart: React.FC<DatasetTrendsChartProps> = ({ datasets
               strokeWidth={3}
               fillOpacity={1} 
               fill="url(#colorCount)" 
-              activeDot={{ r: 6, fill: '#6b7cff', stroke: '#1f1e29', strokeWidth: 2 }}
+              activeDot={{ r: 6, fill: '#6b7cff', stroke: isLight ? '#ffffff' : '#1f1e29', strokeWidth: 2 }}
             />
           </AreaChart>
         </ResponsiveContainer>
@@ -143,9 +148,13 @@ interface ModelDistributionChartProps {
   datasets: DatasetInfo[];
 }
 
-const DONUT_COLORS = ['#6b7cff', '#ffb74d', '#4fc3f7', '#81c784'];
+const DONUT_COLORS_DARK = ['#6b7cff', '#ffb74d', '#4fc3f7', '#81c784'];
+const DONUT_COLORS_LIGHT = ['#2563eb', '#ea580c', '#0891b2', '#059669'];
 
 export const ModelDistributionChart: React.FC<ModelDistributionChartProps> = ({ datasets }) => {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
+  const colors = isLight ? DONUT_COLORS_LIGHT : DONUT_COLORS_DARK;
   // Count datasets per model
   const modelCounts: Record<string, number> = {};
   datasets.forEach((ds) => {
@@ -180,7 +189,7 @@ export const ModelDistributionChart: React.FC<ModelDistributionChartProps> = ({ 
               stroke="none"
             >
               {data.map((_, index) => (
-                <Cell key={`cell-${index}`} fill={DONUT_COLORS[index % DONUT_COLORS.length]} />
+                <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
               ))}
             </Pie>
           </PieChart>
@@ -193,7 +202,7 @@ export const ModelDistributionChart: React.FC<ModelDistributionChartProps> = ({ 
       <div className={styles.legendRow}>
         {data.map((entry, i) => (
           <span key={entry.name} className={styles.legendItem}>
-            <span className={styles.legendDot} style={{ background: DONUT_COLORS[i % DONUT_COLORS.length] }} />
+            <span className={styles.legendDot} style={{ background: colors[i % colors.length] }} />
             {entry.name === 'caption_model' ? 'AutoCap' : entry.name === 'base_line_model' ? 'Baseline' : entry.name}
           </span>
         ))}

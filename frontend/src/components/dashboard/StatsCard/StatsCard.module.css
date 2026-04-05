@@ -117,3 +117,37 @@
   border-color: var(--accent);
   box-shadow: 0 0 15px rgba(216, 238, 16, 0.25);
 }
+
+/* Light Mode Overrides */
+:global(body.light) .card {
+  box-shadow: var(--shadow-sm);
+}
+
+:global(body.light) .card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+:global(body.light) .icon_primary {
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--primary);
+}
+
+:global(body.light) .icon_accent {
+  background: rgba(101, 163, 13, 0.12); 
+  color: var(--accent);
+}
+
+:global(body.light) .icon_success {
+  background: rgba(5, 150, 105, 0.1);
+  color: var(--success);
+}
+
+:global(body.light) .badge_default {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text-muted);
+}
+
+:global(body.light) .badge_info {
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--primary);
+}

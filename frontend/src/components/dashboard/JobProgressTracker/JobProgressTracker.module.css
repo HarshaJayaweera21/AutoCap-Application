@@ -156,3 +156,39 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Light Mode Overrides */
+:global(body.light) .pipelineBlock {
+  box-shadow: var(--shadow-sm);
+}
+
+:global(body.light) .blockActive {
+  background: rgba(37, 99, 235, 0.08);
+  box-shadow: 0 0 15px rgba(37, 99, 235, 0.1);
+}
+
+:global(body.light) .blockCompleted {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+:global(body.light) .statCard {
+  box-shadow: var(--shadow-sm);
+}
+
+:global(body.light) .liveScore {
+  text-shadow: none;
+  color: #0369a1; /* Deeper Cyan for crisp visibility */
+  font-weight: var(--weight-semibold);
+}
+
+:global(body.light) .pulsingGlow {
+  animation: none;
+}
+
+:global(body.light) .statLabel {
+  color: var(--text-secondary);
+}
+
+:global(body.light) .statSubtext {
+  color: var(--text-muted);
+}

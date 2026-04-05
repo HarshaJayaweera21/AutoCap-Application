@@ -673,6 +673,55 @@
 }
 
 /* =====================
+    Light Theme Specific Overrides
+   ===================== */
+:global(body.light) .dsTableRow:hover:not(.dsTableHeader) {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+:global(body.light) .dsScoreFill {
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+}
+
+:global(body.light) .wizardStepActive .wizardStepIcon {
+  box-shadow: 0 0 10px rgba(37, 99, 235, 0.1);
+}
+
+:global(body.light) .summaryBox {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+:global(body.light) .summaryThumbMore {
+  background: rgba(37, 99, 235, 0.05);
+}
+
+:global(body.light) .uploadError {
+  background: rgba(220, 38, 38, 0.05);
+}
+
+:global(body.light) .jobProgressBar {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+:global(body.light) .jobStageStatusActive {
+  color: var(--primary-dark);
+}
+
+:global(body.light) .viewAllLink:hover {
+  color: var(--primary-dark);
+}
+
+:global(body.light) .dsActionBtn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+:global(body.light) .jobMonitorCard,
+:global(body.light) .recentDatasetsCard,
+:global(body.light) .createFormCard {
+  box-shadow: var(--shadow-md);
+}
+
+/* =====================
    Entrance Animation
    ===================== */
 .fadeIn {

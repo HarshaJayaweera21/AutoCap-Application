@@ -117,7 +117,61 @@
   --grad-dark: linear-gradient(135deg, #646464, #292929, #111112, #1b1b1b);
   --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.3);
   --shadow-glow: 0 0 15px rgba(25, 75, 255, 0.3);
+  --shadow-glow: 0 0 15px rgba(25, 75, 255, 0.3);
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===========================
+   Light Theme Tokens
+   =========================== */
+body.light {
+  /* Backgrounds */
+  --bg-base: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-elevated: #f1f5f9;
+
+  /* Borders */
+  --border-default: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.15);
+
+  /* Primary Accent — Blue (slightly more saturated for light mode) */
+  --primary: #2563eb;
+  --primary-light: #3b82f6;
+  --primary-lighter: #60a5fa;
+  --primary-dark: #1d4ed8;
+
+  /* Text */
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --text-placeholder: #94a3b8;
+
+  /* Semantic (High Contrast for Light Mode) */
+  --success: #059669;
+  --error: #dc2626;
+  --accent: #65a30d;
+
+  /* Radius & Shadows (Softer for light mode) */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+  --shadow-glow-primary: 0 0 15px rgba(37, 99, 235, 0.15);
+  
+  /* Resetting color-scheme for scrollbars etc */
+  color-scheme: light;
+}
+
+/* Fix for primary button text color in light mode */
+body.light .btn-primary {
+  color: #ffffff;
+}
+
+body.light .text-success {
+  color: #059669;
+}
+
+body.light .text-error {
+  color: #dc2626;
 }
 
 /* ===========================
