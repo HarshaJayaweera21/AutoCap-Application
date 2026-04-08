@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
-import { HiOutlineArrowDownTray, HiOutlineMagnifyingGlass, HiOutlineArrowsPointingOut } from 'react-icons/hi2';
-import { HiOutlineX } from 'react-icons/hi';
+import api from '../api/axiosInstance';
 import './SearchDatasets.css';
 
 /* ---------- cookie helpers ---------- */
@@ -19,7 +19,8 @@ interface SearchResult {
     isFlagged: boolean;
 }
 
-const SearchDatasets: React.FC = () => {
+export const SearchDatasets: React.FC = () => {
+    const [searchParams] = useSearchParams();
     const [query, setQuery] = useState('');
     const [results, setResults] = useState<SearchResult[]>([]);
     const [loading, setLoading] = useState(false);
@@ -36,6 +37,16 @@ const SearchDatasets: React.FC = () => {
     // Typing debounce reference
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+    // Initial query check from Landing Page override
+    useEffect(() => {
+        const urlQuery = searchParams.get('query');
+        if (urlQuery && urlQuery.trim() !== '') {
+            setQuery(urlQuery);
+            performSearch(urlQuery);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     const performSearch = async (searchQuery: string) => {
         if (!searchQuery.trim()) {
             setResults([]);
@@ -45,20 +56,13 @@ const SearchDatasets: React.FC = () => {
 
         setLoading(true);
         setSelectedIds(new Set());
-        const token = getCookie('token');
         try {
-            const response = await fetch(`http://localhost:8080/api/search/public-captions?query=${encodeURIComponent(searchQuery)}&size=20`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
+            const { data } = await api.get('/api/search/public-captions', {
+                params: {
+                    query: searchQuery,
+                    size: 20
                 }
             });
-
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-
-            const data = await response.json();
-            // Data is PagedResponse<PublicCaptionSearchDto>
             setResults(data.content || []);
         } catch (error) {
             console.error('Error fetching search results:', error);
@@ -91,6 +95,14 @@ const SearchDatasets: React.FC = () => {
             }
             return next;
         });
+    };
+
+    const handleSelectAll = () => {
+        if (selectedIds.size === results.length && results.length > 0) {
+            setSelectedIds(new Set());
+        } else {
+            setSelectedIds(new Set(results.map(r => r.captionId)));
+        }
     };
 
     const handleExport = async () => {
@@ -213,147 +225,182 @@ const SearchDatasets: React.FC = () => {
     }, [exportJobId, isExporting]);
 
     return (
-        <div className="search-datasets">
+        <div className="mds-page">
             <Header />
-            <main className="search-datasets__main">
-                <div className="search-datasets__header">
-                    <div className="search-datasets__header-text">
-                        <h2>Search Public Datasets</h2>
-                        <p>Search via captions across all verified public datasets</p>
-                    </div>
+            <main className="mds-container">
+                <div className="mds-header" style={{ alignItems: 'center', textAlign: 'center' }}>
+                    <h2 className="mds-title">Search Results</h2>
+                    <p className="mds-subtitle">Explore unified public datasets matching your prompt mapping</p>
                 </div>
                 
-                <div className="search-datasets__search-box">
-                    <div className="search-datasets__search-input-wrapper">
-                        <HiOutlineMagnifyingGlass className="search-icon" />
+                <div className="mds-top-search">
+                    <div className="mds-top-search-input-wrap">
+                        <span className="material-symbols-outlined">search</span>
                         <input 
                             type="text" 
-                            placeholder="Search image captions (e.g. 'classrooms')..." 
+                            placeholder="Modify search criteria (e.g. 'classrooms')..." 
                             value={query}
                             onChange={handleSearchChange}
-                            className="search-datasets__input"
+                            className="mds-top-search-input"
                         />
+                    </div>
+                    <button 
+                        className="mds-top-search-btn"
+                        onClick={() => performSearch(query)}
+                    >
+                        Search
+                    </button>
+
+                    <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        {selectedIds.size > 0 && (
+                            <span style={{ fontSize: '0.875rem', color: 'var(--mds-outline)' }}>
+                                {selectedIds.size} selected
+                            </span>
+                        )}
                         <button 
-                            className="search-datasets__search-btn"
-                            onClick={() => performSearch(query)}
+                            className="mds-top-search-btn"
+                            style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: '0.5rem',
+                                opacity: selectedIds.size === 0 || isExporting ? 0.5 : 1,
+                                cursor: selectedIds.size === 0 || isExporting ? 'not-allowed' : 'pointer'
+                            }}
+                            onClick={handleExport}
+                            disabled={selectedIds.size === 0 || isExporting}
                         >
-                            Search
+                            <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>download</span>
+                            Export Selection
                         </button>
                     </div>
                 </div>
 
-                <div className="search-datasets__results-container">
-                    {loading && <div className="search-datasets__loading">Searching...</div>}
+                <div className="mds-table-wrapper">
+                    {loading && <div className="mds-empty">Querying public index...</div>}
                     {!loading && results.length === 0 && query.trim().length > 0 && (
-                        <div className="search-datasets__no-results">No matches found for "{query}"</div>
+                        <div className="mds-empty">No matches found for "{query}" across public datasets.</div>
                     )}
+                    {!loading && results.length === 0 && query.trim().length === 0 && (
+                        <div className="mds-empty">Please input a search query above.</div>
+                    )}
+                    
                     {!loading && results.length > 0 && (
-                        <table className="search-datasets__table">
-                            <thead>
-                                <tr>
-                                    <th>Select</th>
-                                    <th>Image</th>
-                                    <th>Caption</th>
-                                    <th>Similarity Score</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {results.map((result) => (
-                                    <tr 
-                                        key={result.captionId} 
-                                        className={selectedIds.has(result.captionId) ? 'selected-row' : ''}
-                                    >
-                                        <td>
+                        <div className="mds-table-scroll">
+                            <table className="mds-table">
+                                <thead>
+                                    <tr>
+                                        <th style={{ width: '40px' }}>
                                             <input 
                                                 type="checkbox" 
-                                                checked={selectedIds.has(result.captionId)}
-                                                onChange={() => handleSelectRow(result.captionId)}
-                                                className="search-datasets__checkbox"
+                                                className="mds-checkbox"
+                                                checked={selectedIds.size === results.length && results.length > 0}
+                                                onChange={handleSelectAll}
                                             />
-                                        </td>
-                                        <td>
-                                            {result.imageUrl ? (
-                                                <div 
-                                                    className="search-datasets__img-wrapper search-datasets__img--clickable"
-                                                    onClick={() => setPreviewImage(result.imageUrl)}
-                                                >
-                                                    <img 
-                                                        src={result.imageUrl} 
-                                                        alt="Dataset item" 
-                                                        className="search-datasets__img" 
-                                                    />
-                                                    <div className="search-datasets__img-overlay">
-                                                        <HiOutlineArrowsPointingOut />
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <div className="search-datasets__no-img">No Image</div>
-                                            )}
-                                        </td>
-                                        <td className="search-datasets__caption-text">
-                                            {result.captionText}
-                                        </td>
-                                        <td className="search-datasets__score">
-                                            {result.similarityScore !== null 
-                                                ? result.similarityScore.toFixed(3) 
-                                                : 'N/A'
-                                            }
-                                        </td>
-                                        <td>
-                                            {result.isFlagged ? (
-                                                <span className="search-datasets__flag flagged">Flagged</span>
-                                            ) : (
-                                                <span className="search-datasets__flag okay">Not Flagged</span>
-                                            )}
-                                        </td>
+                                        </th>
+                                        <th>Image</th>
+                                        <th>Caption Body</th>
+                                        <th style={{ width: '120px', textAlign: 'center' }}>Score</th>
+                                        <th style={{ width: '120px', textAlign: 'center' }}>Status</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {results.map((result) => {
+                                        const isSelected = selectedIds.has(result.captionId);
+                                        return (
+                                            <tr 
+                                                key={result.captionId} 
+                                                className={isSelected ? 'selected' : ''}
+                                            >
+                                                <td>
+                                                    <input 
+                                                        type="checkbox" 
+                                                        className="mds-checkbox"
+                                                        checked={isSelected}
+                                                        onChange={() => handleSelectRow(result.captionId)}
+                                                    />
+                                                </td>
+                                                <td>
+                                                    {result.imageUrl ? (
+                                                        <div 
+                                                            className="mds-img-wrapper"
+                                                            onClick={() => setPreviewImage(result.imageUrl as string)}
+                                                        >
+                                                            <img 
+                                                                src={result.imageUrl} 
+                                                                alt="Dataset item mapping" 
+                                                                onError={(e) => {
+                                                                    (e.target as HTMLImageElement).src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80" fill="%2336333c"><rect width="120" height="80"/></svg>';
+                                                                }}
+                                                            />
+                                                            <div className="mds-img-overlay">
+                                                                <span className="material-symbols-outlined">zoom_out_map</span>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="mds-no-img">No Image</div>
+                                                    )}
+                                                </td>
+                                                <td>
+                                                    <p className="mds-caption-text">{result.captionText}</p>
+                                                </td>
+                                                <td style={{ textAlign: 'center' }}>
+                                                    {result.similarityScore !== null ? (
+                                                        <span className="mds-score">{result.similarityScore.toFixed(3)}</span>
+                                                    ) : (
+                                                        <span className="mds-score" style={{ color: 'var(--mds-outline)' }}>—</span>
+                                                    )}
+                                                </td>
+                                                <td style={{ textAlign: 'center' }}>
+                                                    {result.isFlagged ? (
+                                                        <span className="mds-badge-flagged">Flagged</span>
+                                                    ) : (
+                                                        <span className="mds-badge-okay">Verified</span>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
                     )}
                 </div>
-                {selectedIds.size > 0 && (
-                    <div className="search-datasets__floating-export">
-                        <button 
-                            className="search-datasets__export-btn"
-                            onClick={handleExport}
-                        >
-                            <HiOutlineArrowDownTray className="btn-icon" />
-                            Export ({selectedIds.size})
-                        </button>
-                    </div>
-                )}
+
             </main>
 
+            {/* Sub-image popup preview overlay */}
             {previewImage && (
-                <div className="search-datasets__modal-overlay" onClick={() => setPreviewImage(null)}>
-                    <div className="search-datasets__modal-content" onClick={e => e.stopPropagation()}>
+                <div className="mds-modal-overlay" onClick={() => setPreviewImage(null)} style={{ zIndex: 3000 }}>
+                    <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
                         <button 
-                            className="search-datasets__modal-close" 
+                            className="mds-modal-close" 
+                            style={{ position: 'absolute', top: '-2.5rem', right: '0', color: '#fff', fontSize: '1.5rem' }}
                             onClick={() => setPreviewImage(null)}
-                            aria-label="Close"
                         >
-                            <HiOutlineX />
+                            <span className="material-symbols-outlined">close</span>
                         </button>
-                        <img src={previewImage} alt="Fullscreen preview" />
+                        <img src={previewImage} alt="Fullscreen image rendering" className="mds-preview-img" />
                     </div>
                 </div>
             )}
 
+            {/* ZIP Archiving Process Status Overlay */}
             {isExporting && (
-                <div className="search-datasets__modal-overlay">
-                    <div className="search-datasets__export-modal">
-                        <h3>Exporting Dataset</h3>
-                        <p>{exportMessage}</p>
-                        <div className="search-datasets__progress-bar-container">
+                <div className="mds-modal-overlay">
+                    <div className="mds-modal-backdrop"></div>
+                    <div className="mds-modal-export">
+                        <div>
+                            <h3>Extracting Records</h3>
+                            <p>{exportMessage}</p>
+                        </div>
+                        <div className="mds-progress-bar-container">
                             <div 
-                                className={`search-datasets__progress-bar ${exportStatus === 'FAILED' ? 'error' : ''}`}
-                                style={{ width: `${exportProgress}%` }}
+                                className={`mds-progress-bar ${exportStatus === 'FAILED' ? 'error' : ''}`}
+                                style={{ width: `${Math.max(5, exportProgress)}%` }} /* Minimum 5% to always show visual */
                             ></div>
                         </div>
-                        <div className="search-datasets__progress-text">
-                            {exportStatus === 'FAILED' ? 'Export Failed' : `${exportProgress}%`}
+                        <div className="mds-progress-text">
+                            {exportStatus === 'FAILED' ? 'Export Corrupted' : `${exportProgress}% Completed`}
                         </div>
                     </div>
                 </div>
