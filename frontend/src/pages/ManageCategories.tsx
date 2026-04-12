@@ -6,6 +6,7 @@ function ManageCategories() {
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [formError, setFormError] = useState('');
 
     // Form state
     const [showForm, setShowForm] = useState(false);
@@ -35,6 +36,7 @@ function ManageCategories() {
         setFormOrder(0);
         setShowForm(true);
         setError('');
+        setFormError('');
     };
 
     const openEdit = (cat: Category) => {
@@ -43,12 +45,40 @@ function ManageCategories() {
         setFormOrder(cat.orderIndex);
         setShowForm(true);
         setError('');
+        setFormError('');
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setSaving(true);
+        setFormError('');
         setError('');
+
+        // Validate name length
+        if (formName.trim().length === 0) {
+            setFormError('Category name is required.');
+            return;
+        }
+        if (formName.length > 100) {
+            setFormError('Category name cannot exceed 100 characters.');
+            return;
+        }
+
+        // Validate order range (0-99)
+        if (formOrder < 0 || formOrder >= 100) {
+            setFormError('Order must be between 0 and 99.');
+            return;
+        }
+
+        // Check for duplicate order index
+        const duplicateOrder = categories.find(
+            c => c.orderIndex === formOrder && (!editingCat || c.id !== editingCat.id)
+        );
+        if (duplicateOrder) {
+            setFormError(`Order ${formOrder} is already used by category "${duplicateOrder.name}". Please choose a different order.`);
+            return;
+        }
+
+        setSaving(true);
         try {
             if (editingCat) {
                 await adminUpdateCategory(editingCat.id, { name: formName, orderIndex: formOrder });
@@ -97,24 +127,38 @@ function ManageCategories() {
                     <h3 style={{ margin: 0, color: '#e0e0ff', fontSize: '1rem' }}>
                         {editingCat ? 'Edit Category' : 'Create Category'}
                     </h3>
+                    {formError && <div style={formErrorStyle}>{formError}</div>}
                     <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end' }}>
                         <div style={{ flex: 1 }}>
-                            <label style={labelStyle}>Name *</label>
+                            <label style={labelStyle}>Name * <span style={charCountStyle}>({formName.length}/100)</span></label>
                             <input
-                                style={inputStyle}
+                                style={{
+                                    ...inputStyle,
+                                    ...(formName.length > 100 ? { borderColor: '#ff6b6b' } : {}),
+                                }}
                                 value={formName}
-                                onChange={e => setFormName(e.target.value)}
+                                onChange={e => { setFormName(e.target.value); setFormError(''); }}
                                 placeholder="Category name"
+                                maxLength={100}
                                 required
                             />
                         </div>
                         <div style={{ width: '100px' }}>
                             <label style={labelStyle}>Order</label>
                             <input
-                                style={inputStyle}
+                                style={{
+                                    ...inputStyle,
+                                    ...(formOrder < 0 || formOrder >= 100 ? { borderColor: '#ff6b6b' } : {}),
+                                }}
                                 type="number"
+                                min={0}
+                                max={99}
                                 value={formOrder}
-                                onChange={e => setFormOrder(parseInt(e.target.value) || 0)}
+                                onChange={e => {
+                                    const val = parseInt(e.target.value);
+                                    setFormOrder(isNaN(val) ? 0 : val);
+                                    setFormError('');
+                                }}
                             />
                         </div>
                         <button type="submit" disabled={saving} style={submitBtnStyle}>
@@ -169,6 +213,23 @@ const errorStyle: React.CSSProperties = {
     borderRadius: '6px',
     fontSize: '0.85rem',
     marginBottom: '1rem',
+};
+
+const formErrorStyle: React.CSSProperties = {
+    background: 'rgba(255,80,80,0.1)',
+    border: '1px solid rgba(255,80,80,0.3)',
+    color: '#ff6b6b',
+    padding: '0.5rem 0.75rem',
+    borderRadius: '6px',
+    fontSize: '0.82rem',
+};
+
+const charCountStyle: React.CSSProperties = {
+    fontSize: '0.7rem',
+    fontWeight: 400,
+    color: 'rgba(255,255,255,0.35)',
+    textTransform: 'none',
+    letterSpacing: 'normal',
 };
 
 const formStyle: React.CSSProperties = {

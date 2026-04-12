@@ -9,11 +9,12 @@ interface Tag {
 
 interface DocFormProps {
     doc?: Doc;                    // if provided → edit mode
+    existingDocs?: Doc[];          // all docs for duplicate order check
     onSaved: () => void;         // callback after successful save
     onCancel: () => void;        // callback to close form
 }
 
-function DocForm({ doc, onSaved, onCancel }: DocFormProps) {
+function DocForm({ doc, existingDocs = [], onSaved, onCancel }: DocFormProps) {
     const isEdit = !!doc;
 
     const [title, setTitle] = useState(doc?.title || '');
@@ -59,6 +60,50 @@ function DocForm({ doc, onSaved, onCancel }: DocFormProps) {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+
+        // Validate title length
+        if (title.trim().length === 0) {
+            setError('Title is required.');
+            return;
+        }
+        if (title.length > 100) {
+            setError('Title cannot exceed 100 characters.');
+            return;
+        }
+
+        // Validate slug length
+        if (slug.trim().length === 0) {
+            setError('Slug is required.');
+            return;
+        }
+        if (slug.length > 100) {
+            setError('Slug cannot exceed 100 characters.');
+            return;
+        }
+
+        // Validate endpoint length (optional but if provided, max 100)
+        if (endpoint.length > 100) {
+            setError('Endpoint cannot exceed 100 characters.');
+            return;
+        }
+
+        // Validate order range (0-99)
+        if (orderIndex < 0 || orderIndex >= 100) {
+            setError('Order must be between 0 and 99.');
+            return;
+        }
+
+        // Check for duplicate order index within same category
+        if (categoryId) {
+            const duplicateOrder = existingDocs.find(
+                d => d.categoryId === categoryId && d.orderIndex === orderIndex && (!doc || d.id !== doc.id)
+            );
+            if (duplicateOrder) {
+                setError(`Order ${orderIndex} is already used by "${duplicateOrder.title}" in this category. Please choose a different order.`);
+                return;
+            }
+        }
+
         setSaving(true);
 
         const payload = {
@@ -110,23 +155,31 @@ function DocForm({ doc, onSaved, onCancel }: DocFormProps) {
 
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     <div style={fieldRow}>
-                        <label style={labelStyle}>Title *</label>
+                        <label style={labelStyle}>Title * <span style={charCountStyle}>({title.length}/100)</span></label>
                         <input
-                            style={inputStyle}
+                            style={{
+                                ...inputStyle,
+                                ...(title.length > 100 ? { borderColor: '#ff6b6b' } : {}),
+                            }}
                             value={title}
                             onChange={e => setTitle(e.target.value)}
                             placeholder="Document title"
+                            maxLength={100}
                             required
                         />
                     </div>
 
                     <div style={fieldRow}>
-                        <label style={labelStyle}>Slug *</label>
+                        <label style={labelStyle}>Slug * <span style={charCountStyle}>({slug.length}/100)</span></label>
                         <input
-                            style={inputStyle}
+                            style={{
+                                ...inputStyle,
+                                ...(slug.length > 100 ? { borderColor: '#ff6b6b' } : {}),
+                            }}
                             value={slug}
                             onChange={e => setSlug(e.target.value)}
                             placeholder="document-slug"
+                            maxLength={100}
                             required
                         />
                     </div>
@@ -144,21 +197,33 @@ function DocForm({ doc, onSaved, onCancel }: DocFormProps) {
 
                     <div style={{ display: 'flex', gap: '1rem' }}>
                         <div style={{ ...fieldRow, flex: 1 }}>
-                            <label style={labelStyle}>Endpoint</label>
+                            <label style={labelStyle}>Endpoint <span style={charCountStyle}>({endpoint.length}/100)</span></label>
                             <input
-                                style={inputStyle}
+                                style={{
+                                    ...inputStyle,
+                                    ...(endpoint.length > 100 ? { borderColor: '#ff6b6b' } : {}),
+                                }}
                                 value={endpoint}
                                 onChange={e => setEndpoint(e.target.value)}
                                 placeholder="/api/example"
+                                maxLength={100}
                             />
                         </div>
                         <div style={{ ...fieldRow, width: '100px' }}>
                             <label style={labelStyle}>Order *</label>
                             <input
-                                style={inputStyle}
+                                style={{
+                                    ...inputStyle,
+                                    ...(orderIndex < 0 || orderIndex >= 100 ? { borderColor: '#ff6b6b' } : {}),
+                                }}
                                 type="number"
+                                min={0}
+                                max={99}
                                 value={orderIndex}
-                                onChange={e => setOrderIndex(parseInt(e.target.value) || 0)}
+                                onChange={e => {
+                                    const val = parseInt(e.target.value);
+                                    setOrderIndex(isNaN(val) ? 0 : val);
+                                }}
                                 required
                             />
                         </div>
@@ -288,6 +353,14 @@ const inputStyle: React.CSSProperties = {
 const selectStyle: React.CSSProperties = {
     ...inputStyle,
     color: '#e0e0ff',
+};
+
+const charCountStyle: React.CSSProperties = {
+    fontSize: '0.7rem',
+    fontWeight: 400,
+    color: 'rgba(255,255,255,0.35)',
+    textTransform: 'none',
+    letterSpacing: 'normal',
 };
 
 const tagContainerStyle: React.CSSProperties = {

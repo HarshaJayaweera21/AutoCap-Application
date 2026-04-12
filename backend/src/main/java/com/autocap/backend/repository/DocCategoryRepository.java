@@ -8,4 +8,8 @@ import java.util.UUID;
 
 @Repository
 public interface DocCategoryRepository extends JpaRepository<DocCategory, UUID> {
+
+    boolean existsByOrderIndex(Integer orderIndex);
+
+    boolean existsByOrderIndexAndIdNot(Integer orderIndex, UUID id);
 }
