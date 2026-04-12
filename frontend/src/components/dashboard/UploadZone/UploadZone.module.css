@@ -246,39 +246,6 @@
   font-size: var(--text-sm);
 }
 
-/* Light Mode Overrides */
-:global(body.light) .dropZone {
-  background: #fff;
-  border-color: var(--border-default);
-}
-
-:global(body.light) .dropZone:hover {
-  background: rgba(37, 99, 235, 0.02);
-  border-color: var(--primary-light);
-}
-
-:global(body.light) .stripContainer {
-  background: #fff;
-  box-shadow: var(--shadow-sm);
-}
-
-:global(body.light) .stripBtn:hover {
-  background: rgba(37, 99, 235, 0.05);
-}
-
-:global(body.light) .dragging {
-  background: rgba(37, 99, 235, 0.05) !important;
-  box-shadow: 0 0 20px rgba(37, 99, 235, 0.1);
-}
-
-:global(body.light) .modal {
-  box-shadow: var(--shadow-lg);
-}
-
-:global(body.light) .modalItem:hover {
-  background: rgba(0, 0, 0, 0.02);
-}
-
 /* =====================
    View All Modal
    ===================== */
