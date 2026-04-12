@@ -16,6 +16,7 @@ import ManageCategories from './pages/ManageCategories';
 import ManageTags from './pages/ManageTags';
 import ManageTokenizers from './pages/ManageTokenizers';
 import SearchDatasets from './pages/SearchDatasets';
+import SearchLanding from './pages/SearchLanding/SearchLanding';
 import DatasetExplorer from './pages/DatasetExplorer/DatasetExplorer';
 import MyDatasets from './pages/MyDatasets/MyDatasets';
 
@@ -77,7 +78,8 @@ function App() {
 
             {/* Normal user routes */}
             <Route path="/dashboard" element={<ProtectedRoute requiredRole="USER"><Dashboard /></ProtectedRoute>} />
-            <Route path="/search-datasets" element={<ProtectedRoute requiredRole="USER"><SearchDatasets /></ProtectedRoute>} />
+            <Route path="/search-datasets" element={<ProtectedRoute requiredRole="USER"><SearchLanding /></ProtectedRoute>} />
+            <Route path="/search-results" element={<ProtectedRoute requiredRole="USER"><SearchDatasets /></ProtectedRoute>} />
             <Route path="/my-datasets" element={<ProtectedRoute requiredRole="USER"><MyDatasets /></ProtectedRoute>} />
             <Route path="/datasets/:id" element={<ProtectedRoute requiredRole="USER"><DatasetExplorer /></ProtectedRoute>} />
 
