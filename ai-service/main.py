@@ -1,14 +1,13 @@
+from dotenv import load_dotenv
+
+# Load environment variables (like HF_TOKEN) before any services are initialized
+load_dotenv()
+
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, BackgroundTasks
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import List, Optional
 from services.caption_service import caption_service
-import requests
-import os
-from dotenv import load_dotenv
-
-# Load environment variables (like HF_TOKEN) from .env file
-load_dotenv()
 
 app = FastAPI()
 
