@@ -35,9 +35,9 @@ class ViTEncoder(nn.Module):
         super().__init__()
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
 
-        # Load CLIP and extract vision encoder
+        # Load CLIP and extract vision encoder (use safetensors to avoid torch.load CVE)
         hf_token = os.environ.get("HF_TOKEN")
-        clip = CLIPModel.from_pretrained(model_name, token=hf_token)
+        clip = CLIPModel.from_pretrained(model_name, token=hf_token, use_safetensors=True)
         self.vision_encoder = clip.vision_model
 
         # Freeze all parameters
@@ -237,7 +237,8 @@ class MultiModalModel(nn.Module):
                 llama_model_name,
                 quantization_config=bnb_config,
                 device_map="auto",
-                token=hf_token
+                token=hf_token,
+                use_safetensors=True
             )
             print("  LLaMA-3 loaded with 4-bit quantization.")
         except Exception as e:
@@ -252,7 +253,8 @@ class MultiModalModel(nn.Module):
                     llama_model_name,
                     quantization_config=bnb_config,
                     device_map="auto",
-                    token=hf_token
+                    token=hf_token,
+                    use_safetensors=True
                 )
                 print("  LLaMA-3 loaded with 8-bit quantization.")
             except Exception as e:
@@ -264,7 +266,8 @@ class MultiModalModel(nn.Module):
                 llama_model_name,
                 torch_dtype=torch.float16,
                 device_map="auto",
-                token=hf_token
+                token=hf_token,
+                use_safetensors=True
             )
             print("  LLaMA-3 loaded with float16 (no quantization).")
 
