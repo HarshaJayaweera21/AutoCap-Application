@@ -43,3 +43,5 @@ ai-service/models/caption_model.pth
 ai-service/models/CLIP model example.ipynb
 ai-service/models/ViT_1_1_model.ipynb
 ai-service/models/ViT_1_1_model.pt
+ai-service/models/ViT_1_1_model_before.ipynb
+ai-service/.env

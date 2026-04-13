@@ -344,7 +344,7 @@ export const Dashboard: React.FC = () => {
                           <div className={styles.summaryItem}>
                             <span className={styles.summaryLabel}>Model</span>
                             <span className={styles.summaryValue}>
-                              {state.blipConfig.modelVariant === 'caption_model' ? 'Caption Model (AutoCap-V1)' : 'Baseline Model'}
+                              {state.blipConfig.modelVariant === 'caption_model' ? 'Caption Model (AutoCap-V1)' : state.blipConfig.modelVariant === 'vit_model' ? 'ViT Model (AutoCap-V1.1)' : 'Baseline Model'}
                             </span>
                           </div>
                           <div className={styles.summaryItem}>
