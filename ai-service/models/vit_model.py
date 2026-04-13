@@ -230,17 +230,18 @@ class MultiModalModel(nn.Module):
             bnb_config = BitsAndBytesConfig(
                 load_in_4bit=True,
                 bnb_4bit_compute_dtype=torch.float16,
+                bnb_4bit_quant_type="nf4",
                 bnb_4bit_use_double_quant=True,
-                bnb_4bit_quant_type="nf4"
+                llm_int8_enable_fp32_cpu_offload=True  # Allow offloading to CPU RAM
             )
             self.llama = AutoModelForCausalLM.from_pretrained(
                 llama_model_name,
                 quantization_config=bnb_config,
                 device_map="auto",
                 token=hf_token,
-                use_safetensors=True
+                trust_remote_code=True
             )
-            print("  LLaMA-3 loaded with 4-bit quantization.")
+            print("  LLaMA-3 loaded with 4-bit quantization (CPU offload enabled).")
         except Exception as e:
             print(f"  4-bit loading failed ({e}), trying 8-bit...")
 
@@ -264,7 +265,7 @@ class MultiModalModel(nn.Module):
         if self.llama is None:
             self.llama = AutoModelForCausalLM.from_pretrained(
                 llama_model_name,
-                torch_dtype=torch.float16,
+                dtype=torch.float16,
                 device_map="auto",
                 token=hf_token,
                 use_safetensors=True
@@ -284,6 +285,12 @@ class MultiModalModel(nn.Module):
 
         self.projection = nn.Linear(768, self.llama_dim)
 
+    @property
+    def input_device(self):
+        """Device where LLaMA's embedding layer lives (may differ from self.device
+        when device_map='auto' offloads layers to CPU)."""
+        return self.llama.get_input_embeddings().weight.device
+
     def forward(self, image_tensor, input_ids, attention_mask, labels=None):
         """
         image_tensor: (B, 3, 224, 224)
@@ -291,33 +298,37 @@ class MultiModalModel(nn.Module):
         attention_mask: (B, T)
         labels: (B, T) or None
         """
+        # Resolve the device where LLaMA's embedding layer actually lives
+        embed_device = self.input_device
+
         with torch.no_grad():
             image_tokens = self.vit(image_tensor)
 
         queries = self.qformer(image_tokens)
         visual_embeds = self.projection(queries)
 
-        visual_embeds = visual_embeds.to(self.llama.dtype)
+        visual_embeds = visual_embeds.to(device=embed_device, dtype=self.llama.dtype)
 
+        input_ids = input_ids.to(embed_device)
         text_embeds = self.llama.get_input_embeddings()(input_ids)
-        text_embeds = text_embeds.to(self.llama.dtype)
+        text_embeds = text_embeds.to(dtype=self.llama.dtype)
 
-        # Combine
+        # Combine (all tensors now on embed_device)
         inputs_embeds = torch.cat([visual_embeds, text_embeds], dim=1)
 
         # Attention mask
         B = input_ids.size(0)
-        visual_mask = torch.ones(B, visual_embeds.size(1), device=self.device)
-        combined_attention_mask = torch.cat([visual_mask, attention_mask], dim=1)
+        visual_mask = torch.ones(B, visual_embeds.size(1), device=embed_device)
+        combined_attention_mask = torch.cat([visual_mask, attention_mask.to(embed_device)], dim=1)
 
         if labels is not None:
             visual_labels = torch.full(
                 (B, visual_embeds.size(1)),
                 -100,
-                device=self.device,
+                device=embed_device,
                 dtype=torch.long
             )
-            combined_labels = torch.cat([visual_labels, labels], dim=1)
+            combined_labels = torch.cat([visual_labels, labels.to(embed_device)], dim=1)
         else:
             combined_labels = None
 
@@ -406,26 +417,27 @@ def generate_caption_vit(
     """
     model.eval()
     device = model.device
+    embed_device = model.input_device  # where LLaMA's embeddings actually live
 
-    # ── Vision ──
+    # ── Vision (runs on cuda) ──
     image_tensor = image_tensor.to(device)
     image_tokens = model.vit(image_tensor)          # (1, 197, 768)
     queries = model.qformer(image_tokens)            # (1, 32, 768)
     visual_embeds = model.projection(queries)        # (1, 32, llama_dim)
 
-    # Cast to LLaMA dtype
-    visual_embeds = visual_embeds.to(model.llama.dtype)
+    # Move to LLaMA's embedding device and cast dtype
+    visual_embeds = visual_embeds.to(device=embed_device, dtype=model.llama.dtype)
 
     # ── Text Prompt ──
     tokenizer = model.tokenizer
-    inputs = tokenizer(prompt, return_tensors="pt").to(device)
+    inputs = tokenizer(prompt, return_tensors="pt").to(embed_device)
     input_ids = inputs.input_ids
 
     text_embeds = model.llama.get_input_embeddings()(input_ids)
 
-    # ── Combine ──
+    # ── Combine (all on embed_device) ──
     inputs_embeds = torch.cat([visual_embeds, text_embeds], dim=1)
-    attention_mask = torch.ones(inputs_embeds.size()[:2], device=device)
+    attention_mask = torch.ones(inputs_embeds.size()[:2], device=embed_device)
 
     # ── Generate ──
     gen_kwargs = dict(
@@ -492,25 +504,27 @@ def generate_multiple_captions_vit(
     """
     model.eval()
     device = model.device
+    embed_device = model.input_device  # where LLaMA's embeddings actually live
 
-    # ── Vision ──
+    # ── Vision (runs on cuda) ──
     image_tensor = image_tensor.to(device)
     image_tokens = model.vit(image_tensor)          # (1, 197, 768)
     queries = model.qformer(image_tokens)            # (1, 32, 768)
     visual_embeds = model.projection(queries)        # (1, 32, llama_dim)
 
-    visual_embeds = visual_embeds.to(model.llama.dtype)
+    # Move to LLaMA's embedding device and cast dtype
+    visual_embeds = visual_embeds.to(device=embed_device, dtype=model.llama.dtype)
 
     # ── Text Prompt ──
     tokenizer = model.tokenizer
-    inputs = tokenizer(prompt, return_tensors="pt").to(device)
+    inputs = tokenizer(prompt, return_tensors="pt").to(embed_device)
     input_ids = inputs.input_ids
 
     text_embeds = model.llama.get_input_embeddings()(input_ids)
 
-    # ── Combine ──
+    # ── Combine (all on embed_device) ──
     inputs_embeds = torch.cat([visual_embeds, text_embeds], dim=1)
-    attention_mask = torch.ones(inputs_embeds.size()[:2], device=device)
+    attention_mask = torch.ones(inputs_embeds.size()[:2], device=embed_device)
 
     # ── Generate multiple sequences ──
     # For beam search: num_beams must be >= num_return_sequences

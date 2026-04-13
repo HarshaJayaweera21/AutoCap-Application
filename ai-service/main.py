@@ -8,6 +8,8 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import List, Optional
 from services.caption_service import caption_service
+import requests
+import os
 
 app = FastAPI()
 
