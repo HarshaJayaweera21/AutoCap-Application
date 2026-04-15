@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { getDocs, getCategories, adminDeleteDoc } from '../services/api';
 import type { Doc, Category } from '../types';
 import DocForm from '../components/DocForm';
+import './ManageDocs.css';
 
 function ManageDocs() {
     const [docs, setDocs] = useState<Doc[]>([]);
@@ -29,18 +30,25 @@ function ManageDocs() {
 
     useEffect(() => { fetchData(); }, []);
 
+    const [deleteTarget, setDeleteTarget] = useState<{id: string, name: string} | null>(null);
+
     const getCategoryName = (categoryId: string) => {
         const cat = categories.find(c => c.id === categoryId);
         return cat ? cat.name : 'Unknown';
     };
 
-    const handleDelete = async (id: string, title: string) => {
-        if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return;
+    const openDeleteModal = (doc: Doc) => setDeleteTarget({id: doc.id, name: doc.title});
+    const closeDeleteModal = () => setDeleteTarget(null);
+
+    const confirmDelete = async () => {
+        if (!deleteTarget) return;
         try {
-            await adminDeleteDoc(id);
-            setDocs(docs.filter(d => d.id !== id));
+            await adminDeleteDoc(deleteTarget.id);
+            setDocs(docs.filter(d => d.id !== deleteTarget.id));
+            closeDeleteModal();
         } catch {
             setError('Failed to delete doc');
+            closeDeleteModal();
         }
     };
 
@@ -69,50 +77,81 @@ function ManageDocs() {
     if (error) return <p style={{ color: '#ff6b6b' }}>{error}</p>;
 
     return (
-        <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <p style={{ color: 'rgba(255,255,255,0.5)', margin: 0 }}>{docs.length} document(s)</p>
-                <button onClick={handleCreate} style={btnStyle}>
-                    + Create New
+        <div className="mdo-page">
+            <div className="mdo-header" style={{ justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
+                <button onClick={handleCreate} className="mdo-primary-btn">
+                    <span className="material-symbols-outlined">add</span> Create New
                 </button>
             </div>
 
-            <table style={tableStyle}>
-                <thead>
-                    <tr>
-                        <th style={thStyle}>Title</th>
-                        <th style={thStyle}>Slug</th>
-                        <th style={thStyle}>Category</th>
-                        <th style={thStyle}>Order</th>
-                        <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {docs.map(doc => (
-                        <tr key={doc.id}>
-                            <td style={tdStyle}>{doc.title}</td>
-                            <td style={{ ...tdStyle, color: 'rgba(255,255,255,0.5)' }}>{doc.slug}</td>
-                            <td style={tdStyle}>{getCategoryName(doc.categoryId)}</td>
-                            <td style={tdStyle}>{doc.orderIndex}</td>
-                            <td style={{ ...tdStyle, textAlign: 'right' }}>
-                                <button onClick={() => handleEdit(doc)} style={editBtnStyle}>
-                                    Edit
+            <div className="mdo-table-container">
+                <div className="mdo-table-scroll">
+                    <table className="mdo-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Slug</th>
+                                <th>Category</th>
+                                <th>Order</th>
+                                <th style={{ textAlign: 'right' }}>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {docs.map(doc => (
+                                <tr key={doc.id}>
+                                    <td className="mdo-cell-title">{doc.title}</td>
+                                    <td className="mdo-cell-slug">{doc.slug}</td>
+                                    <td className="mdo-cell-cat">{getCategoryName(doc.categoryId)}</td>
+                                    <td>{doc.orderIndex}</td>
+                                    <td>
+                                        <div className="mdo-actions">
+                                            <button className="mdo-btn-icon" onClick={() => handleEdit(doc)} title="Edit">
+                                                <span className="material-symbols-outlined">edit</span>
+                                            </button>
+                                            <button className="mdo-btn-icon danger" onClick={() => openDeleteModal(doc)} title="Delete">
+                                                <span className="material-symbols-outlined">delete</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                            {docs.length === 0 && (
+                                <tr>
+                                    <td colSpan={5} style={{ textAlign: 'center', color: '#8e8fa3', padding: '2rem' }}>
+                                        No documents found
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {deleteTarget && (
+                <div className="mdo-modal-overlay">
+                    <div className="mdo-modal-backdrop" onClick={closeDeleteModal}></div>
+                    <div className="mdo-modal-content mdo-modal-confirm">
+                        <div className="mdo-confirm-bar"></div>
+                        <div className="mdo-confirm-body">
+                            <div className="mdo-confirm-icon-wrap">
+                                <span className="material-symbols-outlined">delete_forever</span>
+                            </div>
+                            <h2 className="mdo-confirm-title">Delete Document?</h2>
+                            <p className="mdo-confirm-desc">
+                                Are you sure you want to delete "{deleteTarget.name}"? This cannot be undone.
+                            </p>
+                            <div className="mdo-confirm-actions">
+                                <button className="mdo-btn-confirm" onClick={confirmDelete}>
+                                    Yes, delete document
                                 </button>
-                                <button onClick={() => handleDelete(doc.id, doc.title)} style={deleteBtnStyle}>
-                                    Delete
+                                <button className="mdo-btn-confirm-cancel" onClick={closeDeleteModal}>
+                                    Cancel
                                 </button>
-                            </td>
-                        </tr>
-                    ))}
-                    {docs.length === 0 && (
-                        <tr>
-                            <td colSpan={5} style={{ ...tdStyle, textAlign: 'center', color: 'rgba(255,255,255,0.4)' }}>
-                                No documents found
-                            </td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {showForm && (
                 <DocForm
@@ -125,63 +164,5 @@ function ManageDocs() {
         </div>
     );
 }
-
-const tableStyle: React.CSSProperties = {
-    width: '100%',
-    borderCollapse: 'collapse',
-    background: 'rgba(255,255,255,0.03)',
-    borderRadius: '8px',
-    overflow: 'hidden',
-};
-
-const thStyle: React.CSSProperties = {
-    textAlign: 'left',
-    padding: '0.75rem 1rem',
-    borderBottom: '1px solid rgba(255,255,255,0.08)',
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: '0.8rem',
-    fontWeight: 600,
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
-};
-
-const tdStyle: React.CSSProperties = {
-    padding: '0.75rem 1rem',
-    borderBottom: '1px solid rgba(255,255,255,0.05)',
-    color: 'rgba(255,255,255,0.85)',
-    fontSize: '0.9rem',
-};
-
-const btnStyle: React.CSSProperties = {
-    background: '#6c63ff',
-    color: '#fff',
-    border: 'none',
-    padding: '0.5rem 1rem',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '0.85rem',
-    fontWeight: 600,
-};
-
-const editBtnStyle: React.CSSProperties = {
-    background: 'rgba(108,99,255,0.15)',
-    color: '#a5a0ff',
-    border: '1px solid rgba(108,99,255,0.3)',
-    padding: '0.3rem 0.75rem',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontSize: '0.8rem',
-    marginRight: '0.5rem',
-};
-
-const deleteBtnStyle: React.CSSProperties = {
-    background: 'rgba(255,80,80,0.1)',
-    color: '#ff6b6b',
-    border: '1px solid rgba(255,80,80,0.2)',
-    padding: '0.3rem 0.75rem',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontSize: '0.8rem',
-};
 
 export default ManageDocs;
