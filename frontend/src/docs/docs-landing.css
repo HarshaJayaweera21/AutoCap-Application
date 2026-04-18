@@ -1,0 +1,537 @@
+/* ===== AutoCap Documentation — New Design System ===== */
+/* Scoped exclusively to the .docs-layout page */
+
+/* ========== FORCE DARK THEME VARIABLES (overrides docs.css :root light defaults) ========== */
+.docs-layout {
+  --docs-bg: #14121a;
+  --sidebar-bg: #1d1a23;
+  --sidebar-border: #2a2d3a;
+  --sidebar-title: #e0e0ff;
+  --sidebar-scrollbar: #3a3d4a;
+
+  --cat-header-color: #8b8fa8;
+  --cat-header-hover-bg: #1e2030;
+  --cat-header-hover-color: #c8cce0;
+  --chevron-color: #5a5e78;
+
+  --doc-item-color: #9498b0;
+  --doc-item-hover-bg: #1e2030;
+  --doc-item-hover-color: #e0e0ff;
+  --doc-item-active-bg: rgba(99, 102, 241, 0.12);
+  --doc-item-active-color: #818cf8;
+  --doc-item-active-border: #6366f1;
+
+  --content-bg: #14121a;
+  --content-scrollbar: #3a3d4a;
+
+  --placeholder-color: #5a5e78;
+  --placeholder-heading: #8b8fa8;
+
+  --heading-color: #e0e0ff;
+  --heading2-color: #c8cce0;
+  --heading3-color: #a8abd0;
+  --heading4-color: #9498b0;
+  --body-color: #b0b4cc;
+  --body-strong: #e0e0ff;
+  --body-em: #9498b0;
+  --list-marker: #5a5e78;
+  --border-color: #2a2d3a;
+  --border-light: #1e2030;
+
+  --link-color: #818cf8;
+  --link-hover: #a5b4fc;
+
+  --inline-code-bg: #1e2030;
+  --inline-code-color: #fb7185;
+  --inline-code-border: #2a2d3a;
+
+  --code-header-bg: #161822;
+  --code-header-border: #2a2d3a;
+  --code-lang-color: #6b70a0;
+  --code-copy-bg: rgba(255,255,255,0.04);
+  --code-copy-border: rgba(255,255,255,0.08);
+  --code-copy-color: #6b70a0;
+  --code-copy-hover-bg: rgba(255,255,255,0.08);
+  --code-copy-hover-color: #a8abd0;
+  --code-block-border: #2a2d3a;
+  --code-block-shadow: rgba(0,0,0,0.3);
+
+  --blockquote-bg: rgba(245,158,11,0.08);
+  --blockquote-border: #d97706;
+  --blockquote-color: #fbbf24;
+
+  --endpoint-bg: rgba(5,150,105,0.1);
+  --endpoint-color: #34d399;
+  --endpoint-border: rgba(52,211,153,0.2);
+
+  --tag-bg: rgba(99,102,241,0.1);
+  --tag-color: #818cf8;
+  --tag-border: rgba(129,140,248,0.2);
+
+  --table-header-bg: #161822;
+  --table-header-color: #a8abd0;
+  --table-cell-color: #9498b0;
+  --table-row-hover: #1a1c28;
+
+  --hr-color: #2a2d3a;
+  --img-border: #2a2d3a;
+
+  --search-bg: #161822;
+  --search-border: #2a2d3a;
+  --search-color: #e0e0ff;
+  --search-placeholder: #5a5e78;
+  --search-focus-border: #6366f1;
+  --search-focus-shadow: rgba(99,102,241,0.2);
+  --search-result-bg: #161822;
+  --search-result-hover: #1e2030;
+  --search-result-title: #e0e0ff;
+  --search-result-snippet: #8b8fa8;
+  --search-highlight: rgba(250,204,21,0.25);
+  --search-icon-color: #5a5e78;
+}
+
+/* ========== LAYOUT OVERRIDES ========== */
+.docs-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: #14121a;
+}
+
+.docs-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Remove the old topbar if present */
+.docs-topbar {
+  display: none !important;
+}
+
+/* ========== NEW SIDEBAR ========== */
+.docs-sidebar {
+  width: 256px;
+  min-width: 256px;
+  background: #1d1a23;
+  border-right: 1px solid rgba(67, 70, 86, 0.18);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  flex-shrink: 0;
+}
+
+/* ---- Sidebar Search ---- */
+.docs-sidebar-search {
+  padding: 28px 14px 10px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.docs-sidebar-search-wrapper {
+  position: relative;
+}
+
+.docs-sidebar-search-icon {
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #5a5878;
+  font-size: 17px;
+  pointer-events: none;
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.docs-sidebar-search-input {
+  width: 100%;
+  padding: 7px 10px 7px 32px;
+  background: rgba(55, 50, 70, 0.35);
+  border: 1px solid rgba(67, 70, 86, 0.35);
+  border-radius: 8px;
+  color: #e0dcea;
+  font-size: 12.5px;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.docs-sidebar-search-input::placeholder {
+  color: #5a5878;
+}
+
+.docs-sidebar-search-input:focus {
+  border-color: rgba(25, 75, 255, 0.55);
+  background: rgba(55, 50, 70, 0.5);
+  box-shadow: 0 0 0 3px rgba(25, 75, 255, 0.1);
+}
+
+/* ---- Search Results Dropdown ---- */
+.docs-sidebar-search-results {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 14px;
+  right: 14px;
+  background: #211e27;
+  border: 1px solid rgba(67, 70, 86, 0.45);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  max-height: 260px;
+  overflow-y: auto;
+  z-index: 50;
+}
+
+.docs-sidebar-search-result-item {
+  padding: 9px 13px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(67, 70, 86, 0.2);
+  transition: background 0.15s;
+}
+
+.docs-sidebar-search-result-item:last-child {
+  border-bottom: none;
+}
+
+.docs-sidebar-search-result-item:hover {
+  background: rgba(67, 70, 86, 0.25);
+}
+
+.docs-sidebar-search-result-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #e0dcea;
+  margin-bottom: 2px;
+}
+
+.docs-sidebar-search-result-snippet {
+  font-size: 11.5px;
+  color: #8e8fa3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.docs-sidebar-no-results,
+.docs-sidebar-searching {
+  padding: 14px;
+  text-align: center;
+  color: #5a5878;
+  font-size: 12.5px;
+}
+
+/* ---- Sidebar Nav ---- */
+.docs-sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 12px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.docs-sidebar-nav::-webkit-scrollbar {
+  width: 3px;
+}
+
+.docs-sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(67, 70, 86, 0.5);
+  border-radius: 10px;
+}
+
+/* ---- Category Header (top-level) ---- */
+.docs-cat-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  color: #c5c4c7;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  user-select: none;
+  border-right: 2px solid transparent;
+  text-decoration: none !important;
+  position: relative;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+.docs-cat-header:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: #f0eef4;
+  text-decoration: none !important;
+}
+
+.docs-cat-header.docs-cat-active {
+  color: #194BFF;
+  background: transparent;
+  border-right-color: transparent;
+  font-weight: 600;
+}
+
+/* Material Symbol Icon */
+.docs-cat-icon {
+  font-family: 'Material Symbols Outlined';
+  font-size: 20px;
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.docs-cat-label {
+  flex: 1;
+}
+
+.docs-cat-chevron {
+  font-family: 'Material Symbols Outlined';
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-flex;
+  align-items: center;
+  color: #5a5878;
+  transition: transform 0.22s ease;
+  flex-shrink: 0;
+}
+
+.docs-cat-chevron.docs-expanded {
+  transform: rotate(90deg);
+}
+
+/* ---- Sub-doc List ---- */
+.docs-cat-items {
+  list-style: none;
+  padding: 2px 0 6px 0;
+  margin: 0;
+}
+
+.docs-cat-item {
+  display: flex;
+  align-items: center;
+  padding: 7px 14px 7px 46px;
+  border-radius: 8px;
+  color: #c5c4c7;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  margin: 1px 0;
+  border-left: 2px solid transparent;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  text-decoration: none !important;
+}
+
+.docs-cat-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: #f0eef4;
+  text-decoration: none !important;
+}
+
+.docs-cat-item.docs-item-active {
+  color: #194BFF;
+  background: transparent;
+  font-weight: 600;
+  border-left-color: transparent;
+}
+
+/* ========== DOCS MAIN CONTENT WRAPPER ========== */
+.docs-main {
+  flex: 1;
+  background: #14121a;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========== LANDING PAGE ========== */
+.docs-landing {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 56px 56px 88px;
+}
+
+.docs-landing-inner {
+  max-width: 100%;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.docs-landing-heading {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: clamp(2.4rem, 5vw, 4.2rem);
+  font-weight: 800;
+  color: #e6e0ec;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  margin: 0 0 18px;
+}
+
+.docs-landing-subtitle {
+  font-size: 18px;
+  color: #8e8fa3;
+  line-height: 1.65;
+  margin: 0 0 60px;
+  max-width: 560px;
+  font-family: 'Outfit', system-ui, sans-serif;
+}
+
+.docs-quick-label {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #b9c3ff;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 14px;
+}
+
+.docs-quick-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+/* ---- Quick Access Card ---- */
+.docs-quick-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 22px;
+  background: #1d1a23;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.22s ease, border-color 0.22s ease;
+  text-decoration: none !important;
+  gap: 16px;
+}
+
+.docs-quick-card:hover {
+  background: #25222d;
+  border-color: rgba(67, 70, 86, 0.4);
+  text-decoration: none !important;
+}
+
+.docs-quick-card-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.docs-quick-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: rgba(25, 75, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.22s ease;
+}
+
+.docs-quick-card:hover .docs-quick-card-icon {
+  background: rgba(25, 75, 255, 0.18);
+}
+
+.docs-quick-card-icon span {
+  font-family: 'Material Symbols Outlined';
+  font-size: 21px;
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  color: #b9c3ff;
+  display: inline-flex;
+  align-items: center;
+}
+
+.docs-quick-card-title {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 16.5px;
+  font-weight: 700;
+  color: #e6e0ec;
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+.docs-quick-card-desc {
+  font-size: 13px;
+  color: #8e8fa3;
+  margin: 0;
+  font-family: 'Outfit', system-ui, sans-serif;
+}
+
+.docs-quick-card-arrow {
+  font-family: 'Material Symbols Outlined';
+  font-size: 22px;
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  color: #434656;
+  transition: color 0.22s ease;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
+.docs-quick-card:hover .docs-quick-card-arrow {
+  color: #194BFF;
+}
+
+/* ---- Skeleton loader for quick access ---- */
+.docs-quick-skeleton {
+  height: 80px;
+  background: #1d1a23;
+  border-radius: 10px;
+  animation: docs-skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes docs-skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ========== MAIN CONTENT (doc is selected) ========== */
+.docs-main-content {
+  flex: 1;
+  padding: 40px 56px;
+  overflow-y: auto;
+  background: #14121a;
+  color: #e6e0ec;
+}
+
+.docs-main-content::-webkit-scrollbar {
+  width: 5px;
+}
+
+.docs-main-content::-webkit-scrollbar-thumb {
+  background: rgba(67, 70, 86, 0.5);
+  border-radius: 10px;
+}
