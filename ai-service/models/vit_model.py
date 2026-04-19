@@ -249,13 +249,16 @@ class MultiModalModel(nn.Module):
         if self.llama is None:
             try:
                 from transformers import BitsAndBytesConfig
-                bnb_config = BitsAndBytesConfig(load_in_8bit=True)
+                bnb_config = BitsAndBytesConfig(
+                    load_in_8bit=True,
+                    llm_int8_enable_fp32_cpu_offload=True  # Allow offloading to CPU RAM
+                )
                 self.llama = AutoModelForCausalLM.from_pretrained(
                     llama_model_name,
                     quantization_config=bnb_config,
                     device_map="auto",
                     token=hf_token,
-                    use_safetensors=True
+                    trust_remote_code=True
                 )
                 print("  LLaMA-3 loaded with 8-bit quantization.")
             except Exception as e:
@@ -287,9 +290,16 @@ class MultiModalModel(nn.Module):
 
     @property
     def input_device(self):
-        """Device where LLaMA's embedding layer lives (may differ from self.device
-        when device_map='auto' offloads layers to CPU)."""
-        return self.llama.get_input_embeddings().weight.device
+        """Device where LLaMA's embedding layer lives. 
+        If offloaded to 'meta' (SSD), fallback to a real device (CPU or GPU)."""
+        device = self.llama.get_input_embeddings().weight.device
+        if device.type == 'meta':
+            # Fallback to the first parameter's device if it's not meta, otherwise CPU
+            for param in self.llama.parameters():
+                if param.device.type != 'meta':
+                    return param.device
+            return torch.device("cpu")
+        return device
 
     def forward(self, image_tensor, input_ids, attention_mask, labels=None):
         """
