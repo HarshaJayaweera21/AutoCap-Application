@@ -10,21 +10,18 @@
 
 /* ===== Welcome Banner ===== */
 .welcome-banner {
-    margin: 1.25rem 1.5rem 0;
-    padding: 2rem 2.5rem;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 50%, #818cf8 100%);
+    margin: 3rem 1.5rem 2rem;
+    padding: 0;
     text-align: center;
-    box-shadow: 0 4px 24px rgba(99, 102, 241, 0.2);
 }
 
 .welcome-banner__title {
-    font-family: 'Outfit', sans-serif;
-    font-weight: 700;
-    font-size: 1.6rem;
-    color: #ffffff;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 800;
+    font-size: 2.5rem;
+    color: #e6e0ec;
     margin: 0;
-    letter-spacing: -0.2px;
+    letter-spacing: -0.025em;
 }
 
 /* ===== User Stat Cards Row ===== */

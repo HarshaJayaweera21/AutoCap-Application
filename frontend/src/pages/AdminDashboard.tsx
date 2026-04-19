@@ -169,7 +169,6 @@ function AdminDashboard() {
 
             {/* ===== Dataset Intelligence Panel ===== */}
             <div className="intel-section">
-                <h2 className="intel-section__title">Dataset Intelligence Panel</h2>
 
                 {/* ── ROW 1: Key Metric Cards ── */}
                 <div className="intel-cards">
