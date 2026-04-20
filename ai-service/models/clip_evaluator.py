@@ -6,19 +6,22 @@ from typing import List, Tuple
 
 class ClipEvaluator:
     """
-    Uses OpenAI CLIP (clip-vit-base-patch32) to score and rank
-    candidate captions against an image.
+    Uses a shared OpenAI CLIP instance to score and rank candidate captions
+    against an image. The model and processor are injected externally so that
+    a single CLIP instance can be shared across all model variants.
     """
 
-    CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
-
-    def __init__(self, device: torch.device):
+    def __init__(self, device: torch.device, model: CLIPModel, processor: CLIPProcessor):
+        """
+        Args:
+            device:    The torch device (cuda/cpu) to run inference on.
+            model:     A pre-loaded CLIPModel instance (already on device).
+            processor: The matching CLIPProcessor for tokenisation/preprocessing.
+        """
         self.device = device
-        print(f"Loading CLIP model: {self.CLIP_MODEL_NAME} ...")
-        self.model = CLIPModel.from_pretrained(self.CLIP_MODEL_NAME, use_safetensors=True).to(self.device)
-        self.processor = CLIPProcessor.from_pretrained(self.CLIP_MODEL_NAME)
+        self.model = model
+        self.processor = processor
         self.model.eval()
-        print("CLIP model loaded successfully.")
 
     @torch.no_grad()
     def score_captions(self, image: Image.Image, captions: List[str]) -> List[float]:

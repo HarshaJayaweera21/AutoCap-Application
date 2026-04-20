@@ -50,10 +50,15 @@ async def generate_caption_api(
     repetitionPenalty: float = Form(1.0),
     topP: float = Form(0.9)
 ):
+    print(f"\n[API] POST /api/captions/generate  model={modelVariant}  "
+          f"temp={temperature}  maxLen={maxLength}  minLen={minLength}  "
+          f"beams={numBeams}  repPenalty={repetitionPenalty}  topP={topP}", flush=True)
+
     if not file.content_type.startswith('image/'):
         raise HTTPException(status_code=400, detail="Invalid file type. Please upload an image.")
     
     contents = await file.read()
+    print(f"[API] Image received: {len(contents)} bytes, content_type={file.content_type}", flush=True)
     
     try:
         kwargs = {
@@ -65,11 +70,18 @@ async def generate_caption_api(
             "top_p": topP
         }
         caption, similarity_score = caption_service.get_caption(contents, modelVariant, **kwargs)
+        print(f"[API] [OK] Response ready  score={similarity_score}", flush=True)
         return {"caption": caption, "similarityScore": similarity_score}
+    except HTTPException:
+        raise  # Preserve 503 / 400 etc. from caption_service
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 def process_job_background(job_request: JobRequest):
+    print(f"\n[JOB] === Starting background job {job_request.jobId} ==="
+          f"  model={job_request.modelVariant}  images={len(job_request.images)}", flush=True)
     results = []
     error_message = None
     
@@ -111,7 +123,10 @@ def process_job_background(job_request: JobRequest):
             })
     except Exception as e:
         error_message = str(e)
-        print(f"Error processing job {job_request.jobId}: {e}")
+        print(f"\n!!! [FATAL DEBUG] process_job_background caught Exception !!!", flush=True)
+        import traceback
+        traceback.print_exc()
+        print(f"Error processing job {job_request.jobId}: {e}", flush=True)
         
     # POST callback to Spring Boot
     callback_url = f"http://127.0.0.1:8080/api/jobs/{job_request.jobId}/callback"
