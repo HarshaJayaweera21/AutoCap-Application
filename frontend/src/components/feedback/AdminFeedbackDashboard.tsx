@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useFeedback } from '../../hooks/useFeedback';
-import { Feedback } from '../../types/feedback';
-import { getStatusColor, formatDate } from '../../utils/feedbackHelpers';
+import { Feedback, FeedbackStatsData } from '../../types/feedback';
 import Header from '../Header';
-import './feedback.css';
+import './AdminFeedbackDashboard.css';
 
 const AdminFeedbackDashboard: React.FC = () => {
-    const { getAdminFeedback, updateFeedbackStatus, deleteFeedback, loading, error } = useFeedback();
+    const { getAdminFeedback, updateFeedbackStatus, deleteFeedback, getFeedbackStats, loading, error } = useFeedback();
     const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
+    const [stats, setStats] = useState<FeedbackStatsData | null>(null);
     const [statusFilter, setStatusFilter] = useState('');
     const [typeFilter, setTypeFilter] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
@@ -16,19 +16,24 @@ const AdminFeedbackDashboard: React.FC = () => {
     const statuses = ['New', 'In Review', 'Resolved', "Won't Fix"];
     const types = ['Bug Report', 'Feature Request', 'General', 'Caption Quality'];
 
-    const fetchFeedbacks = async () => {
+    const fetchData = async () => {
+        // Fetch stats
+        const statsData = await getFeedbackStats();
+        if (statsData) setStats(statsData);
+
+        // Fetch paginated/filtered list
         const params: any = {};
         if (statusFilter) params.status = statusFilter;
         if (typeFilter) params.type = typeFilter;
         if (searchQuery) params.search = searchQuery;
+        
         const data = await getAdminFeedback(params);
         if (data) setFeedbacks(data);
     };
 
     useEffect(() => {
-        // Debounce search
         const timer = setTimeout(() => {
-            fetchFeedbacks();
+            fetchData();
         }, 300);
         return () => clearTimeout(timer);
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -39,6 +44,12 @@ const AdminFeedbackDashboard: React.FC = () => {
         if (updated) {
             setFeedbacks(feedbacks.map(f => f.id === id ? updated : f));
             if (selectedFeedback?.id === id) setSelectedFeedback(updated);
+            
+            // Refresh stats slightly delayed
+            setTimeout(async () => {
+                const statsData = await getFeedbackStats();
+                if (statsData) setStats(statsData);
+            }, 500);
         }
     };
 
@@ -50,155 +61,223 @@ const AdminFeedbackDashboard: React.FC = () => {
                 if (selectedFeedback?.id === id) {
                     setSelectedFeedback(null);
                 }
+                setTimeout(async () => {
+                    const statsData = await getFeedbackStats();
+                    if (statsData) setStats(statsData);
+                }, 500);
             } catch (err: any) {
                 alert('Failed to delete feedback: ' + err.message);
             }
         }
     };
 
+    const getBadgeClass = (type: string) => {
+        switch (type) {
+            case 'Bug Report': return 'afb-badge-bug';
+            case 'Feature Request': return 'afb-badge-feature';
+            case 'Praise': return 'afb-badge-praise';
+            case 'Caption Quality': return 'afb-badge-critical';
+            default: return 'afb-badge-neutral';
+        }
+    };
+    
+    // Fallback static values if null
+    const timeSince = (dateString: string) => {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffInMs = Math.abs(now.getTime() - date.getTime());
+        const diffInMins = Math.floor(diffInMs / (1000 * 60));
+        
+        if (diffInMins < 60) return `${diffInMins}m ago`;
+        const diffInHours = Math.floor(diffInMins / 60);
+        if (diffInHours < 24) return `${diffInHours}h ago`;
+        const diffInDays = Math.floor(diffInHours / 24);
+        return `${diffInDays}d ago`;
+    };
+
+    // Derived stats
+    const totalCount = stats?.total_count || 0;
+    const newCount = stats?.status_breakdown?.['New'] || 0;
+    const resolvedCount = stats?.status_breakdown?.['Resolved'] || 0;
 
     if (error) {
-        return <div className="fb-module-container"><div className="fb-text" style={{ color: 'var(--fb-error)' }}>Error: {error}</div></div>;
+        return <div style={{ color: 'var(--error)', padding: '2rem' }}>Error: {error}</div>;
     }
 
     return (
-        <>
+        <div className="afb-page">
             <Header />
-            <div className="fb-module-container" style={{ display: 'flex', gap: '2rem', height: '100vh', overflow: 'hidden', padding: '1rem' }}>
-
-            {/* Left Sidebar - List */}
-            <div className="fb-card" style={{ flex: '1', display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
-                <div style={{ marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <h2 className="fb-h2" style={{ margin: 0 }}>Feedback Queue</h2>
+            <main className="afb-main">
+                {/* Header section */}
+                <div className="afb-header">
+                    <h1 className="afb-h1">Feedback Management</h1>
+                    <p className="afb-subtitle">Overview and management of the AutoCap platform user feedbacks</p>
+                </div>
+                
+                {/* Stats Grid */}
+                <div className="afb-stats-grid">
+                    <div className="afb-stat-card">
+                        <span className="afb-stat-label">Total Feedback</span>
+                        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+                            <span className="afb-stat-value">{totalCount.toLocaleString()}</span>
+                        </div>
                     </div>
-                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                        <input
-                            type="text"
-                            className="fb-input"
-                            placeholder="Search feedback..."
-                            style={{ flex: '1', minWidth: '150px', padding: '0.5rem' }}
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                        <select
-                            className="fb-select"
-                            style={{ width: 'auto', padding: '0.5rem' }}
-                            value={typeFilter}
-                            onChange={(e) => setTypeFilter(e.target.value)}
-                        >
-                            <option value="">All Types</option>
-                            {types.map(t => <option key={t} value={t}>{t}</option>)}
-                        </select>
-                        <select
-                            className="fb-select"
-                            style={{ width: 'auto', padding: '0.5rem' }}
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                        >
-                            <option value="">All Statuses</option>
-                            {statuses.map(s => <option key={s} value={s}>{s}</option>)}
-                        </select>
+                    <div className="afb-stat-card">
+                        <span className="afb-stat-label">New Feedback</span>
+                        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+                            <span className="afb-stat-value highlight">{newCount.toLocaleString()}</span>
+                        </div>
+                    </div>
+                    <div className="afb-stat-card">
+                        <span className="afb-stat-label">Resolved</span>
+                        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+                            <span className="afb-stat-value">{resolvedCount.toLocaleString()}</span>
+                        </div>
                     </div>
                 </div>
 
-                <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem', paddingRight: '0.5rem' }}>
-                    {loading && feedbacks.length === 0 ? (
-                        <div className="fb-skeleton" style={{ height: '80px', borderRadius: '8px' }} />
-                    ) : feedbacks.length === 0 ? (
-                        <div className="fb-subtext" style={{ textAlign: 'center', marginTop: '2rem' }}>No feedback in queue.</div>
-                    ) : (
-                        feedbacks.map(fb => (
-                            <div
-                                key={fb.id}
-                                onClick={() => setSelectedFeedback(fb)}
-                                style={{
-                                    padding: '1rem',
-                                    backgroundColor: selectedFeedback?.id === fb.id ? 'var(--fb-bg-base)' : 'transparent',
-                                    border: `1px solid ${selectedFeedback?.id === fb.id ? 'var(--fb-accent)' : 'var(--fb-border)'}`,
-                                    borderRadius: '8px',
-                                    cursor: 'pointer',
-                                    borderLeft: `4px solid ${getStatusColor(fb.status)}`
-                                }}
+                {/* Split View Area */}
+                <div className="afb-split-view">
+                    
+                    {/* Left Panel: Scrollable List (40%) */}
+                    <section className="afb-left-panel">
+                        {/* Filter Bar */}
+                        <div className="afb-filter-bar">
+                            <div className="afb-search-wrapper">
+                                <span className="material-symbols-outlined afb-search-icon">search</span>
+                                <input 
+                                    className="afb-search-input" 
+                                    placeholder="Search feedback..." 
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                            </div>
+                            <select 
+                                className="afb-select"
+                                value={typeFilter}
+                                onChange={(e) => setTypeFilter(e.target.value)}
                             >
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                                    <span className="fb-text" style={{ fontWeight: 600, fontSize: '14px' }}>{fb.subject || fb.type}</span>
-                                    <span className="fb-subtext" style={{ fontSize: '12px' }}>{formatDate(fb.created_at)}</span>
+                                <option value="">Type: All</option>
+                                {types.map(t => <option key={t} value={t}>{t}</option>)}
+                            </select>
+                            <select 
+                                className="afb-select"
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                            >
+                                <option value="">Status: All</option>
+                                {statuses.map(s => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                        </div>
+
+                        {/* List Content */}
+                        <div className="afb-list-content">
+                            {loading && feedbacks.length === 0 ? (
+                                <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--outline)' }}>Loading feedback...</div>
+                            ) : feedbacks.length === 0 ? (
+                                <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--outline)' }}>No feedback items found.</div>
+                            ) : (
+                                feedbacks.map(fb => (
+                                    <div 
+                                        key={fb.id} 
+                                        className={`afb-list-item ${selectedFeedback?.id === fb.id ? 'selected' : ''}`}
+                                        onClick={() => setSelectedFeedback(fb)}
+                                    >
+                                        <div className="afb-item-header">
+                                            <span className={`afb-item-user ${selectedFeedback?.id === fb.id ? 'selected' : ''}`}>
+                                                @user_{fb.user_id || 'anon'}
+                                            </span>
+                                            <span className="afb-item-time">{timeSince(fb.created_at)}</span>
+                                        </div>
+                                        <p className="afb-item-msg">{fb.subject || fb.message}</p>
+                                        <div className="afb-item-tags">
+                                            <span className={`afb-badge ${getBadgeClass(fb.type)}`}>
+                                                {fb.type}
+                                            </span>
+                                            <span className="afb-badge afb-badge-neutral">
+                                                {fb.status}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </section>
+
+                    {/* Right Panel: Detail View (60%) */}
+                    <section className="afb-right-panel">
+                        {selectedFeedback ? (
+                            <div className="afb-detail-view">
+                                <div className="afb-detail-header">
+                                    <div>
+                                        <h2 className="afb-detail-title">{selectedFeedback.subject || selectedFeedback.type}</h2>
+                                        <div className="afb-detail-meta">
+                                            Submitted: {new Date(selectedFeedback.created_at).toLocaleString()} | User ID: {selectedFeedback.user_id || 'Anonymous'}
+                                        </div>
+                                    </div>
+                                    <div className="afb-detail-actions">
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <span className="afb-detail-label">Status:</span>
+                                            <select 
+                                                className="afb-status-select"
+                                                value={selectedFeedback.status}
+                                                onChange={(e) => handleStatusChange(selectedFeedback.id, e.target.value)}
+                                            >
+                                                {statuses.map(s => <option key={s} value={s}>{s}</option>)}
+                                            </select>
+                                        </div>
+                                        <button className="afb-btn-delete" onClick={() => handleDelete(selectedFeedback.id)}>
+                                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>delete</span>
+                                            Delete
+                                        </button>
+                                    </div>
                                 </div>
-                                <div className="fb-subtext" style={{ fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                    {fb.type} | {fb.status}
+
+                                {selectedFeedback.rating && (
+                                    <div>
+                                        <h3 className="afb-detail-section-title">Experience Rating</h3>
+                                        <div className="afb-stars">
+                                            {[1, 2, 3, 4, 5].map(s => (
+                                                <span key={s} className={`material-symbols-outlined afb-star ${s <= selectedFeedback.rating! ? 'active' : ''}`}>star</span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div>
+                                    <h3 className="afb-detail-section-title">Detailed Message</h3>
+                                    <div className="afb-detail-message">
+                                        {selectedFeedback.message}
+                                    </div>
                                 </div>
+
+                                {selectedFeedback.screenshot_url && (
+                                    <div>
+                                        <h3 className="afb-detail-section-title">Screenshot Attachment</h3>
+                                        <a href={selectedFeedback.screenshot_url} target="_blank" rel="noopener noreferrer" className="afb-image-wrapper">
+                                            <img src={selectedFeedback.screenshot_url} alt="Feedback attached screenshot" />
+                                        </a>
+                                    </div>
+                                )}
                             </div>
-                        ))
-                    )}
+                        ) : (
+                            <>
+                                <div className="afb-empty-overlay"></div>
+                                <div className="afb-empty-state">
+                                    <div className="afb-empty-icon-wrap">
+                                        <span className="material-symbols-outlined afb-empty-icon">mark_chat_unread</span>
+                                    </div>
+                                    <h3 className="afb-empty-title">No Feedback Selected</h3>
+                                    <p className="afb-empty-desc">Select a feedback item to view details.</p>
+                                </div>
+                            </>
+                        )}
+                    </section>
+
                 </div>
-            </div>
-
-            {/* Right Content - Detail & Actions */}
-            <div className="fb-card" style={{ flex: '2', height: '100%', overflowY: 'auto' }}>
-                {selectedFeedback ? (
-                    <div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
-                            <div>
-                                <h1 className="fb-h1" style={{ marginBottom: '0.5rem' }}>{selectedFeedback.subject || selectedFeedback.type}</h1>
-                                <div className="fb-subtext">
-                                    Submitted: {formatDate(selectedFeedback.created_at)} | User ID: {selectedFeedback.user_id || 'Anonymous'} | Type: {selectedFeedback.type}
-                                </div>
-                            </div>
-
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                <span className="fb-subtext">Status:</span>
-                                <select
-                                    className="fb-select"
-                                    style={{ width: 'auto', backgroundColor: `${getStatusColor(selectedFeedback.status)}15`, borderColor: getStatusColor(selectedFeedback.status) }}
-                                    value={selectedFeedback.status}
-                                    onChange={(e) => handleStatusChange(selectedFeedback.id, e.target.value)}
-                                >
-                                    {statuses.map(s => <option key={s} value={s}>{s}</option>)}
-                                </select>
-                                <button 
-                                    className="fb-btn" 
-                                    style={{ backgroundColor: 'var(--fb-error)', color: 'white', border: '1px solid var(--fb-error)', padding: '0.3rem 0.8rem', borderRadius: '4px', cursor: 'pointer' }}
-                                    onClick={() => handleDelete(selectedFeedback.id)}
-                                >
-                                    Delete
-                                </button>
-                            </div>
-                        </div>
-
-                        {selectedFeedback.rating && (
-                            <div className="fb-stars" style={{ margin: '1rem 0' }}>
-                                Rating: {[1, 2, 3, 4, 5].map(s => (
-                                    <span key={s} className={`fb-star ${s <= selectedFeedback.rating! ? 'active' : ''}`} style={{ fontSize: '20px' }}>★</span>
-                                ))}
-                            </div>
-                        )}
-
-                        <div style={{ marginBottom: '2rem' }}>
-                            <h3 className="fb-h2" style={{ fontSize: '16px' }}>Message</h3>
-                            <div className="fb-text" style={{ backgroundColor: 'var(--fb-bg-base)', padding: '1rem', borderRadius: '8px', whiteSpace: 'pre-wrap' }}>
-                                {selectedFeedback.message}
-                            </div>
-                        </div>
-
-                        {selectedFeedback.screenshot_url && (
-                            <div style={{ marginBottom: '2rem' }}>
-                                <h3 className="fb-h2" style={{ fontSize: '16px' }}>Screenshot Attachment</h3>
-                                <a href={selectedFeedback.screenshot_url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--fb-border)', maxWidth: '400px' }}>
-                                    <img src={selectedFeedback.screenshot_url} alt="Feedback attached screenshot" style={{ width: '100%', objectFit: 'cover', display: 'block' }} />
-                                </a>
-                            </div>
-                        )}
-                    </div>
-                ) : (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--fb-text-muted)' }}>
-                        Select a feedback item from the queue to view details and update status.
-                    </div>
-                )}
-            </div>
-
+            </main>
         </div>
-        </>
     );
 };
 
