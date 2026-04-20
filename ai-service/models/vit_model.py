@@ -237,16 +237,22 @@ class MultiModalModel(nn.Module):
                 bnb_4bit_compute_dtype=torch.float16,
                 bnb_4bit_quant_type="nf4",
                 bnb_4bit_use_double_quant=True,
-                llm_int8_enable_fp32_cpu_offload=True  # Allow offloading to CPU RAM
             )
+            
+            # Force all layers to the primary device to prevent 'accelerate' from 
+            # splitting 4-bit weights across CPU/Disk, which triggers the uint8 bug.
+            target_device = self.device if isinstance(self.device, str) else str(self.device)
+            custom_device_map = {"": target_device} if "cuda" in target_device else "auto"
+
             self.llama = AutoModelForCausalLM.from_pretrained(
                 llama_model_name,
                 quantization_config=bnb_config,
-                device_map="auto",
+                device_map=custom_device_map,
                 token=hf_token,
+                low_cpu_mem_usage=True,
                 trust_remote_code=True
             )
-            print("  LLaMA-3 loaded with 4-bit quantization (CPU offload enabled).")
+            print("  LLaMA-3 loaded with 4-bit quantization.")
         except Exception as e:
             print(f"  4-bit loading failed ({e}), trying 8-bit...")
 
@@ -322,11 +328,16 @@ class MultiModalModel(nn.Module):
         queries = self.qformer(image_tokens)
         visual_embeds = self.projection(queries)
 
-        visual_embeds = visual_embeds.to(device=embed_device, dtype=self.llama.dtype)
+        # Ensure we use float16 for computation, even if model weights are uint8 (quantized)
+        compute_dtype = getattr(self.llama, "dtype", torch.float16)
+        if compute_dtype == torch.uint8:
+            compute_dtype = torch.float16
+
+        visual_embeds = visual_embeds.to(device=embed_device, dtype=compute_dtype)
 
         input_ids = input_ids.to(embed_device)
         text_embeds = self.llama.get_input_embeddings()(input_ids)
-        text_embeds = text_embeds.to(dtype=self.llama.dtype)
+        text_embeds = text_embeds.to(dtype=compute_dtype)
 
         # Combine (all tensors now on embed_device)
         inputs_embeds = torch.cat([visual_embeds, text_embeds], dim=1)
@@ -448,8 +459,12 @@ def generate_caption_vit(
     queries = model.qformer(image_tokens)            # (1, 32, 768)
     visual_embeds = model.projection(queries)        # (1, 32, llama_dim)
 
-    # Move to LLaMA's embedding device and cast dtype
-    visual_embeds = visual_embeds.to(device=embed_device, dtype=model.llama.dtype)
+    # Move to LLaMA's embedding device and cast to compute dtype (avoid uint8 weights dtype)
+    compute_dtype = getattr(model.llama, "dtype", torch.float16)
+    if compute_dtype == torch.uint8:
+        compute_dtype = torch.float16
+        
+    visual_embeds = visual_embeds.to(device=embed_device, dtype=compute_dtype)
 
     # ── Text Prompt ──
     tokenizer = model.tokenizer
@@ -535,8 +550,12 @@ def generate_multiple_captions_vit(
     queries = model.qformer(image_tokens)            # (1, 32, 768)
     visual_embeds = model.projection(queries)        # (1, 32, llama_dim)
 
-    # Move to LLaMA's embedding device and cast dtype
-    visual_embeds = visual_embeds.to(device=embed_device, dtype=model.llama.dtype)
+    # Move to LLaMA's embedding device and cast to compute dtype (avoid uint8 weights dtype)
+    compute_dtype = getattr(model.llama, "dtype", torch.float16)
+    if compute_dtype == torch.uint8:
+        compute_dtype = torch.float16
+        
+    visual_embeds = visual_embeds.to(device=embed_device, dtype=compute_dtype)
 
     # ── Text Prompt ──
     tokenizer = model.tokenizer
