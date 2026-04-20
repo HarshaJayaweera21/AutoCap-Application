@@ -31,14 +31,19 @@ vit_transform = T.Compose([
 #  Vision Encoder (frozen CLIP ViT-B/16)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 class ViTEncoder(nn.Module):
-    def __init__(self, model_name="openai/clip-vit-base-patch16", device=None):
+    def __init__(self, clip_vision_model, device=None):
+        """
+        Args:
+            clip_vision_model: The vision_model component of an already-loaded CLIPModel.
+                               Injected externally so the CLIP weights are shared and not
+                               duplicated in memory.
+            device: Target torch device for inference.
+        """
         super().__init__()
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
 
-        # Load CLIP and extract vision encoder (use safetensors to avoid torch.load CVE)
-        hf_token = os.environ.get("HF_TOKEN")
-        clip = CLIPModel.from_pretrained(model_name, token=hf_token, use_safetensors=True)
-        self.vision_encoder = clip.vision_model
+        # Use the injected vision encoder directly (no separate CLIP load)
+        self.vision_encoder = clip_vision_model
 
         # Freeze all parameters
         for param in self.vision_encoder.parameters():
@@ -354,21 +359,29 @@ class MultiModalModel(nn.Module):
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #  Factory: build entire model and load trained weights
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-def load_vit_model_for_inference(checkpoint_path: str, device: torch.device):
+def load_vit_model_for_inference(checkpoint_path: str, device: torch.device, clip_model=None):
     """
     Build the full MultiModalModel and load the trained Q-Former
     and projection weights from the checkpoint.
 
     Args:
         checkpoint_path: Path to ViT_1_1_model.pt
-        device: Target torch device
+        device:          Target torch device
+        clip_model:      Optional pre-loaded CLIPModel whose vision_model will be shared.
+                         If None, the ViTEncoder will raise an error (CLIP must be provided).
 
     Returns:
         Fully initialised MultiModalModel in eval mode.
     """
     print(f"Building ViT 1.1 model (device={device}) ...")
 
-    vit = ViTEncoder(device=str(device))
+    if clip_model is None:
+        raise ValueError(
+            "A shared CLIPModel must be passed to load_vit_model_for_inference via the "
+            "'clip_model' argument. Load CLIP once in CaptionService and share it."
+        )
+
+    vit = ViTEncoder(clip_vision_model=clip_model.vision_model, device=str(device))
     qformer = QFormer()
 
     model = MultiModalModel(
