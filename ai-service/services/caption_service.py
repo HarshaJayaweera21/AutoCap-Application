@@ -8,6 +8,7 @@ from PIL import Image
 from fastapi import HTTPException
 from models.baseline import EncoderCNN, DecoderRNN, generate_caption, toTensor
 from models.caption import CaptionModel, get_tokenizer, generate_caption_greedy, generate_multiple_captions, caption_transform
+from models.vit_model import load_vit_model_for_inference, generate_multiple_captions_vit, vit_transform
 from models.clip_evaluator import ClipEvaluator
 
 # Number of candidate captions to generate for multi-caption models
@@ -24,10 +25,13 @@ class CaptionService:
         self.caption_model = None
         self.tokenizer = None
 
+        self.vit_model = None
+
         self.clip_evaluator = None
         
         self._load_baseline_model()
         self._load_caption_model()
+        self._load_vit_model()
         self._load_clip_model()
 
     def _load_baseline_model(self):
@@ -81,6 +85,21 @@ class CaptionService:
             print(f"Error loading caption_model: {e}")
             self.caption_model = None
 
+    def _load_vit_model(self):
+        try:
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            checkpoint_path = os.path.join(current_dir, '..', 'models', 'ViT_1_1_model.pt')
+
+            if not os.path.exists(checkpoint_path):
+                print(f"Warning: ViT 1.1 checkpoint not found at {checkpoint_path}")
+                return
+
+            self.vit_model = load_vit_model_for_inference(checkpoint_path, self.device)
+            print("ViT 1.1 model loaded successfully.")
+        except Exception as e:
+            print(f"Error loading ViT 1.1 model: {e}")
+            self.vit_model = None
+
     def _load_clip_model(self):
         try:
             self.clip_evaluator = ClipEvaluator(self.device)
@@ -126,6 +145,37 @@ class CaptionService:
                 return (caption, similarity_score)
             except Exception as e:
                 raise HTTPException(status_code=500, detail=f"Error generating baseline caption: {e}")
+        elif model_variant == "vit_model":
+            if self.vit_model is None:
+                raise HTTPException(status_code=503, detail="ViT 1.1 model is not loaded.")
+
+            try:
+                image_tensor = vit_transform(pil_image).unsqueeze(0).to(self.device)
+
+                # Generate multiple candidate captions
+                candidates = generate_multiple_captions_vit(
+                    self.vit_model,
+                    image_tensor,
+                    num_captions=NUM_CANDIDATE_CAPTIONS,
+                    max_new_tokens=kwargs.get("max_length", 50),
+                    min_new_tokens=kwargs.get("min_length", 5),
+                    temperature=kwargs.get("temperature", 0.7),
+                    top_p=kwargs.get("top_p", 0.9),
+                    repetition_penalty=kwargs.get("repetition_penalty", 1.2),
+                    num_beams=kwargs.get("num_beams", 1),
+                )
+
+                print(f"  Generated {len(candidates)} candidate captions (ViT 1.1)")
+
+                # Use CLIP to select the best caption
+                if self.clip_evaluator is not None and len(candidates) > 0:
+                    best_caption, similarity_score = self.clip_evaluator.select_best(pil_image, candidates)
+                    return (best_caption, similarity_score)
+                else:
+                    print("  Warning: CLIP not available, returning first candidate")
+                    return (candidates[0] if candidates else "", 0.0)
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"Error generating ViT caption: {e}")
         else:
             if self.caption_model is None:
                 raise HTTPException(status_code=503, detail="Caption model is not loaded.")

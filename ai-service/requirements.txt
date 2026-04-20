@@ -9,3 +9,5 @@ Pillow
 python-multipart
 torch
 torchvision
+accelerate
+bitsandbytes

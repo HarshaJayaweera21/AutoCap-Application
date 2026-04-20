@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FaSun, FaMoon } from 'react-icons/fa';
-import { useTheme } from '../context/ThemeContext';
 import './Header.css';
 
 /* ---------- cookie helpers ---------- */
@@ -53,7 +52,7 @@ function Header() {
     const location = useLocation();
     const [menuOpen, setMenuOpen] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
-    const { theme, toggleTheme } = useTheme();
+    const [theme, setTheme] = useState<'light' | 'dark'>('dark');
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     const role = getCookie('role'); // "ADMIN" | "USER" | null
@@ -84,6 +83,9 @@ function Header() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [dropdownOpen]);
 
+    const toggleTheme = () => {
+        setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+    };
 
     const handleLogout = async () => {
         const token = getCookie('token');

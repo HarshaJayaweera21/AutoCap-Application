@@ -28,6 +28,7 @@ const PARAMS: ParamDef[] = [
     type: 'select',
     options: [
       { value: 'caption_model', label: 'Caption Model (AutoCap-V1)' },
+      { value: 'vit_model', label: 'ViT Model (AutoCap-V1.1)' },
       { value: 'base_line_model', label: 'Baseline Model' },
     ],
   },
@@ -127,7 +128,7 @@ export const BlipConfigPanel: React.FC<BlipConfigPanelProps> = ({ config, onChan
           </svg>
           <span className={styles.headerTitle}>Model Configuration</span>
         </div>
-        <span className={styles.headerBadge}>{config.modelVariant === 'caption_model' ? 'Caption' : 'Baseline'}</span>
+        <span className={styles.headerBadge}>{config.modelVariant === 'caption_model' ? 'Caption' : config.modelVariant === 'vit_model' ? 'ViT' : 'Baseline'}</span>
       </div>
 
       <div className={styles.body}>
