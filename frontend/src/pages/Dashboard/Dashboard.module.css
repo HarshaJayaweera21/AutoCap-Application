@@ -444,6 +444,147 @@
   color: var(--text-primary);
 }
 
+.dsMenuContainer {
+  position: relative;
+}
+
+.dsMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 100;
+  min-width: 180px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+  padding: var(--space-1);
+  margin-top: var(--space-1);
+  display: flex;
+  flex-direction: column;
+  animation: menuAppear 0.15s ease-out;
+}
+
+@keyframes menuAppear {
+  from { opacity: 0; transform: scale(0.95) translateY(-5px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.dsMenuItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--transition-fast);
+  width: 100%;
+}
+
+.dsMenuItem:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.dsMenuItem svg {
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.dsMenuItem:hover svg {
+  opacity: 1;
+}
+
+.dsMenuDivider {
+  height: 1px;
+  background: var(--border-default);
+  margin: var(--space-1) 0;
+}
+
+.dsMenuDelete {
+  color: #ff5e5e;
+}
+
+.dsMenuDelete:hover {
+  background: rgba(255, 94, 94, 0.1);
+  color: #ff5e5e;
+}
+
+.dsMenuContainer {
+  position: relative;
+}
+
+.dsMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 100;
+  min-width: 180px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+  padding: var(--space-1);
+  margin-top: var(--space-1);
+  display: flex;
+  flex-direction: column;
+  animation: menuAppear 0.15s ease-out;
+}
+
+@keyframes menuAppear {
+  from { opacity: 0; transform: scale(0.95) translateY(-5px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.dsMenuItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--transition-fast);
+}
+
+.dsMenuItem:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.dsMenuItem svg {
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.dsMenuItem:hover svg {
+  opacity: 1;
+}
+
+.dsMenuDivider {
+  height: 1px;
+  background: var(--border-default);
+  margin: var(--space-1) 0;
+}
+
+.dsMenuDelete {
+  color: #ff5e5e;
+}
+
+.dsMenuDelete:hover {
+  background: rgba(255, 94, 94, 0.1);
+  color: #ff5e5e;
+}
+
 /* =====================
    Wizard Stepper
    ===================== */
@@ -682,6 +823,143 @@
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* =====================
+   Modal
+   ===================== */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modalContent {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 450px;
+  padding: var(--space-8);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  animation: modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalSlideUp {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modalTitle {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.modalDescription {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.modalBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.modalInputLabel {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: var(--weight-bold);
+}
+
+.modalInput {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  color: var(--text-primary);
+  font-size: var(--text-base);
+  transition: all var(--transition-base);
+}
+
+.modalInput:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 0 3px rgba(25, 75, 255, 0.15);
+}
+
+.modalFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+}
+
+.modalCancelBtn {
+  background: transparent;
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  padding: var(--space-2) var(--space-5);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.modalCancelBtn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+
+.modalSaveBtn {
+  background: var(--primary);
+  border: none;
+  color: white;
+  padding: var(--space-2) var(--space-6);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: 0 4px 12px rgba(25, 75, 255, 0.25);
+}
+
+.modalSaveBtn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(25, 75, 255, 0.35);
+}
+
+.modalSaveBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* =====================
