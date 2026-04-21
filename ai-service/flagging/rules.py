@@ -10,7 +10,7 @@ class BaseRule:
 
 class LowAlignmentRule(BaseRule):
     """Flags captions with a CLIP score below the specified threshold."""
-    def __init__(self, threshold: float = 0.9):
+    def __init__(self, threshold: float = 0.68):
         super().__init__("LOW_ALIGNMENT")
         self.threshold = threshold
 

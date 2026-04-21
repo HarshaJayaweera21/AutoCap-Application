@@ -1,7 +1,7 @@
 from flagging.rules import LowAlignmentRule, VocabRule
 
 class FlagEngine:
-    def __init__(self, clip_threshold: float = 0.9):
+    def __init__(self, clip_threshold: float = 0.68):
         self.rules = [
             LowAlignmentRule(threshold=clip_threshold),
             VocabRule()
