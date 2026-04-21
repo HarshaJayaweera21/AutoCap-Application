@@ -13,18 +13,8 @@ interface JobProgressTrackerProps {
   navigate: (path: string) => void;
 }
 
-const STAGES: { status: JobStatus; label: string }[] = [
-  { status: 'UPLOADING', label: 'Uploading' },
-  { status: 'QUEUED', label: 'Queued' },
-  { status: 'PROCESSING', label: 'Processing' },
-  { status: 'GENERATING', label: 'Generating' },
-  { status: 'SCORING', label: 'Scoring' },
-  { status: 'COMPLETE', label: 'Complete' },
-];
-
-const STAGE_ORDER = STAGES.map((s) => s.status);
-
-const PIPELINE_STAGES = [
+// Removed PIPELINE_STAGES constant as we use hook metadata now
+const PIPELINE_BLOCKS = [
   { id: 'uploading', label: 'Uploading', matchIndex: [0] },
   { id: 'queued', label: 'Queued', matchIndex: [1] },
   { id: 'processing', label: 'Processing', matchIndex: [2] },
@@ -39,42 +29,7 @@ export const JobProgressTracker: React.FC<JobProgressTrackerProps> = ({
   navigate,
 }) => {
   const { statusData, error } = useJobStatus(jobId);
-  const [currentPhase, setCurrentPhase] = useState<JobStatus>('UPLOADING');
-
-  // Simulation Timeline logic
-  useEffect(() => {
-    // 0 -> 3s: UPLOADING
-    const t1 = setTimeout(() => setCurrentPhase('QUEUED'), 3000); // at 3s
-    const t2 = setTimeout(() => setCurrentPhase('PROCESSING'), 5000); // at 5s (3+2)
-    const t3 = setTimeout(() => setCurrentPhase('GENERATING'), 8000); // at 8s (3+2+3)
-    
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-    };
-  }, []);
-
-  // Waiting for realization phase
-  useEffect(() => {
-    if (statusData?.status === 'FAILED') {
-      setCurrentPhase('FAILED');
-      return;
-    }
-
-    if (currentPhase === 'GENERATING' && statusData?.status === 'COMPLETE') {
-      setCurrentPhase('SCORING');
-      setTimeout(() => {
-        setCurrentPhase('COMPLETE');
-        onComplete();
-      }, 1000); // Scoring for 1s
-    }
-  }, [currentPhase, statusData?.status, onComplete]);
-
-  const currentStatus = currentPhase === 'FAILED' ? 'FAILED' : (error ? 'FAILED' : currentPhase);
-  const currentIndex = STAGE_ORDER.indexOf(currentStatus === 'FAILED' ? 'COMPLETE' : currentStatus);
-
-  // Replaced by simulation logic above
+  const { currentPhase, currentStatus, currentIndex, simulatedProcessedCount, progressPct: overallPct } = useJobSimulation(jobId, statusData, error, onComplete);
 
   const [liveScore, setLiveScore] = useState<string>('0.00');
 
@@ -92,11 +47,11 @@ export const JobProgressTracker: React.FC<JobProgressTrackerProps> = ({
       setLiveScore(finalScore);
     }
     return () => clearInterval(interval);
-  }, [currentStatus]);
+  }, [currentStatus, statusData]);
 
   const total = statusData?.totalCount || 0;
-  const processed = statusData?.processedCount || 0;
-  const progressPct = total > 0 ? (processed / total) * 100 : 0;
+  const processed = currentStatus === 'COMPLETE' ? total : simulatedProcessedCount;
+  const itemProgressPct = total > 0 ? (processed / total) * 100 : 0;
   
   // Fake estimation logic: ~0.8s per remaining image
   const remainingImages = total - processed;
@@ -112,10 +67,10 @@ export const JobProgressTracker: React.FC<JobProgressTrackerProps> = ({
 
       {/* Pipeline Block Visualization */}
       <div className={styles.pipelineContainer}>
-        {PIPELINE_STAGES.map((stage, i) => {
-          const isCompleted = currentIndex > Math.max(...stage.matchIndex);
-          const isActive = stage.matchIndex.includes(currentIndex) && currentStatus !== 'FAILED';
-          const isFailed = currentStatus === 'FAILED' && stage.matchIndex.includes(currentIndex);
+        {PIPELINE_BLOCKS.map((stage, idx) => {
+          const isCompleted = currentIndex > idx;
+          const isActive = currentIndex === idx && currentStatus !== 'FAILED';
+          const isFailed = currentStatus === 'FAILED' && isActive;
 
           return (
             <React.Fragment key={stage.id}>
@@ -162,7 +117,7 @@ export const JobProgressTracker: React.FC<JobProgressTrackerProps> = ({
             {processed} <span className={styles.statSubtext}>/ {total || '--'}</span>
           </div>
           <div className={styles.statsProgressBar}>
-            <div className={styles.statsProgressFill} style={{ width: `${progressPct}%` }} />
+            <div className={styles.statsProgressFill} style={{ width: `${itemProgressPct}%` }} />
           </div>
         </div>
 

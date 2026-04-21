@@ -2,7 +2,6 @@ import React, { useReducer, useCallback, useEffect, useState, useMemo } from 're
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { DEFAULT_BLIP_CONFIG } from '../../types/dashboard.types';
-import type { DashboardFormState } from '../../types/dashboard.types';
 import { dashboardReducer } from './dashboardReducer';
 import Header from '../../components/Header';
 import { UploadZone } from '../../components/dashboard/UploadZone/UploadZone';
@@ -14,6 +13,9 @@ import { StatsCard } from '../../components/dashboard/StatsCard/StatsCard';
 import { DatasetTrendsChart, ModelDistributionChart, SimilarityGauge } from '../../components/dashboard/DashboardCharts';
 import { uploadImages } from '../../api/uploadApi';
 import { getRecentDatasets, downloadDataset, getMyDatasets, deleteDataset, renameDataset } from '../../api/datasetApi';
+import { useJobStatus } from '../../hooks/useJobStatus';
+import { useJobSimulation, STAGES } from '../../hooks/useJobSimulation';
+import type { RecentDataset, DashboardFormState, JobStatus } from '../../types/dashboard.types';
 import styles from './Dashboard.module.css';
 
 const initialState: DashboardFormState = {
@@ -122,6 +124,9 @@ export const Dashboard: React.FC = () => {
     queryFn: getMyDatasets,
     refetchOnWindowFocus: false,
   });
+
+  const { statusData: activeJobData, error: activeJobError } = useJobStatus(state.activeJobId);
+  const { currentPhase, currentStatus, currentIndex, simulatedProcessedCount, progressPct } = useJobSimulation(state.activeJobId, activeJobData, activeJobError);
 
   /* ── Computed stats ─────────────────────────────────────────────── */
   const stats = useMemo(() => {
@@ -519,33 +524,46 @@ export const Dashboard: React.FC = () => {
             {hasActiveJob ? (
               <div className={styles.jobMonitorBody}>
                 <div className={styles.jobItem}>
-                  <span className={styles.jobItemName}>Job #{state.activeJobId}</span>
-                  <div className={styles.jobProgressBar}>
-                    <div className={styles.jobProgressFill} style={{ width: '64%' }} />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span className={styles.jobItemName}>Job #{state.activeJobId}</span>
+                      <span className={styles.jobProgressPct}>{progressPct}%</span>
+                    </div>
+                    <div className={styles.jobProgressBar}>
+                      <div className={styles.jobProgressFill} style={{ width: `${progressPct}%` }} />
+                    </div>
+                    <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+                      {currentStatus === 'COMPLETE' ? 'Finished' : `${simulatedProcessedCount} / ${activeJobData?.totalCount || '--'} images`}
+                    </span>
                   </div>
-                  <span className={styles.jobProgressPct}>64%</span>
                 </div>
                 <div className={styles.jobStages}>
-                  <div className={styles.jobStage}>
-                    <span className={styles.jobStageDotComplete} />
-                    <span>Preprocessing</span>
-                    <span className={styles.jobStageStatus}>Complete</span>
-                  </div>
-                  <div className={styles.jobStage}>
-                    <span className={styles.jobStageDotComplete} />
-                    <span>Extraction</span>
-                    <span className={styles.jobStageStatus}>Complete</span>
-                  </div>
-                  <div className={styles.jobStage}>
-                    <span className={styles.jobStageDotActive} />
-                    <span>Generation</span>
-                    <span className={styles.jobStageStatusActive}>In Progress</span>
-                  </div>
-                  <div className={styles.jobStage}>
-                    <span className={styles.jobStageDotPending} />
-                    <span className={styles.jobStagePending}>Evaluation</span>
-                    <span className={styles.jobStageStatusPending}>Pending</span>
-                  </div>
+                  {STAGES.slice(0, 5).map((stage, idx) => {
+                    const isCompleted = currentIndex > idx;
+                    const isActive = currentIndex === idx && currentStatus !== 'FAILED';
+                    const isPending = currentIndex < idx;
+                    const isFailed = currentStatus === 'FAILED' && isActive;
+
+                    return (
+                      <div key={stage.status} className={`${styles.jobStage} ${isPending ? styles.jobStagePending : ''}`}>
+                        <span className={
+                          isCompleted ? styles.jobStageDotComplete : 
+                          isActive ? styles.jobStageDotActive : 
+                          isFailed ? styles.jobStageDotFailed : 
+                          styles.jobStageDotPending
+                        } />
+                        <span>{stage.label}</span>
+                        <span className={
+                          isCompleted ? styles.jobStageStatus : 
+                          isActive ? styles.jobStageStatusActive : 
+                          isFailed ? styles.jobStageStatusFailed :
+                          styles.jobStageStatusPending
+                        }>
+                          {isCompleted ? 'Complete' : isActive ? 'In Progress' : 'Pending'}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             ) : (

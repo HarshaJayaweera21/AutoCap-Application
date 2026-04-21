@@ -253,6 +253,15 @@
   flex-shrink: 0;
 }
 
+.jobStageDotFailed {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--error);
+  flex-shrink: 0;
+  box-shadow: 0 0 8px rgba(232, 74, 52, 0.3);
+}
+
 .jobStageStatus {
   margin-left: auto;
   font-size: var(--text-xs);
@@ -269,6 +278,12 @@
   margin-left: auto;
   font-size: var(--text-xs);
   color: var(--text-placeholder);
+}
+
+.jobStageStatusFailed {
+  margin-left: auto;
+  font-size: var(--text-xs);
+  color: var(--error);
 }
 
 .jobStagePending {
