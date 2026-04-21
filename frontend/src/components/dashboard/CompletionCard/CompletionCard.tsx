@@ -6,6 +6,7 @@ interface CompletionCardProps {
   totalItems: number;
   onDownload: () => void;
   onView: () => void;
+  onReset: () => void;
 }
 
 export const CompletionCard: React.FC<CompletionCardProps> = ({
@@ -13,6 +14,7 @@ export const CompletionCard: React.FC<CompletionCardProps> = ({
   totalItems,
   onDownload,
   onView,
+  onReset,
 }) => {
   return (
     <div
@@ -39,12 +41,28 @@ export const CompletionCard: React.FC<CompletionCardProps> = ({
       <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', marginBottom: 'var(--space-4)' }}>
         {totalItems} image{totalItems !== 1 ? 's' : ''} processed
       </p>
-      <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
-        <button className="btn-primary" onClick={onDownload} style={{ flex: 1 }}>
-          Download Dataset
-        </button>
-        <button className="btn-secondary" onClick={onView} style={{ flex: 1 }}>
-          View Dataset
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+        <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
+          <button className="btn-primary" onClick={onDownload} style={{ flex: 1 }}>
+            Download Dataset
+          </button>
+          <button className="btn-secondary" onClick={onView} style={{ flex: 1 }}>
+            View Dataset
+          </button>
+        </div>
+        <button 
+          className="btn-secondary" 
+          onClick={onReset}
+          style={{ 
+            width: '100%', 
+            border: '1px dashed var(--primary-lighter)', 
+            background: 'rgba(162, 182, 255, 0.05)',
+            color: 'var(--primary-lighter)',
+            fontWeight: 'var(--weight-medium)',
+            marginTop: 'var(--space-1)'
+          }}
+        >
+          + Generate Another Dataset
         </button>
       </div>
     </div>

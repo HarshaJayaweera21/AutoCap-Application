@@ -38,15 +38,42 @@ export const JobProgressTracker: React.FC<JobProgressTrackerProps> = ({
   navigate,
 }) => {
   const { statusData, error } = useJobStatus(jobId);
+  const [currentPhase, setCurrentPhase] = useState<JobStatus>('UPLOADING');
 
-  const currentStatus = statusData?.status ?? 'UPLOADING';
+  // Simulation Timeline logic
+  useEffect(() => {
+    // 0 -> 3s: UPLOADING
+    const t1 = setTimeout(() => setCurrentPhase('QUEUED'), 3000); // at 3s
+    const t2 = setTimeout(() => setCurrentPhase('PROCESSING'), 5000); // at 5s (3+2)
+    const t3 = setTimeout(() => setCurrentPhase('GENERATING'), 8000); // at 8s (3+2+3)
+    
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
+  }, []);
+
+  // Waiting for realization phase
+  useEffect(() => {
+    if (statusData?.status === 'FAILED') {
+      setCurrentPhase('FAILED');
+      return;
+    }
+
+    if (currentPhase === 'GENERATING' && statusData?.status === 'COMPLETE') {
+      setCurrentPhase('SCORING');
+      setTimeout(() => {
+        setCurrentPhase('COMPLETE');
+        onComplete();
+      }, 1000); // Scoring for 1s
+    }
+  }, [currentPhase, statusData?.status, onComplete]);
+
+  const currentStatus = currentPhase === 'FAILED' ? 'FAILED' : (error ? 'FAILED' : currentPhase);
   const currentIndex = STAGE_ORDER.indexOf(currentStatus === 'FAILED' ? 'COMPLETE' : currentStatus);
 
-  useEffect(() => {
-    if (statusData?.status === 'COMPLETE') {
-      onComplete();
-    }
-  }, [statusData?.status, onComplete]);
+  // Replaced by simulation logic above
 
   const [liveScore, setLiveScore] = useState<string>('0.00');
 
@@ -166,6 +193,7 @@ export const JobProgressTracker: React.FC<JobProgressTrackerProps> = ({
           totalItems={statusData.totalCount}
           onDownload={() => downloadDataset(statusData.datasetId!, statusData.datasetName || `Dataset #${statusData.datasetId}`)}
           onView={() => navigate(`/datasets/${statusData.datasetId}`)}
+          onReset={onReset}
         />
       )}
 
