@@ -6,17 +6,16 @@ from typing import List, Tuple
 
 class ClipEvaluator:
     """
-    Uses a shared OpenAI CLIP instance to score and rank candidate captions
-    against an image. The model and processor are injected externally so that
-    a single CLIP instance can be shared across all model variants.
+    CLIP-based evaluator to score and rank captions against an image.
+    Uses cosine similarity between normalized image and text embeddings.
     """
 
     def __init__(self, device: torch.device, model: CLIPModel, processor: CLIPProcessor):
         """
         Args:
-            device:    The torch device (cuda/cpu) to run inference on.
-            model:     A pre-loaded CLIPModel instance (already on device).
-            processor: The matching CLIPProcessor for tokenisation/preprocessing.
+            device: torch.device (cuda or cpu)
+            model: Preloaded CLIPModel (already moved to device)
+            processor: CLIPProcessor for preprocessing
         """
         self.device = device
         self.model = model
@@ -26,16 +25,19 @@ class ClipEvaluator:
     @torch.no_grad()
     def score_captions(self, image: Image.Image, captions: List[str]) -> List[float]:
         """
-        Compute CLIP cosine similarity scores between an image and
-        a list of candidate captions.
+        Compute cosine similarity scores between an image and captions.
 
         Args:
-            image: A PIL RGB image.
-            captions: List of candidate caption strings.
+            image: PIL Image
+            captions: List of caption strings
 
         Returns:
-            List of similarity scores (floats between 0 and 1), one per caption.
+            List of cosine similarity scores (-1 to 1)
         """
+        if not captions:
+            return []
+
+        # Preprocess inputs
         inputs = self.processor(
             text=captions,
             images=image,
@@ -43,48 +45,86 @@ class ClipEvaluator:
             padding=True,
             truncation=True
         )
-        # Move all tensors to the correct device
+
+        # Move to GPU/CPU
         inputs = {k: v.to(self.device) for k, v in inputs.items()}
 
+        # Forward pass
         outputs = self.model(**inputs)
 
-        # logits_per_image shape: (1, num_captions)
-        # Apply softmax-like normalization via cosine similarity
-        logits = outputs.logits_per_image.squeeze(0)  # (num_captions,)
+        # Extract embeddings
+        image_embeds = outputs.image_embeds  # shape: (1, D)
+        text_embeds = outputs.text_embeds    # shape: (N, D)
 
-        # Convert logits to 0-1 similarity scores
-        # CLIP logits are scaled cosine similarities (multiplied by temperature)
-        # We normalize them to a 0-1 range using sigmoid for interpretability
-        scores = torch.sigmoid(logits / 10.0).cpu().tolist()
+        # Normalize embeddings (CRITICAL for cosine similarity)
+        image_embeds = image_embeds / image_embeds.norm(p=2, dim=-1, keepdim=True)
+        text_embeds = text_embeds / text_embeds.norm(p=2, dim=-1, keepdim=True)
 
-        return scores
+        # Cosine similarity
+        similarities = (image_embeds @ text_embeds.T).squeeze(0)  # (N,)
+
+        return similarities.detach().cpu().tolist()
 
     @torch.no_grad()
-    def select_best(self, image: Image.Image, captions: List[str]) -> Tuple[str, float]:
+    def select_best(
+        self,
+        image: Image.Image,
+        captions: List[str],
+        threshold: float = 0.27
+    ) -> Tuple[str, float, bool]:
         """
-        Score all candidate captions and return the best one.
+        Select best caption based on similarity score.
 
         Args:
-            image: A PIL RGB image.
-            captions: List of candidate caption strings.
+            image: PIL Image
+            captions: List of captions
+            threshold: Minimum acceptable raw cosine similarity score
 
         Returns:
-            Tuple of (best_caption_text, similarity_score).
+            (best_caption, normalized_score, is_flagged)
         """
-        if len(captions) == 0:
-            return ("", 0.0)
-
-        if len(captions) == 1:
-            scores = self.score_captions(image, captions)
-            return (captions[0], round(scores[0], 4))
+        if not captions:
+            return ("", 0.0, True)
 
         scores = self.score_captions(image, captions)
 
-        # Log all candidates and their scores for debugging
-        print("  CLIP Evaluation:")
-        for i, (cap, score) in enumerate(zip(captions, scores)):
-            marker = " <-- BEST" if score == max(scores) else ""
-            print(f"    [{i+1}] ({score:.4f}) {cap}{marker}")
-
         best_idx = scores.index(max(scores))
-        return (captions[best_idx], round(scores[best_idx], 4))
+        best_caption = captions[best_idx]
+        best_raw_score = scores[best_idx]
+
+        # Debug logging (useful for development)
+        print("\n🔍 CLIP Evaluation Results:")
+        for i, (cap, score) in enumerate(zip(captions, scores)):
+            normalized = self.normalize_score(score)
+            marker = " <-- BEST" if i == best_idx else ""
+            print(f"[{i+1}] Raw: {score:.4f} | Normalized: {normalized:.4f} | {cap}{marker}")
+
+        # Flag if raw score is below threshold
+        is_flagged = best_raw_score < threshold
+
+        # Return normalized score for UI display
+        normalized_best = self.normalize_score(best_raw_score)
+
+        return (best_caption, normalized_best, is_flagged)
+
+    @staticmethod
+    def normalize_score(score: float, min_score: float = 0.10, max_score: float = 0.35) -> float:
+        """
+        Convert cosine similarity to a 0-1 scale stretched over the
+        realistic CLIP score range for image-text pairs (0.10-0.45).
+
+        This makes low scores (e.g. 0.21) read as genuinely low (~0.31)
+        and good scores (e.g. 0.32) read as clearly higher (~0.63),
+        unlike the naive (score + 1) / 2 approach which compresses
+        everything into a narrow band around 0.60.
+
+        Args:
+            score:     Raw cosine similarity from CLIP (-1 to 1)
+            min_score: Lower bound of expected real-world score range
+            max_score: Upper bound of expected real-world score range
+
+        Returns:
+            Normalized score clamped to [0.0, 1.0]
+        """
+        normalized = (score - min_score) / (max_score - min_score)
+        return round(max(0.0, min(1.0, normalized)), 4)
