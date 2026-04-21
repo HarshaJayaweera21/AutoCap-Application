@@ -499,7 +499,8 @@
 
 /* ========== DOC ARTICLE ========== */
 .doc-article {
-  max-width: 800px;
+  max-width: 100%;
+  width: 100%;
 }
 
 .doc-header {

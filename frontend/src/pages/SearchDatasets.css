@@ -110,7 +110,7 @@
 }
 
 .mds-top-search-btn {
-    background: linear-gradient(135deg, #6B8AFF 0%, #194BFF 100%);
+    background: var(--primary);
     color: white;
     padding: 1.125rem 2.5rem;
     font-family: 'Plus Jakarta Sans', sans-serif;
@@ -124,7 +124,7 @@
 }
 
 .mds-top-search-btn:hover {
-    box-shadow: 0 0 15px rgba(25, 75, 255, 0.6);
+    box-shadow: 0 0 15px rgba(25, 75, 255, 0.4);
 }
 
 /* ---------- Table Container ---------- */
@@ -254,9 +254,13 @@
 
 /* Checkboxes */
 .mds-checkbox {
-    width: 1.25rem;
-    height: 1.25rem;
-    border-radius: 0.25rem;
+    width: 14px;
+    height: 14px;
+    min-width: 14px;
+    min-height: 14px;
+    padding: 0 !important;
+    margin: 0;
+    border-radius: 3px;
     border: 2px solid var(--mds-outline);
     background-color: transparent;
     cursor: pointer;
@@ -274,13 +278,13 @@
 .mds-checkbox:checked::after {
     content: '';
     position: absolute;
-    width: 4px;
-    height: 10px;
+    width: 3px;
+    height: 7px;
     border: solid var(--mds-surface);
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
-    top: 2px;
-    left: 6px;
+    top: 0px;
+    left: 3px;
 }
 
 /* Status Badges */

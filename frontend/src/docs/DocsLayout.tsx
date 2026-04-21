@@ -1,17 +1,3 @@
-import { useState } from "react";
-import Sidebar from "./Sidebar";
-import DocViewer from "./DocViewer";
-import "./docs.css";
-
-const DocsLayout = () => {
-  const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
-
-  return (
-    <div className="docs-container">
-      <Sidebar onSelectDoc={setSelectedDocId} />
-      <DocViewer selectedDocId={selectedDocId} />
-    </div>
-  );
-};
-
+// Legacy layout — not used. App uses pages/DocumentationPage instead.
+const DocsLayout = () => null;
 export default DocsLayout;

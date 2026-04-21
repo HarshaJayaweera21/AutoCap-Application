@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getTokenizers, adminCreateTokenizer, adminDeleteTokenizer } from '../services/api';
+import './ManageDocs.css';
 
 interface Tokenizer {
     id: string;
@@ -60,20 +61,27 @@ function ManageTokenizers() {
         }
     };
 
-    const handleDelete = async (id: string, name: string) => {
-        if (!window.confirm(`Delete tokenizer "${name}"?`)) return;
+    const [deleteTarget, setDeleteTarget] = useState<{id: string, name: string} | null>(null);
+
+    const openDeleteModal = (id: string, name: string) => setDeleteTarget({id, name});
+    const closeDeleteModal = () => setDeleteTarget(null);
+
+    const confirmDelete = async () => {
+        if (!deleteTarget) return;
         try {
-            await adminDeleteTokenizer(id);
-            setTokenizers(tokenizers.filter(t => t.id !== id));
+            await adminDeleteTokenizer(deleteTarget.id);
+            setTokenizers(tokenizers.filter(t => t.id !== deleteTarget.id));
+            closeDeleteModal();
         } catch {
             setError('Failed to delete tokenizer');
+            closeDeleteModal();
         }
     };
 
     if (loading) return <p>Loading...</p>;
 
     return (
-        <div>
+        <div className="mdo-page">
             {error && <div style={errorStyle}>{error}</div>}
 
             {/* Create form */}
@@ -96,51 +104,87 @@ function ManageTokenizers() {
                         <label style={labelStyle}>Order</label>
                         <input style={inputStyle} type="number" value={formOrder} onChange={e => setFormOrder(parseInt(e.target.value) || 0)} />
                     </div>
-                    <button type="submit" disabled={saving} style={btnStyle}>
-                        {saving ? '...' : '+ Add'}
+                    <button type="submit" disabled={saving} className="mdo-primary-btn">
+                        {saving ? '...' : <><span className="material-symbols-outlined">add</span> Add</>}
                     </button>
                 </div>
             </form>
 
-            <p style={{ color: 'rgba(255,255,255,0.5)', margin: '0 0 0.75rem' }}>{tokenizers.length} tokenizer(s)</p>
+            <div className="mdo-header" style={{ justifyContent: 'flex-start', marginBottom: '0.75rem' }}>
+                <p className="mdo-subtitle">{tokenizers.length} tokenizer(s)</p>
+            </div>
 
-            <table style={tableStyle}>
-                <thead>
-                    <tr>
-                        <th style={thStyle}>Name</th>
-                        <th style={thStyle}>Model Key</th>
-                        <th style={thStyle}>Description</th>
-                        <th style={thStyle}>Order</th>
-                        <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {tokenizers.map(t => (
-                        <tr key={t.id}>
-                            <td style={tdStyle}>{t.name}</td>
-                            <td style={{ ...tdStyle, fontFamily: 'monospace', color: '#a5a0ff' }}>{t.modelKey}</td>
-                            <td style={{ ...tdStyle, color: 'rgba(255,255,255,0.5)' }}>{t.description}</td>
-                            <td style={tdStyle}>{t.orderIndex}</td>
-                            <td style={{ ...tdStyle, textAlign: 'right' }}>
-                                <button onClick={() => handleDelete(t.id, t.name)} style={deleteBtnStyle}>Delete</button>
-                            </td>
-                        </tr>
-                    ))}
-                    {tokenizers.length === 0 && (
-                        <tr>
-                            <td colSpan={5} style={{ ...tdStyle, textAlign: 'center', color: 'rgba(255,255,255,0.4)' }}>
-                                No tokenizers configured. Add one above to get started.
-                            </td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
+            <div className="mdo-table-container">
+                <div className="mdo-table-scroll">
+                    <table className="mdo-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Model Key</th>
+                                <th>Description</th>
+                                <th>Order</th>
+                                <th style={{ textAlign: 'right' }}>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {tokenizers.map(t => (
+                                <tr key={t.id}>
+                                    <td className="mdo-cell-title">{t.name}</td>
+                                    <td style={{ fontFamily: 'monospace', color: '#a5a0ff' }}>{t.modelKey}</td>
+                                    <td className="mdo-cell-cat">{t.description}</td>
+                                    <td>{t.orderIndex}</td>
+                                    <td>
+                                        <div className="mdo-actions">
+                                            <button className="mdo-btn-icon danger" onClick={() => openDeleteModal(t.id, t.name)} title="Delete">
+                                                <span className="material-symbols-outlined">delete</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                            {tokenizers.length === 0 && (
+                                <tr>
+                                    <td colSpan={5} style={{ textAlign: 'center', color: '#8e8fa3', padding: '2rem' }}>
+                                        No tokenizers configured. Add one above to get started.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
             <div style={{ marginTop: '1rem', padding: '0.75rem 1rem', background: 'rgba(108,99,255,0.06)', borderRadius: '8px', border: '1px solid rgba(108,99,255,0.12)' }}>
                 <p style={{ margin: 0, fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>
                     <strong style={{ color: '#a5a0ff' }}>💡 Supported model keys:</strong> gpt-4o, gpt-4, gpt-3.5-turbo, text-davinci-003, text-davinci-002, text-davinci-001, davinci, curie, babbage, ada
                 </p>
             </div>
+
+            {deleteTarget && (
+                <div className="mdo-modal-overlay">
+                    <div className="mdo-modal-backdrop" onClick={closeDeleteModal}></div>
+                    <div className="mdo-modal-content mdo-modal-confirm">
+                        <div className="mdo-confirm-bar"></div>
+                        <div className="mdo-confirm-body">
+                            <div className="mdo-confirm-icon-wrap">
+                                <span className="material-symbols-outlined">delete_forever</span>
+                            </div>
+                            <h2 className="mdo-confirm-title">Delete Tokenizer?</h2>
+                            <p className="mdo-confirm-desc">
+                                Are you sure you want to delete the configuration for "{deleteTarget.name}"?
+                            </p>
+                            <div className="mdo-confirm-actions">
+                                <button className="mdo-btn-confirm" onClick={confirmDelete}>
+                                    Yes, delete tokenizer
+                                </button>
+                                <button className="mdo-btn-confirm-cancel" onClick={closeDeleteModal}>
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
