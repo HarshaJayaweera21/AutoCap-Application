@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getCategories, adminCreateCategory, adminUpdateCategory, adminDeleteCategory } from '../services/api';
 import type { Category } from '../types';
+import './ManageDocs.css';
 
 function ManageCategories() {
     const [categories, setCategories] = useState<Category[]>([]);
@@ -100,25 +101,33 @@ function ManageCategories() {
         }
     };
 
-    const handleDelete = async (id: string, name: string) => {
-        if (!window.confirm(`Delete category "${name}"? Documents in this category may be affected.`)) return;
+    const [deleteTarget, setDeleteTarget] = useState<{id: string, name: string} | null>(null);
+
+    const openDeleteModal = (cat: Category) => setDeleteTarget({id: cat.id, name: cat.name});
+    const closeDeleteModal = () => setDeleteTarget(null);
+
+    const confirmDelete = async () => {
+        if (!deleteTarget) return;
         try {
-            await adminDeleteCategory(id);
-            setCategories(categories.filter(c => c.id !== id));
+            await adminDeleteCategory(deleteTarget.id);
+            setCategories(categories.filter(c => c.id !== deleteTarget.id));
+            closeDeleteModal();
         } catch {
             setError('Failed to delete category. It may still have documents assigned.');
+            closeDeleteModal();
         }
     };
 
     if (loading) return <p>Loading...</p>;
 
     return (
-        <div>
+        <div className="mdo-page">
             {error && <div style={errorStyle}>{error}</div>}
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <p style={{ color: 'rgba(255,255,255,0.5)', margin: 0 }}>{categories.length} category(ies)</p>
-                <button onClick={openCreate} style={btnStyle}>+ Create New</button>
+            <div className="mdo-header" style={{ justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
+                <button onClick={openCreate} className="mdo-primary-btn">
+                    <span className="material-symbols-outlined">add</span> Create New
+                </button>
             </div>
 
             {/* Inline form */}
@@ -171,34 +180,69 @@ function ManageCategories() {
                 </form>
             )}
 
-            <table style={tableStyle}>
-                <thead>
-                    <tr>
-                        <th style={thStyle}>Name</th>
-                        <th style={thStyle}>Order</th>
-                        <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {categories.map(cat => (
-                        <tr key={cat.id}>
-                            <td style={tdStyle}>{cat.name}</td>
-                            <td style={tdStyle}>{cat.orderIndex}</td>
-                            <td style={{ ...tdStyle, textAlign: 'right' }}>
-                                <button onClick={() => openEdit(cat)} style={editBtnStyle}>Edit</button>
-                                <button onClick={() => handleDelete(cat.id, cat.name)} style={deleteBtnStyle}>Delete</button>
-                            </td>
-                        </tr>
-                    ))}
-                    {categories.length === 0 && (
-                        <tr>
-                            <td colSpan={3} style={{ ...tdStyle, textAlign: 'center', color: 'rgba(255,255,255,0.4)' }}>
-                                No categories found
-                            </td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
+            <div className="mdo-table-container">
+                <div className="mdo-table-scroll">
+                    <table className="mdo-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Order</th>
+                                <th style={{ textAlign: 'right' }}>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {categories.map(cat => (
+                                <tr key={cat.id}>
+                                    <td className="mdo-cell-title">{cat.name}</td>
+                                    <td>{cat.orderIndex}</td>
+                                    <td>
+                                        <div className="mdo-actions">
+                                            <button className="mdo-btn-icon" onClick={() => openEdit(cat)} title="Edit">
+                                                <span className="material-symbols-outlined">edit</span>
+                                            </button>
+                                            <button className="mdo-btn-icon danger" onClick={() => openDeleteModal(cat)} title="Delete">
+                                                <span className="material-symbols-outlined">delete</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                            {categories.length === 0 && (
+                                <tr>
+                                    <td colSpan={3} style={{ textAlign: 'center', color: '#8e8fa3', padding: '2rem' }}>
+                                        No categories found
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {deleteTarget && (
+                <div className="mdo-modal-overlay">
+                    <div className="mdo-modal-backdrop" onClick={closeDeleteModal}></div>
+                    <div className="mdo-modal-content mdo-modal-confirm">
+                        <div className="mdo-confirm-bar"></div>
+                        <div className="mdo-confirm-body">
+                            <div className="mdo-confirm-icon-wrap">
+                                <span className="material-symbols-outlined">delete_forever</span>
+                            </div>
+                            <h2 className="mdo-confirm-title">Delete Category?</h2>
+                            <p className="mdo-confirm-desc">
+                                Are you sure you want to delete the category "{deleteTarget.name}"? Documents in this category may be affected.
+                            </p>
+                            <div className="mdo-confirm-actions">
+                                <button className="mdo-btn-confirm" onClick={confirmDelete}>
+                                    Yes, delete category
+                                </button>
+                                <button className="mdo-btn-confirm-cancel" onClick={closeDeleteModal}>
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

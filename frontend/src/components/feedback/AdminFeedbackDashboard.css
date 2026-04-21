@@ -1,0 +1,495 @@
+/* AdminFeedbackDashboard.css - Matching the Tailwind HTML Prototype */
+
+.afb-page {
+    --surface-variant: #36333c;
+    --secondary: #f8ffb9;
+    --on-surface-variant: #c4c5d9;
+    --on-surface: #e6e0ec;
+    --error: #ffb4ab;
+    --primary: #b9c3ff;
+    --surface-container-highest: #36333c;
+    --surface-container: #211e27;
+    --surface-container-low: #1d1a23;
+    --surface-container-lowest: #0f0d15;
+    --background: #14121a;
+    --surface: #14121a;
+    --surface-dim: #14121a;
+    --outline-variant: #434656;
+    --outline: #8e8fa3;
+    --tertiary: #7bdc6c;
+    --secondary-fixed: #d9ef12;
+    --primary-container: #194bff;
+
+    background-color: var(--surface-dim);
+    color: var(--on-surface);
+    font-family: 'Manrope', system-ui, sans-serif;
+    min-height: calc(100vh - 64px); /* At least screen height */
+    display: flex;
+    flex-direction: column;
+}
+
+.afb-page * {
+    box-sizing: border-box;
+}
+
+.afb-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--surface);
+    padding: 3rem 1.5rem;
+    gap: 1.5rem;
+    position: relative;
+}
+
+@media (min-width: 768px) {
+    .afb-main {
+        padding-left: 3rem;
+        padding-right: 3rem;
+    }
+}
+
+/* Header & Bento */
+.afb-header {
+    margin-bottom: 2.5rem;
+}
+
+.afb-h1 {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--on-surface);
+    letter-spacing: -0.025em;
+    margin: 0 0 0.5rem 0;
+}
+
+.afb-subtitle {
+    font-size: 0.875rem;
+    color: var(--outline);
+    margin: 0;
+}
+
+.afb-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+}
+
+.afb-stat-card {
+    background-color: var(--surface-container-low);
+    padding: 1.25rem;
+    border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.afb-stat-label {
+    color: var(--outline);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.afb-stat-value {
+    font-size: 1.5rem;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 600;
+    color: var(--on-surface);
+}
+
+.afb-stat-value.highlight {
+    color: var(--secondary-fixed);
+}
+
+/* Split View Area */
+.afb-split-view {
+    display: flex;
+    flex: 1;
+    gap: 1.5rem;
+}
+
+/* Left Panel */
+.afb-left-panel {
+    width: 40%;
+    background-color: var(--surface-container-low);
+    border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+    box-shadow: 0 0 0 1px rgba(67, 70, 86, 0.05) inset;
+}
+
+.afb-filter-bar {
+    padding: 1rem;
+    background-color: var(--surface-container-highest);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    z-index: 10;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    gap: 0.5rem;
+}
+
+.afb-search-wrapper {
+    position: relative;
+    flex: 1 1 100%;
+}
+
+.afb-search-icon {
+    position: absolute;
+    left: 0.625rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--outline);
+    font-size: 16px;
+    font-family: 'Material Symbols Outlined';
+}
+
+.afb-search-input {
+    width: 100%;
+    background-color: #1F1E29;
+    color: var(--on-surface);
+    font-size: 0.875rem;
+    border-radius: 0.375rem;
+    border: 1px solid rgba(67, 70, 86, 0.3);
+    padding: 0.375rem 0.75rem 0.375rem 2.25rem;
+    outline: none;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.afb-search-input::placeholder {
+    color: var(--outline);
+}
+
+.afb-search-input:focus {
+    border-color: var(--primary-container);
+    box-shadow: 0 0 0 1px var(--primary-container);
+}
+
+.afb-select {
+    flex: 1;
+    background-color: #1F1E29;
+    color: var(--on-surface);
+    font-size: 0.75rem;
+    border-radius: 0.375rem;
+    border: 1px solid rgba(67, 70, 86, 0.3);
+    padding: 0.375rem 2rem 0.375rem 0.5rem;
+    outline: none;
+    appearance: none;
+    position: relative;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238e8fa3%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1em 1em;
+}
+
+.afb-select:focus {
+    border-color: var(--primary-container);
+    box-shadow: 0 0 0 1px var(--primary-container);
+}
+
+/* List Items */
+.afb-list-content {
+    flex: 1;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+/* Custom Scrollbar for list */
+.afb-list-content::-webkit-scrollbar {
+    width: 6px;
+}
+.afb-list-content::-webkit-scrollbar-thumb {
+    background: rgba(67, 70, 86, 0.5);
+    border-radius: 10px;
+}
+
+.afb-list-item {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid transparent;
+}
+
+.afb-list-item:hover {
+    background-color: var(--surface-container-highest);
+}
+
+.afb-list-item.selected {
+    background-color: var(--surface-container-highlight);
+    border: 1px solid var(--primary-container);
+}
+
+.afb-item-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.25rem;
+}
+
+.afb-item-user {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.afb-item-user.selected {
+    color: var(--secondary-fixed);
+}
+
+.afb-item-time {
+    font-size: 0.75rem;
+    color: var(--outline);
+}
+
+.afb-item-msg {
+    font-size: 0.875rem;
+    color: var(--on-surface-variant);
+    font-family: 'Manrope', sans-serif;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+}
+
+.afb-item-tags {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.afb-badge {
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.125rem;
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+.afb-badge-bug {
+    background-color: rgba(255, 180, 171, 0.1);
+    color: var(--error);
+}
+
+.afb-badge-praise {
+    background-color: rgba(123, 220, 108, 0.1);
+    color: var(--tertiary);
+}
+
+.afb-badge-feature {
+    background-color: rgba(185, 195, 255, 0.1);
+    color: var(--primary);
+}
+
+.afb-badge-critical {
+    background-color: #3b3841; /* surface-bright */
+    color: var(--on-surface-variant);
+}
+
+.afb-badge-neutral {
+    background-color: rgba(67, 70, 86, 0.2);
+    color: var(--on-surface-variant);
+}
+
+/* Right Panel */
+.afb-right-panel {
+    width: 60%;
+    background-color: var(--surface-container-lowest);
+    border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 0 0 1px rgba(67, 70, 86, 0.1) inset, inset 0 40px 100px rgba(20,18,26,0.8);
+}
+
+.afb-empty-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom right, rgba(29, 26, 35, 0.2), transparent);
+    pointer-events: none;
+}
+
+.afb-empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    opacity: 0.7;
+    position: relative;
+    z-index: 10;
+}
+
+.afb-empty-icon-wrap {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 9999px;
+    background-color: var(--surface-container-high);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.afb-empty-icon {
+    font-size: 2rem;
+    color: var(--outline);
+    font-family: 'Material Symbols Outlined';
+    font-weight: 300;
+}
+
+.afb-empty-title {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: var(--on-surface);
+    margin: 0 0 0.5rem 0;
+}
+
+.afb-empty-desc {
+    font-size: 0.875rem;
+    color: var(--on-surface-variant);
+    margin: 0;
+}
+
+/* Detail View (when item is selected) */
+.afb-detail-view {
+    padding: 2.5rem;
+    flex: 1;
+    z-index: 10;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.afb-detail-view::-webkit-scrollbar {
+    width: 6px;
+}
+.afb-detail-view::-webkit-scrollbar-thumb {
+    background: rgba(67, 70, 86, 0.5);
+    border-radius: 10px;
+}
+
+
+.afb-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.afb-detail-title {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--on-surface);
+    margin: 0 0 0.5rem 0;
+}
+
+.afb-detail-meta {
+    font-size: 0.875rem;
+    color: var(--outline);
+    font-family: 'Outfit', sans-serif;
+}
+
+.afb-detail-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.afb-detail-label {
+    font-size: 0.875rem;
+    color: var(--outline);
+    font-weight: 500;
+}
+
+.afb-status-select {
+    background-color: var(--surface-container-high);
+    color: var(--on-surface);
+    border: 1px solid var(--outline-variant);
+    padding: 0.5rem 2rem 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    outline: none;
+    appearance: none;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23e6e0ec%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1em 1em;
+}
+
+.afb-btn-delete {
+    background-color: rgba(255, 180, 171, 0.1);
+    color: var(--error);
+    border: 1px solid rgba(255, 180, 171, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.afb-btn-delete:hover {
+    background-color: rgba(255, 180, 171, 0.2);
+}
+
+.afb-detail-section-title {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--on-surface);
+    margin: 0 0 1rem 0;
+}
+
+.afb-detail-message {
+    background-color: var(--surface-container-high);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--on-surface-variant);
+    border: 1px solid rgba(67, 70, 86, 0.1);
+    white-space: pre-wrap;
+}
+
+.afb-stars {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+.afb-star {
+    font-size: 1.25rem;
+    color: var(--outline-variant);
+}
+.afb-star.active {
+    color: var(--secondary-fixed);
+}
+
+.afb-image-wrapper {
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 1px solid rgba(67, 70, 86, 0.2);
+    display: inline-block;
+}
+.afb-image-wrapper img {
+    max-width: 100%;
+    display: block;
+}

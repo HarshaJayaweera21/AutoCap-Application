@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getTags, adminCreateTag, adminDeleteTag } from '../services/api';
+import './ManageDocs.css';
 
 interface Tag {
     id: string;
@@ -48,20 +49,27 @@ function ManageTags() {
         }
     };
 
-    const handleDelete = async (id: string, name: string) => {
-        if (!window.confirm(`Delete tag "${name}"?`)) return;
+    const [deleteTarget, setDeleteTarget] = useState<{id: string, name: string} | null>(null);
+
+    const openDeleteModal = (id: string, name: string) => setDeleteTarget({id, name});
+    const closeDeleteModal = () => setDeleteTarget(null);
+
+    const confirmDelete = async () => {
+        if (!deleteTarget) return;
         try {
-            await adminDeleteTag(id);
-            setTags(tags.filter(t => t.id !== id));
+            await adminDeleteTag(deleteTarget.id);
+            setTags(tags.filter(t => t.id !== deleteTarget.id));
+            closeDeleteModal();
         } catch {
             setError('Failed to delete tag');
+            closeDeleteModal();
         }
     };
 
     if (loading) return <p>Loading...</p>;
 
     return (
-        <div>
+        <div className="mdo-page">
             {error && <div style={errorStyle}>{error}</div>}
 
             {/* Create form */}
@@ -80,38 +88,73 @@ function ManageTags() {
                     />
                     <span style={charCountStyle}>{newTagName.length}/100</span>
                 </div>
-                <button type="submit" disabled={saving} style={btnStyle}>
-                    {saving ? '...' : '+ Add Tag'}
+                <button type="submit" disabled={saving} className="mdo-primary-btn">
+                    {saving ? '...' : <><span className="material-symbols-outlined">add</span> Add Tag</>}
                 </button>
             </form>
 
-            <p style={{ color: 'rgba(255,255,255,0.5)', margin: '0 0 0.75rem' }}>{tags.length} tag(s)</p>
+            <div className="mdo-header" style={{ justifyContent: 'flex-start', marginBottom: '0.75rem' }}>
+                <p className="mdo-subtitle">{tags.length} tag(s)</p>
+            </div>
 
-            <table style={tableStyle}>
-                <thead>
-                    <tr>
-                        <th style={thStyle}>Name</th>
-                        <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {tags.map(tag => (
-                        <tr key={tag.id}>
-                            <td style={tdStyle}>{tag.name}</td>
-                            <td style={{ ...tdStyle, textAlign: 'right' }}>
-                                <button onClick={() => handleDelete(tag.id, tag.name)} style={deleteBtnStyle}>Delete</button>
-                            </td>
-                        </tr>
-                    ))}
-                    {tags.length === 0 && (
-                        <tr>
-                            <td colSpan={2} style={{ ...tdStyle, textAlign: 'center', color: 'rgba(255,255,255,0.4)' }}>
-                                No tags found
-                            </td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
+            <div className="mdo-table-container">
+                <div className="mdo-table-scroll">
+                    <table className="mdo-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th style={{ textAlign: 'right' }}>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {tags.map(tag => (
+                                <tr key={tag.id}>
+                                    <td className="mdo-cell-title">{tag.name}</td>
+                                    <td>
+                                        <div className="mdo-actions">
+                                            <button className="mdo-btn-icon danger" onClick={() => openDeleteModal(tag.id, tag.name)} title="Delete">
+                                                <span className="material-symbols-outlined">delete</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                            {tags.length === 0 && (
+                                <tr>
+                                    <td colSpan={2} style={{ textAlign: 'center', color: '#8e8fa3', padding: '2rem' }}>
+                                        No tags found
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {deleteTarget && (
+                <div className="mdo-modal-overlay">
+                    <div className="mdo-modal-backdrop" onClick={closeDeleteModal}></div>
+                    <div className="mdo-modal-content mdo-modal-confirm">
+                        <div className="mdo-confirm-bar"></div>
+                        <div className="mdo-confirm-body">
+                            <div className="mdo-confirm-icon-wrap">
+                                <span className="material-symbols-outlined">delete_forever</span>
+                            </div>
+                            <h2 className="mdo-confirm-title">Delete Tag?</h2>
+                            <p className="mdo-confirm-desc">
+                                Are you sure you want to delete the tag "{deleteTarget.name}"?
+                            </p>
+                            <div className="mdo-confirm-actions">
+                                <button className="mdo-btn-confirm" onClick={confirmDelete}>
+                                    Yes, delete tag
+                                </button>
+                                <button className="mdo-btn-confirm-cancel" onClick={closeDeleteModal}>
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

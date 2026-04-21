@@ -1,0 +1,294 @@
+/* ===== Documentation Management Page - Dark Theme ===== */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap');
+
+.mdo-page {
+    width: 100%;
+    color: #e6e0ec; /* --mu-on-surface */
+    font-family: 'Manrope', sans-serif;
+}
+
+/* ---------- Header ---------- */
+.mdo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 2.5rem;
+}
+
+.mdo-title-area {
+    display: flex;
+    flex-direction: column;
+}
+
+.mdo-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #e6e0ec;
+    letter-spacing: -0.025em;
+    margin: 0 0 0.5rem 0;
+}
+
+.mdo-subtitle {
+    font-size: 0.875rem;
+    color: #8e8fa3; /* --mu-outline */
+    margin: 0;
+}
+
+.mdo-primary-btn {
+    background: #194bff; /* --mu-primary-container */
+    color: #dadeff; /* --mu-on-primary-container */
+    border: none;
+    padding: 0.625rem 1.5rem;
+    border-radius: 0.5rem;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.mdo-primary-btn:hover {
+    box-shadow: 0 0 15px rgba(25, 75, 255, 0.4);
+}
+.mdo-primary-btn:active {
+    transform: scale(0.95);
+}
+
+/* ---------- Table Layout ---------- */
+.mdo-table-container {
+    background-color: #1d1a23; /* --mu-surface-container-low */
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(67, 70, 86, 0.1);
+}
+
+.mdo-table-scroll {
+    overflow-x: auto;
+}
+
+/* Custom scrollbar */
+.mdo-table-scroll::-webkit-scrollbar {
+    height: 6px;
+}
+.mdo-table-scroll::-webkit-scrollbar-track {
+    background: #1d1a23;
+}
+.mdo-table-scroll::-webkit-scrollbar-thumb {
+    background: #434656; /* --mu-outline-variant */
+    border-radius: 3px;
+}
+
+.mdo-table {
+    width: 100%;
+    text-align: left;
+    border-collapse: collapse;
+    white-space: nowrap;
+}
+
+.mdo-table thead tr {
+    background-color: #211e27; /* --mu-surface-container */
+    border-bottom: 1px solid rgba(67, 70, 86, 0.1);
+}
+
+.mdo-table th {
+    padding: 1rem 1.5rem;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #8e8fa3;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.mdo-table tbody tr {
+    transition: background-color 0.2s;
+    border-bottom: 1px solid rgba(67, 70, 86, 0.1);
+}
+
+.mdo-table tbody tr:hover {
+    background-color: rgba(43, 41, 49, 0.5);
+}
+
+.mdo-table td {
+    padding: 1rem 1.5rem;
+    font-size: 0.875rem;
+    vertical-align: middle;
+}
+
+.mdo-cell-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    color: #e6e0ec;
+}
+
+.mdo-cell-slug {
+    color: #8e8fa3;
+}
+
+.mdo-cell-cat {
+    color: #c4c5d9; /* --mu-on-surface-variant */
+}
+
+/* Actions */
+.mdo-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.mdo-btn-icon {
+    padding: 0.375rem;
+    color: #8e8fa3;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+}
+
+.mdo-btn-icon:hover {
+    color: #b9c3ff; /* --mu-primary */
+}
+
+.mdo-btn-icon.danger:hover {
+    color: #ffb4ab; /* --mu-error */
+    border-color: rgba(255, 180, 171, 0.2);
+}
+
+.mdo-btn-icon .material-symbols-outlined {
+    font-size: 1.125rem;
+}
+
+/* ---------- Modals ---------- */
+.mdo-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.mdo-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(15, 13, 21, 0.9);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.mdo-modal-content {
+    position: relative;
+    width: 100%;
+    z-index: 101;
+    overflow: hidden;
+    animation: mdo-popIn 0.2s ease-out forwards;
+}
+
+@keyframes mdo-popIn {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.mdo-modal-confirm {
+    max-width: 28rem;
+    background-color: #2b2931; /* surface-container-high */
+    border-radius: 0.75rem;
+    border: 1px solid rgba(67, 70, 86, 0.2);
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
+    text-align: center;
+}
+
+.mdo-confirm-body {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.mdo-confirm-icon-wrap {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    background-color: rgba(147, 0, 10, 0.2);
+}
+
+.mdo-confirm-icon-wrap .material-symbols-outlined {
+    font-size: 2.25rem;
+    color: #ffb4ab;
+}
+
+.mdo-confirm-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #e6e0ec;
+    margin: 0 0 0.75rem 0;
+}
+
+.mdo-confirm-desc {
+    font-size: 0.875rem;
+    color: #c4c5d9;
+    line-height: 1.6;
+    margin: 0 0 2rem 0;
+}
+
+.mdo-confirm-actions {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.mdo-btn-confirm {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: #ffb4ab;
+    color: #690005;
+}
+
+.mdo-btn-confirm:hover { opacity: 0.9; }
+.mdo-btn-confirm:active { transform: scale(0.98); }
+
+.mdo-btn-confirm-cancel {
+    width: 100%;
+    padding: 0.75rem;
+    background: transparent;
+    color: #c4c5d9;
+    font-weight: 600;
+    font-size: 0.875rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mdo-btn-confirm-cancel:hover { background-color: rgba(255, 255, 255, 0.05); }
+.mdo-btn-confirm-cancel:active { transform: scale(0.98); }
+
+.mdo-confirm-bar {
+    height: 0.25rem;
+    width: 100%;
+    background-color: #ffb4ab;
+}
