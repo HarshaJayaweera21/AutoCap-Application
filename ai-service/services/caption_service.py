@@ -14,6 +14,7 @@ from models.baseline import EncoderCNN, DecoderRNN, generate_caption, toTensor
 from models.caption import CaptionModel, get_tokenizer, generate_caption_greedy, generate_multiple_captions, caption_transform
 from models.vit_model import load_vit_model_for_inference, generate_multiple_captions_vit, vit_transform
 from models.clip_evaluator import ClipEvaluator
+from flagging.flag_engine import default_engine
 
 # Number of candidate captions to generate for multi-caption models
 NUM_CANDIDATE_CAPTIONS = 4
@@ -327,7 +328,11 @@ class CaptionService:
             elapsed = time.time() - t_gen
             print(f"  [OK] Baseline caption generated in {elapsed:.2f}s  CLIP={similarity_score:.4f}", flush=True)
             print(f"    \"{caption}\"", flush=True)
-            return (caption, similarity_score)
+            
+            # Run flagging
+            is_flagged = default_engine.process(pil_image, caption, similarity_score)
+            
+            return (caption, similarity_score, is_flagged)
 
         elif variant == VARIANT_VIT:
             if not self._is_model_loaded(VARIANT_VIT):
@@ -354,11 +359,17 @@ class CaptionService:
                 elapsed = time.time() - t_gen
                 print(f"  [OK] ViT caption generated in {elapsed:.2f}s  CLIP={similarity_score:.4f}", flush=True)
                 print(f"    \"{best_caption}\"", flush=True)
-                return (best_caption, similarity_score)
+                
+                # Run flagging
+                is_flagged = default_engine.process(pil_image, best_caption, similarity_score)
+                
+                return (best_caption, similarity_score, is_flagged)
             else:
                 elapsed = time.time() - t_gen
                 print(f"  [OK] ViT caption generated in {elapsed:.2f}s  (no CLIP ranking)", flush=True)
-                return (candidates[0] if candidates else "", 0.0)
+                caption = candidates[0] if candidates else ""
+                is_flagged = default_engine.process(pil_image, caption, 0.0)
+                return (caption, 0.0, is_flagged)
 
         elif variant == VARIANT_CAPTION:
             if not self._is_model_loaded(VARIANT_CAPTION):
@@ -381,11 +392,17 @@ class CaptionService:
                 elapsed = time.time() - t_gen
                 print(f"  [OK] Caption (GPT-2) generated in {elapsed:.2f}s  CLIP={similarity_score:.4f}", flush=True)
                 print(f"    \"{best_caption}\"", flush=True)
-                return (best_caption, similarity_score)
+                
+                # Run flagging
+                is_flagged = default_engine.process(pil_image, best_caption, similarity_score)
+                
+                return (best_caption, similarity_score, is_flagged)
             else:
                 elapsed = time.time() - t_gen
                 print(f"  [OK] Caption (GPT-2) generated in {elapsed:.2f}s  (no CLIP ranking)", flush=True)
-                return (candidates[0] if candidates else "", 0.0)
+                caption = candidates[0] if candidates else ""
+                is_flagged = default_engine.process(pil_image, caption, 0.0)
+                return (caption, 0.0, is_flagged)
 
         else:
             # Should never reach here because _normalize_variant already validates

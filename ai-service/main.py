@@ -69,9 +69,9 @@ async def generate_caption_api(
             "repetition_penalty": repetitionPenalty,
             "top_p": topP
         }
-        caption, similarity_score = caption_service.get_caption(contents, modelVariant, **kwargs)
-        print(f"[API] [OK] Response ready  score={similarity_score}", flush=True)
-        return {"caption": caption, "similarityScore": similarity_score}
+        caption, similarity_score, is_flagged = caption_service.get_caption(contents, modelVariant, **kwargs)
+        print(f"[API] [OK] Response ready  score={similarity_score}  flagged={is_flagged}", flush=True)
+        return {"caption": caption, "similarityScore": similarity_score, "isFlagged": is_flagged}
     except HTTPException:
         raise  # Preserve 503 / 400 etc. from caption_service
     except Exception as e:
@@ -105,13 +105,14 @@ def process_job_background(job_request: JobRequest):
                 "top_p": job_request.topP
             }
             contents = response.content
-            caption_text, similarity_score = caption_service.get_caption(contents, job_request.modelVariant, **kwargs)
+            caption_text, similarity_score, is_flagged = caption_service.get_caption(contents, job_request.modelVariant, **kwargs)
             
             # Match FastApiCallbackDto.CaptionResultDto
             results.append({
                 "imageId": image.id,
                 "captionText": caption_text,
                 "similarityScore": similarity_score,
+                "isFlagged": is_flagged,
                 "bleu1": None,
                 "bleu2": None,
                 "bleu3": None,
@@ -150,3 +151,45 @@ def process_job_background(job_request: JobRequest):
 async def process_job_api(job_request: JobRequest, background_tasks: BackgroundTasks):
     background_tasks.add_task(process_job_background, job_request)
     return {"message": f"Job {job_request.jobId} accepted for processing."}
+
+@app.post("/api/captions/regenerate")
+async def regenerate_caption_api(
+    imageUrl: str = Form(...),
+    modelVariant: str = Form("caption_model"),
+    temperature: float = Form(1.0),
+    maxLength: int = Form(50),
+    minLength: int = Form(5),
+    numBeams: int = Form(4),
+    repetitionPenalty: float = Form(1.0),
+    topP: float = Form(0.9)
+):
+    """
+    Direct endpoint for regenerating a single caption.
+    Returns the result immediately.
+    """
+    print(f"\n[API] POST /api/captions/regenerate  url={imageUrl}  model={modelVariant}", flush=True)
+    
+    try:
+        response = requests.get(imageUrl, timeout=30)
+        if response.status_code != 200:
+            raise HTTPException(status_code=400, detail=f"Failed to fetch image from {imageUrl}")
+        
+        contents = response.content
+        kwargs = {
+            "temperature": temperature,
+            "max_length": maxLength,
+            "min_length": minLength,
+            "num_beams": numBeams,
+            "repetition_penalty": repetitionPenalty,
+            "top_p": topP
+        }
+        caption, similarity_score, is_flagged = caption_service.get_caption(contents, modelVariant, **kwargs)
+        
+        return {
+            "caption": caption,
+            "similarityScore": similarity_score,
+            "isFlagged": is_flagged
+        }
+    except Exception as e:
+        print(f"Error regenerating caption: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

@@ -40,6 +40,7 @@ export const DatasetExplorer: React.FC = () => {
     // Delete confirmation modal
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [actionLoading, setActionLoading] = useState<number | null>(null); // Stores captionId of the item being processed
 
     const fetchItems = useCallback(async (page = 0) => {
         setLoading(true);
@@ -146,6 +147,36 @@ export const DatasetExplorer: React.FC = () => {
             console.error('Error deleting items:', error);
         } finally {
             setIsDeleting(false);
+        }
+    };
+
+    const handleApprove = async (captionId: number) => {
+        setActionLoading(captionId);
+        try {
+            await api.put(`/api/datasets/${id}/items/${captionId}/approve`);
+            // Update local state instead of full fetch for snappier UI
+            setItems(prev => prev.map(item => 
+                item.captionId === captionId ? { ...item, isFlagged: false } : item
+            ));
+        } catch (error) {
+            console.error('Error approving caption:', error);
+            alert('Failed to approve caption.');
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    const handleRegenerate = async (captionId: number) => {
+        setActionLoading(captionId);
+        try {
+            await api.post(`/api/datasets/${id}/items/${captionId}/regenerate`);
+            // Regeneration changes text/score, so we should re-fetch the page data
+            await fetchItems(currentPage);
+        } catch (error) {
+            console.error('Error regenerating caption:', error);
+            alert('Failed to regenerate caption.');
+        } finally {
+            setActionLoading(null);
         }
     };
 
@@ -273,11 +304,32 @@ export const DatasetExplorer: React.FC = () => {
                                                         )}
                                                     </td>
                                                     <td>
-                                                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                                        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
+                                                            {item.isFlagged && (
+                                                                <>
+                                                                    <button 
+                                                                        className="mds-approve-btn"
+                                                                        onClick={() => handleApprove(item.captionId)}
+                                                                        title="Approve Anyway"
+                                                                        disabled={actionLoading === item.captionId}
+                                                                    >
+                                                                        <span className="material-symbols-outlined" style={{ fontSize: '1rem', color: 'var(--mds-success)' }}>check_circle</span>
+                                                                    </button>
+                                                                    <button 
+                                                                        className="mds-regen-btn"
+                                                                        onClick={() => handleRegenerate(item.captionId)}
+                                                                        title="Regenerate Caption"
+                                                                        disabled={actionLoading === item.captionId}
+                                                                    >
+                                                                        <span className="material-symbols-outlined" style={{ fontSize: '1rem', color: 'var(--mds-primary)' }}>rotate_right</span>
+                                                                    </button>
+                                                                </>
+                                                            )}
                                                             <button 
                                                                 className="mds-edit-btn"
                                                                 onClick={() => openEditModal(item.captionId, item.captionText)}
                                                                 title="Edit Caption"
+                                                                disabled={actionLoading === item.captionId}
                                                             >
                                                                 <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>edit</span>
                                                             </button>

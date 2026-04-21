@@ -302,6 +302,47 @@
     border-color: var(--mds-primary);
 }
 
+.mds-approve-btn, .mds-regen-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    background-color: var(--mds-surface-container-highest);
+    color: var(--mds-outline);
+    border: 1px solid rgba(67, 70, 86, 0.2);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mds-approve-btn:hover {
+    background-color: var(--mds-tertiary);
+    color: var(--mds-surface-container-highest);
+    border-color: var(--mds-tertiary);
+}
+
+.mds-approve-btn:hover .material-symbols-outlined {
+    color: var(--mds-surface-container-highest) !important;
+}
+
+.mds-regen-btn:hover {
+    background-color: var(--mds-primary);
+    color: var(--mds-surface-container-highest);
+    border-color: var(--mds-primary);
+}
+
+.mds-regen-btn:hover .material-symbols-outlined {
+    color: var(--mds-surface-container-highest) !important;
+}
+
+.mds-approve-btn:disabled, 
+.mds-regen-btn:disabled, 
+.mds-edit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 /* ---------- Pagination ---------- */
 .mds-pagination {
     background-color: var(--mds-surface-container-low);
