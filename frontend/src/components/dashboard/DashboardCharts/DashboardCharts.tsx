@@ -194,7 +194,7 @@ export const ModelDistributionChart: React.FC<ModelDistributionChartProps> = ({ 
         {data.map((entry, i) => (
           <span key={entry.name} className={styles.legendItem}>
             <span className={styles.legendDot} style={{ background: DONUT_COLORS[i % DONUT_COLORS.length] }} />
-            {entry.name === 'caption_model' ? 'AutoCap' : entry.name === 'base_line_model' ? 'Baseline' : entry.name}
+            {entry.name === 'caption_model' ? 'AutoCap V1' : entry.name === 'base_line_model' ? 'Baseline' : entry.name}
           </span>
         ))}
       </div>

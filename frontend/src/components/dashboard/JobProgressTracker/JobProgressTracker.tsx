@@ -25,10 +25,11 @@ const STAGES: { status: JobStatus; label: string }[] = [
 const STAGE_ORDER = STAGES.map((s) => s.status);
 
 const PIPELINE_STAGES = [
-  { id: 'upload', label: 'Upload & Queue', matchIndex: [0, 1] },
-  { id: 'processing', label: 'Feature Extraction', matchIndex: [2] },
-  { id: 'generating', label: 'Captioning', matchIndex: [3] },
-  { id: 'scoring', label: 'CLIP Scoring', matchIndex: [4] },
+  { id: 'uploading', label: 'Uploading', matchIndex: [0] },
+  { id: 'queued', label: 'Queued', matchIndex: [1] },
+  { id: 'processing', label: 'Processing', matchIndex: [2] },
+  { id: 'generating', label: 'Generating', matchIndex: [3] },
+  { id: 'scoring', label: 'Scoring', matchIndex: [4] },
 ];
 
 export const JobProgressTracker: React.FC<JobProgressTrackerProps> = ({

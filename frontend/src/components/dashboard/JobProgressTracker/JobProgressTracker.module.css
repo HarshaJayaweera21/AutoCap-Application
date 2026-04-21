@@ -30,15 +30,16 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  padding: var(--space-3) var(--space-2);
+  padding: var(--space-3) var(--space-1);
   background: var(--bg-surface);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   color: var(--text-muted);
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   font-weight: var(--weight-medium);
   transition: all var(--transition-base);
   text-align: center;
+  white-space: nowrap;
 }
 
 .pipelineArrow {
