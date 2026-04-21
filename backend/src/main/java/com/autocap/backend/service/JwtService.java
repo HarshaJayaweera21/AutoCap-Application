@@ -17,7 +17,7 @@ public class JwtService {
     @Value("${jwt.secret}")
     private String secret;
 
-    @Value("${jwt.expiration:3600000}") // Default 1 hour in milliseconds
+    @Value("${jwt.expiration:86400000}") // Default 1 day in milliseconds
     private Long jwtExpiration;
 
     private SecretKey getSigningKey() {
