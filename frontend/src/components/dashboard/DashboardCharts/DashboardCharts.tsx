@@ -4,6 +4,7 @@ import {
   PieChart, Pie, Cell,
 } from 'recharts';
 import styles from './DashboardCharts.module.css';
+import { getFormattedModelName } from '../../../types/dashboard.types';
 
 /* ─── Types ──────────────────────────────────────────────────── */
 
@@ -149,7 +150,7 @@ export const ModelDistributionChart: React.FC<ModelDistributionChartProps> = ({ 
   // Count datasets per model
   const modelCounts: Record<string, number> = {};
   datasets.forEach((ds) => {
-    const model = ds.modelName || 'Unknown';
+    const model = getFormattedModelName(ds.modelName);
     modelCounts[model] = (modelCounts[model] || 0) + 1;
   });
 
@@ -186,7 +187,7 @@ export const ModelDistributionChart: React.FC<ModelDistributionChartProps> = ({ 
           </PieChart>
         </ResponsiveContainer>
         <div className={styles.donutCenter}>
-          <span className={styles.donutDominant}>{dominant.name === 'caption_model' ? 'AutoCap' : dominant.name === 'base_line_model' ? 'Baseline' : dominant.name}</span>
+          <span className={styles.donutDominant}>{dominant.name === 'Unknown' || dominant.name === 'No Data' || dominant.name === '—' ? 'None' : dominant.name.replace(' (AutoCap-V1)', '').replace(' (AutoCap-V2.0)', '').replace(' Model', '')}</span>
           <span className={styles.donutSub}>Dominant</span>
         </div>
       </div>
@@ -194,7 +195,7 @@ export const ModelDistributionChart: React.FC<ModelDistributionChartProps> = ({ 
         {data.map((entry, i) => (
           <span key={entry.name} className={styles.legendItem}>
             <span className={styles.legendDot} style={{ background: DONUT_COLORS[i % DONUT_COLORS.length] }} />
-            {entry.name === 'caption_model' ? 'AutoCap V1' : entry.name === 'base_line_model' ? 'Baseline' : entry.name}
+            {entry.name}
           </span>
         ))}
       </div>

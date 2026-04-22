@@ -67,3 +67,11 @@ export interface RecentDataset {
   averageSimilarity: number | null;
   createdAt: string;
 }
+
+export const getFormattedModelName = (modelName: string | null | undefined): string => {
+  if (!modelName) return '—';
+  if (modelName === 'base_line_model') return 'Baseline Model';
+  if (modelName === 'caption_model') return 'Caption Model';
+  if (modelName === 'vit_model') return 'ViT Model';
+  return modelName;
+};

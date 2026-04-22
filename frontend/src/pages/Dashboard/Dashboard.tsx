@@ -1,7 +1,7 @@
 import React, { useReducer, useCallback, useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { DEFAULT_BLIP_CONFIG } from '../../types/dashboard.types';
+import { DEFAULT_BLIP_CONFIG, getFormattedModelName } from '../../types/dashboard.types';
 import { dashboardReducer } from './dashboardReducer';
 import Header from '../../components/Header';
 import { UploadZone } from '../../components/dashboard/UploadZone/UploadZone';
@@ -631,7 +631,7 @@ export const Dashboard: React.FC = () => {
                   return (
                     <div key={ds.id} className={styles.dsTableRow}>
                       <span className={styles.dsName} title={ds.name}>{ds.name}</span>
-                      <span className={styles.dsMeta}>{ds.modelName || '—'}</span>
+                      <span className={styles.dsMeta}>{getFormattedModelName(ds.modelName)}</span>
                       <span className={styles.dsMeta}>{(ds.totalItems ?? 0).toLocaleString()}</span>
                       <div className={styles.dsScoreWrap}>
                         <div className={styles.dsScoreBar}>
