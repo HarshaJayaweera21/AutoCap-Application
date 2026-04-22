@@ -111,4 +111,20 @@ public class DatasetController {
         datasetService.deleteEntireDataset(datasetId);
         return ResponseEntity.ok().build();
     }
+
+    @PutMapping("/{datasetId}/items/{captionId}/approve")
+    public ResponseEntity<Void> approveCaption(
+            @PathVariable("datasetId") Long datasetId,
+            @PathVariable("captionId") Long captionId) {
+        datasetService.approveCaption(datasetId, captionId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{datasetId}/items/{captionId}/regenerate")
+    public ResponseEntity<Void> regenerateCaption(
+            @PathVariable("datasetId") Long datasetId,
+            @PathVariable("captionId") Long captionId) {
+        datasetService.regenerateCaption(datasetId, captionId);
+        return ResponseEntity.ok().build();
+    }
 }

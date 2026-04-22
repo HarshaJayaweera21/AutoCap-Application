@@ -33,3 +33,14 @@ export const downloadDataset = async (
   link.remove();
   window.URL.revokeObjectURL(url);
 };
+
+export const deleteDataset = async (datasetId: number): Promise<void> => {
+  await api.delete(`/api/datasets/${datasetId}`);
+};
+
+export const renameDataset = async (
+  datasetId: number,
+  newName: string,
+): Promise<void> => {
+  await api.put(`/api/datasets/${datasetId}`, { name: newName });
+};

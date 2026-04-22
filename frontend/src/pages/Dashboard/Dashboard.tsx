@@ -2,7 +2,6 @@ import React, { useReducer, useCallback, useEffect, useState, useMemo } from 're
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { DEFAULT_BLIP_CONFIG } from '../../types/dashboard.types';
-import type { DashboardFormState } from '../../types/dashboard.types';
 import { dashboardReducer } from './dashboardReducer';
 import Header from '../../components/Header';
 import { UploadZone } from '../../components/dashboard/UploadZone/UploadZone';
@@ -13,7 +12,10 @@ import { JobProgressTracker } from '../../components/dashboard/JobProgressTracke
 import { StatsCard } from '../../components/dashboard/StatsCard/StatsCard';
 import { DatasetTrendsChart, ModelDistributionChart, SimilarityGauge } from '../../components/dashboard/DashboardCharts';
 import { uploadImages } from '../../api/uploadApi';
-import { getRecentDatasets, downloadDataset, getMyDatasets } from '../../api/datasetApi';
+import { getRecentDatasets, downloadDataset, getMyDatasets, deleteDataset, renameDataset } from '../../api/datasetApi';
+import { useJobStatus } from '../../hooks/useJobStatus';
+import { useJobSimulation, STAGES } from '../../hooks/useJobSimulation';
+import type { RecentDataset, DashboardFormState, JobStatus } from '../../types/dashboard.types';
 import styles from './Dashboard.module.css';
 
 const initialState: DashboardFormState = {
@@ -70,6 +72,30 @@ const MoreIcon = () => (
   </svg>
 );
 
+const TrashIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+    <path d="M10 11v6" />
+    <path d="M14 11v6" />
+    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+  </svg>
+);
+
+const EditIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+  </svg>
+);
+
+const CopyIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+  </svg>
+);
+
 /* ─── Main Component ─────────────────────────────────────────────── */
 export const Dashboard: React.FC = () => {
   const [state, dispatch] = useReducer(dashboardReducer, initialState);
@@ -78,6 +104,10 @@ export const Dashboard: React.FC = () => {
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
   const [filterHighQuality, setFilterHighQuality] = useState(false);
+  const [activeMenuId, setActiveMenuId] = useState<number | null>(null);
+  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const [modalData, setModalData] = useState<{ id: number; name: string } | null>(null);
+  const [newNameInput, setNewNameInput] = useState('');
   const navigate = useNavigate();
 
   const hasActiveJob = state.activeJobId !== null;
@@ -94,6 +124,9 @@ export const Dashboard: React.FC = () => {
     queryFn: getMyDatasets,
     refetchOnWindowFocus: false,
   });
+
+  const { statusData: activeJobData, error: activeJobError } = useJobStatus(state.activeJobId);
+  const { currentPhase, currentStatus, currentIndex, simulatedProcessedCount, progressPct } = useJobSimulation(state.activeJobId, activeJobData, activeJobError);
 
   /* ── Computed stats ─────────────────────────────────────────────── */
   const stats = useMemo(() => {
@@ -140,9 +173,56 @@ export const Dashboard: React.FC = () => {
       e.preventDefault();
       e.returnValue = '';
     };
-    window.addEventListener('beforeunload', handler);
+  window.addEventListener('beforeunload', handler);
     return () => window.removeEventListener('beforeunload', handler);
   }, [hasActiveJob]);
+
+  useEffect(() => {
+    const handleClickOutside = () => setActiveMenuId(null);
+    if (activeMenuId) {
+      window.addEventListener('click', handleClickOutside);
+    }
+    return () => window.removeEventListener('click', handleClickOutside);
+  }, [activeMenuId]);
+
+  const handleDeleteDataset = useCallback(async (id: number, name: string) => {
+    if (!window.confirm(`Are you sure you want to delete dataset "${name}"? This action cannot be undone.`)) return;
+    try {
+      await deleteDataset(id);
+      refetchDatasets();
+      refetchAllDatasets();
+    } catch (err) {
+      console.error('Delete failed', err);
+      alert('Failed to delete dataset');
+    }
+  }, [refetchDatasets, refetchAllDatasets]);
+
+  const handleRenameDataset = useCallback((id: number, currentName: string) => {
+    setModalData({ id, name: currentName });
+    setNewNameInput(currentName);
+    setIsRenameModalOpen(true);
+  }, []);
+
+  const submitRename = async () => {
+    if (!modalData || !newNameInput.trim() || newNameInput === modalData.name) {
+      setIsRenameModalOpen(false);
+      return;
+    }
+    try {
+      await renameDataset(modalData.id, newNameInput.trim());
+      refetchDatasets();
+      refetchAllDatasets();
+      setIsRenameModalOpen(false);
+    } catch (err) {
+      console.error('Rename failed', err);
+      alert('Failed to rename dataset');
+    }
+  };
+
+  const handleCopyId = useCallback((id: number) => {
+    navigator.clipboard.writeText(id.toString());
+    // Could add a toast here
+  }, []);
 
   const handleGenerate = useCallback(async () => {
     setIsUploading(true);
@@ -344,7 +424,7 @@ export const Dashboard: React.FC = () => {
                           <div className={styles.summaryItem}>
                             <span className={styles.summaryLabel}>Model</span>
                             <span className={styles.summaryValue}>
-                              {state.blipConfig.modelVariant === 'caption_model' ? 'Caption Model (AutoCap-V1)' : state.blipConfig.modelVariant === 'vit_model' ? 'ViT Model (AutoCap-V1.1)' : 'Baseline Model'}
+                              {state.blipConfig.modelVariant === 'caption_model' ? 'Caption Model (AutoCap-V1)' : state.blipConfig.modelVariant === 'vit_model' ? 'ViT Model (AutoCap-V2.0)' : 'Baseline Model'}
                             </span>
                           </div>
                           <div className={styles.summaryItem}>
@@ -444,33 +524,46 @@ export const Dashboard: React.FC = () => {
             {hasActiveJob ? (
               <div className={styles.jobMonitorBody}>
                 <div className={styles.jobItem}>
-                  <span className={styles.jobItemName}>Job #{state.activeJobId}</span>
-                  <div className={styles.jobProgressBar}>
-                    <div className={styles.jobProgressFill} style={{ width: '64%' }} />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span className={styles.jobItemName}>Job #{state.activeJobId}</span>
+                      <span className={styles.jobProgressPct}>{progressPct}%</span>
+                    </div>
+                    <div className={styles.jobProgressBar}>
+                      <div className={styles.jobProgressFill} style={{ width: `${progressPct}%` }} />
+                    </div>
+                    <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+                      {currentStatus === 'COMPLETE' ? 'Finished' : `${simulatedProcessedCount} / ${activeJobData?.totalCount || '--'} images`}
+                    </span>
                   </div>
-                  <span className={styles.jobProgressPct}>64%</span>
                 </div>
                 <div className={styles.jobStages}>
-                  <div className={styles.jobStage}>
-                    <span className={styles.jobStageDotComplete} />
-                    <span>Preprocessing</span>
-                    <span className={styles.jobStageStatus}>Complete</span>
-                  </div>
-                  <div className={styles.jobStage}>
-                    <span className={styles.jobStageDotComplete} />
-                    <span>Extraction</span>
-                    <span className={styles.jobStageStatus}>Complete</span>
-                  </div>
-                  <div className={styles.jobStage}>
-                    <span className={styles.jobStageDotActive} />
-                    <span>Generation</span>
-                    <span className={styles.jobStageStatusActive}>In Progress</span>
-                  </div>
-                  <div className={styles.jobStage}>
-                    <span className={styles.jobStageDotPending} />
-                    <span className={styles.jobStagePending}>Evaluation</span>
-                    <span className={styles.jobStageStatusPending}>Pending</span>
-                  </div>
+                  {STAGES.slice(0, 5).map((stage, idx) => {
+                    const isCompleted = currentIndex > idx;
+                    const isActive = currentIndex === idx && currentStatus !== 'FAILED';
+                    const isPending = currentIndex < idx;
+                    const isFailed = currentStatus === 'FAILED' && isActive;
+
+                    return (
+                      <div key={stage.status} className={`${styles.jobStage} ${isPending ? styles.jobStagePending : ''}`}>
+                        <span className={
+                          isCompleted ? styles.jobStageDotComplete : 
+                          isActive ? styles.jobStageDotActive : 
+                          isFailed ? styles.jobStageDotFailed : 
+                          styles.jobStageDotPending
+                        } />
+                        <span>{stage.label}</span>
+                        <span className={
+                          isCompleted ? styles.jobStageStatus : 
+                          isActive ? styles.jobStageStatusActive : 
+                          isFailed ? styles.jobStageStatusFailed :
+                          styles.jobStageStatusPending
+                        }>
+                          {isCompleted ? 'Complete' : isActive ? 'In Progress' : 'Pending'}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             ) : (
@@ -574,9 +667,35 @@ export const Dashboard: React.FC = () => {
                         >
                           →
                         </button>
-                        <button className={styles.dsMoreBtn} title="More">
-                          <MoreIcon />
-                        </button>
+                        <div className={styles.dsMenuContainer}>
+                          <button
+                            className={styles.dsMoreBtn}
+                            title="More actions"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveMenuId(activeMenuId === Number(ds.id) ? null : Number(ds.id));
+                            }}
+                          >
+                            <MoreIcon />
+                          </button>
+                          {activeMenuId === Number(ds.id) && (
+                            <div className={styles.dsMenu} onClick={(e) => e.stopPropagation()}>
+                              <button className={styles.dsMenuItem} onClick={() => { navigate(`/datasets/${ds.id}`); setActiveMenuId(null); }}>
+                                <span>→</span> View Details
+                              </button>
+                              <button className={styles.dsMenuItem} onClick={() => { handleRenameDataset(Number(ds.id), ds.name); setActiveMenuId(null); }}>
+                                <EditIcon /> Rename
+                              </button>
+                              <button className={styles.dsMenuItem} onClick={() => { handleCopyId(Number(ds.id)); setActiveMenuId(null); }}>
+                                <CopyIcon /> Copy ID
+                              </button>
+                              <div className={styles.dsMenuDivider} />
+                              <button className={`${styles.dsMenuItem} ${styles.dsMenuDelete}`} onClick={() => { handleDeleteDataset(Number(ds.id), ds.name); setActiveMenuId(null); }}>
+                                <TrashIcon /> Delete
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );
@@ -586,6 +705,41 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* ── Rename Modal ────────────────────────────────────────────── */}
+      {isRenameModalOpen && (
+        <div className={styles.modalOverlay} onClick={() => setIsRenameModalOpen(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <h2 className={styles.modalTitle}>Rename Dataset</h2>
+            <p className={styles.modalDescription}>
+              Update the identifier for this dataset. This will be reflected across all your workspaces.
+            </p>
+            <div className={styles.modalBody}>
+              <label className={styles.modalInputLabel}>Dataset Name</label>
+              <input
+                autoFocus
+                className={styles.modalInput}
+                value={newNameInput}
+                onChange={(e) => setNewNameInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && submitRename()}
+                placeholder="Enter workspace name..."
+              />
+            </div>
+            <div className={styles.modalFooter}>
+              <button className={styles.modalCancelBtn} onClick={() => setIsRenameModalOpen(false)}>
+                Cancel
+              </button>
+              <button
+                className={styles.modalSaveBtn}
+                disabled={!newNameInput.trim() || newNameInput === modalData?.name}
+                onClick={submitRename}
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

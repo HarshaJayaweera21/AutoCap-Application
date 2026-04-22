@@ -159,8 +159,9 @@ public class JobService {
             item.setCaption(caption);
             datasetItemRepository.save(item);
 
-            // Update image status
+            // Update image status and flagging
             image.setStatus(ImageStatus.completed);
+            image.setIsFlagged(result.getIsFlagged() != null ? result.getIsFlagged() : false);
             imageRepository.save(image);
 
             // Accumulate similarity scores

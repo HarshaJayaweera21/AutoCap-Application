@@ -24,6 +24,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import java.util.Map;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -261,6 +265,70 @@ public class DatasetService {
 
         // 4. Delete the dataset itself
         datasetRepository.delete(dataset);
+    }
+
+    @Transactional
+    public void approveCaption(Long datasetId, Long captionId) {
+        log.info("Approving captionId={} in datasetId={}", captionId, datasetId);
+        List<DatasetItem> items = datasetItemRepository.findAllByIdDatasetId(datasetId);
+        DatasetItem targetItem = items.stream()
+                .filter(item -> item.getId().getCaptionId().equals(captionId))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("Caption not found in this dataset"));
+
+        com.autocap.backend.entity.Image image = targetItem.getImage();
+        image.setIsFlagged(false);
+        imageRepository.save(image);
+        log.info("Successfully approved item: imageId={}", image.getId());
+    }
+
+    @Transactional
+    public void regenerateCaption(Long datasetId, Long captionId) {
+        log.info("Regenerating captionId={} in datasetId={}", captionId, datasetId);
+        List<DatasetItem> items = datasetItemRepository.findAllByIdDatasetId(datasetId);
+        DatasetItem targetItem = items.stream()
+                .filter(item -> item.getId().getCaptionId().equals(captionId))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("Caption not found in this dataset"));
+
+        Dataset dataset = targetItem.getDataset();
+        com.autocap.backend.entity.Image image = targetItem.getImage();
+        com.autocap.backend.entity.Caption caption = targetItem.getCaption();
+
+        // Call FastAPI to regenerate
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("imageUrl", image.getFilePath());
+        body.add("modelVariant", dataset.getModelName() != null ? dataset.getModelName() : "caption_model");
+
+        try {
+            // Using a Map for simple result extraction
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+                    "http://127.0.0.1:8000/api/captions/regenerate",
+                    body,
+                    Map.class);
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                Map<String, Object> result = response.getBody();
+                String newText = (String) result.get("caption");
+                Double newScore = (Double) result.get("similarityScore");
+                Boolean isFlagged = (Boolean) result.get("isFlagged");
+
+                caption.setCaptionText(newText);
+                caption.setSimilarityScore(newScore);
+                captionRepository.save(caption);
+
+                image.setIsFlagged(isFlagged != null ? isFlagged : false);
+                imageRepository.save(image);
+
+                log.info("Regenerated caption for imageId={}: newScore={}, isFlagged={}", 
+                        image.getId(), newScore, isFlagged);
+            } else {
+                throw new RuntimeException("AI Service returned non-success status: " + response.getStatusCode());
+            }
+        } catch (Exception e) {
+            log.error("Failed to regenerate caption for captionId={}", captionId, e);
+            throw new RuntimeException("AI Service error: " + e.getMessage());
+        }
     }
 
     /** Thrown when a requested dataset does not exist. */

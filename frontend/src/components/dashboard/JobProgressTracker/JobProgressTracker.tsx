@@ -13,22 +13,13 @@ interface JobProgressTrackerProps {
   navigate: (path: string) => void;
 }
 
-const STAGES: { status: JobStatus; label: string }[] = [
-  { status: 'UPLOADING', label: 'Uploading' },
-  { status: 'QUEUED', label: 'Queued' },
-  { status: 'PROCESSING', label: 'Processing' },
-  { status: 'GENERATING', label: 'Generating' },
-  { status: 'SCORING', label: 'Scoring' },
-  { status: 'COMPLETE', label: 'Complete' },
-];
-
-const STAGE_ORDER = STAGES.map((s) => s.status);
-
-const PIPELINE_STAGES = [
-  { id: 'upload', label: 'Upload & Queue', matchIndex: [0, 1] },
-  { id: 'processing', label: 'Feature Extraction', matchIndex: [2] },
-  { id: 'generating', label: 'Captioning', matchIndex: [3] },
-  { id: 'scoring', label: 'CLIP Scoring', matchIndex: [4] },
+// Removed PIPELINE_STAGES constant as we use hook metadata now
+const PIPELINE_BLOCKS = [
+  { id: 'uploading', label: 'Uploading', matchIndex: [0] },
+  { id: 'queued', label: 'Queued', matchIndex: [1] },
+  { id: 'processing', label: 'Processing', matchIndex: [2] },
+  { id: 'generating', label: 'Generating', matchIndex: [3] },
+  { id: 'scoring', label: 'Scoring', matchIndex: [4] },
 ];
 
 export const JobProgressTracker: React.FC<JobProgressTrackerProps> = ({
@@ -38,15 +29,7 @@ export const JobProgressTracker: React.FC<JobProgressTrackerProps> = ({
   navigate,
 }) => {
   const { statusData, error } = useJobStatus(jobId);
-
-  const currentStatus = statusData?.status ?? 'UPLOADING';
-  const currentIndex = STAGE_ORDER.indexOf(currentStatus === 'FAILED' ? 'COMPLETE' : currentStatus);
-
-  useEffect(() => {
-    if (statusData?.status === 'COMPLETE') {
-      onComplete();
-    }
-  }, [statusData?.status, onComplete]);
+  const { currentPhase, currentStatus, currentIndex, simulatedProcessedCount, progressPct: overallPct } = useJobSimulation(jobId, statusData, error, onComplete);
 
   const [liveScore, setLiveScore] = useState<string>('0.00');
 
@@ -64,11 +47,11 @@ export const JobProgressTracker: React.FC<JobProgressTrackerProps> = ({
       setLiveScore(finalScore);
     }
     return () => clearInterval(interval);
-  }, [currentStatus]);
+  }, [currentStatus, statusData]);
 
   const total = statusData?.totalCount || 0;
-  const processed = statusData?.processedCount || 0;
-  const progressPct = total > 0 ? (processed / total) * 100 : 0;
+  const processed = currentStatus === 'COMPLETE' ? total : simulatedProcessedCount;
+  const itemProgressPct = total > 0 ? (processed / total) * 100 : 0;
   
   // Fake estimation logic: ~0.8s per remaining image
   const remainingImages = total - processed;
@@ -84,10 +67,10 @@ export const JobProgressTracker: React.FC<JobProgressTrackerProps> = ({
 
       {/* Pipeline Block Visualization */}
       <div className={styles.pipelineContainer}>
-        {PIPELINE_STAGES.map((stage, i) => {
-          const isCompleted = currentIndex > Math.max(...stage.matchIndex);
-          const isActive = stage.matchIndex.includes(currentIndex) && currentStatus !== 'FAILED';
-          const isFailed = currentStatus === 'FAILED' && stage.matchIndex.includes(currentIndex);
+        {PIPELINE_BLOCKS.map((stage, idx) => {
+          const isCompleted = currentIndex > idx;
+          const isActive = currentIndex === idx && currentStatus !== 'FAILED';
+          const isFailed = currentStatus === 'FAILED' && isActive;
 
           return (
             <React.Fragment key={stage.id}>
@@ -134,7 +117,7 @@ export const JobProgressTracker: React.FC<JobProgressTrackerProps> = ({
             {processed} <span className={styles.statSubtext}>/ {total || '--'}</span>
           </div>
           <div className={styles.statsProgressBar}>
-            <div className={styles.statsProgressFill} style={{ width: `${progressPct}%` }} />
+            <div className={styles.statsProgressFill} style={{ width: `${itemProgressPct}%` }} />
           </div>
         </div>
 
@@ -166,6 +149,7 @@ export const JobProgressTracker: React.FC<JobProgressTrackerProps> = ({
           totalItems={statusData.totalCount}
           onDownload={() => downloadDataset(statusData.datasetId!, statusData.datasetName || `Dataset #${statusData.datasetId}`)}
           onView={() => navigate(`/datasets/${statusData.datasetId}`)}
+          onReset={onReset}
         />
       )}
 

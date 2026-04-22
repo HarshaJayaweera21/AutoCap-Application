@@ -28,7 +28,7 @@ const PARAMS: ParamDef[] = [
     type: 'select',
     options: [
       { value: 'caption_model', label: 'Caption Model (AutoCap-V1)' },
-      { value: 'vit_model', label: 'ViT Model (AutoCap-V1.1)' },
+      { value: 'vit_model', label: 'ViT Model (AutoCap-V2.0)' },
       { value: 'base_line_model', label: 'Baseline Model' },
     ],
   },

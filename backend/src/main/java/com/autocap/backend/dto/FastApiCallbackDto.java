@@ -22,6 +22,7 @@ public class FastApiCallbackDto {
         private Long imageId;
         private String captionText;
         private Double similarityScore;
+        private Boolean isFlagged;
         private Double bleu1;
         private Double bleu2;
         private Double bleu3;
