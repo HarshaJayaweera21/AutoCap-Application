@@ -17,7 +17,8 @@ import torchvision.transforms.v2 as T
 
 # ── CLIP ViT-B/16 normalization ─────────────────────────────────────
 vit_transform = T.Compose([
-    T.Resize((224, 224)),
+    T.Resize(224, interpolation=T.InterpolationMode.BICUBIC),
+    T.CenterCrop(224),
     T.ToImage(),
     T.ToDtype(torch.float32, scale=True),
     T.Normalize(
@@ -472,6 +473,7 @@ def generate_caption_vit(
     input_ids = inputs.input_ids
 
     text_embeds = model.llama.get_input_embeddings()(input_ids)
+    text_embeds = text_embeds.to(dtype=compute_dtype)
 
     # ── Combine (all on embed_device) ──
     inputs_embeds = torch.cat([visual_embeds, text_embeds], dim=1)
@@ -563,6 +565,7 @@ def generate_multiple_captions_vit(
     input_ids = inputs.input_ids
 
     text_embeds = model.llama.get_input_embeddings()(input_ids)
+    text_embeds = text_embeds.to(dtype=compute_dtype)
 
     # ── Combine (all on embed_device) ──
     inputs_embeds = torch.cat([visual_embeds, text_embeds], dim=1)

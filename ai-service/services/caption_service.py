@@ -20,7 +20,7 @@ from flagging.flag_engine import default_engine
 NUM_CANDIDATE_CAPTIONS = 4
 
 # Shared CLIP model name (used by both ViT encoder and CLIP evaluator)
-SHARED_CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
+SHARED_CLIP_MODEL_NAME = "openai/clip-vit-base-patch16"
 
 # Canonical variant names
 VARIANT_BASELINE = "baseline_model"
