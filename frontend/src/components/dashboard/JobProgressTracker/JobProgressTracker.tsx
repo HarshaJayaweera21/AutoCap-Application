@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useJobStatus } from '../../../hooks/useJobStatus';
+import { useJobSimulation } from '../../../hooks/useJobSimulation';
 import type { JobStatus } from '../../../types/dashboard.types';
 import { CompletionCard } from '../CompletionCard/CompletionCard';
 import { ErrorCard } from '../ErrorCard/ErrorCard';
@@ -101,7 +102,7 @@ export const JobProgressTracker: React.FC<JobProgressTrackerProps> = ({
                 </div>
                 <span>{stage.label}</span>
               </div>
-              {i < PIPELINE_STAGES.length - 1 && (
+              {idx < PIPELINE_BLOCKS.length - 1 && (
                 <div className={styles.pipelineArrow}>→</div>
               )}
             </React.Fragment>
