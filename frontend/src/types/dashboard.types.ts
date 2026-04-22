@@ -18,7 +18,7 @@ export interface BlipConfig {
 }
 
 export const DEFAULT_BLIP_CONFIG: BlipConfig = {
-  modelVariant: 'caption_model',
+  modelVariant: 'vit_model',
   temperature: 1.0,
   maxLength: 50,
   minLength: 5,

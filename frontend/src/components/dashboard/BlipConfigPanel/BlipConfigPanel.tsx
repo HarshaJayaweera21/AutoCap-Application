@@ -23,12 +23,12 @@ const PARAMS: ParamDef[] = [
   {
     key: 'modelVariant',
     label: 'Model Variant',
-    tooltip: 'Model selection. Caption Model is the default.',
+    tooltip: 'Model selection. ViT Model is the default.',
     min: 0, max: 0, step: 0,
     type: 'select',
     options: [
-      { value: 'caption_model', label: 'Caption Model (AutoCap-V1)' },
       { value: 'vit_model', label: 'ViT Model (AutoCap-V2.0)' },
+      { value: 'caption_model', label: 'Caption Model (AutoCap-V1)' },
       { value: 'base_line_model', label: 'Baseline Model' },
     ],
   },
