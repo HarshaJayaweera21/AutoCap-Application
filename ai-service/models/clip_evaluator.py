@@ -108,10 +108,10 @@ class ClipEvaluator:
         return (best_caption, normalized_best, is_flagged)
 
     @staticmethod
-    def normalize_score(score: float, min_score: float = 0.10, max_score: float = 0.35) -> float:
+    def normalize_score(score: float, min_score: float = 0.10, max_score: float = 0.30) -> float:
         """
         Convert cosine similarity to a 0-1 scale stretched over the
-        realistic CLIP score range for image-text pairs (0.10-0.45).
+        realistic CLIP score range for image-text pairs (0.10-0.30).
 
         This makes low scores (e.g. 0.21) read as genuinely low (~0.31)
         and good scores (e.g. 0.32) read as clearly higher (~0.63),

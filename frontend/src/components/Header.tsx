@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FaSun, FaMoon } from 'react-icons/fa';
 import './Header.css';
 
 /* ---------- cookie helpers ---------- */
@@ -52,7 +51,6 @@ function Header() {
     const location = useLocation();
     const [menuOpen, setMenuOpen] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
-    const [theme, setTheme] = useState<'light' | 'dark'>('dark');
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     const role = getCookie('role'); // "ADMIN" | "USER" | null
@@ -83,10 +81,6 @@ function Header() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [dropdownOpen]);
 
-    const toggleTheme = () => {
-        setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
-    };
-
     const handleLogout = async () => {
         const token = getCookie('token');
 
@@ -109,7 +103,7 @@ function Header() {
     return (
         <>
             {/* Fixed header bar */}
-            <header className={`app-header ${theme}`}>
+            <header className="app-header dark">
                 {/* Left: Brand + Nav */}
                 <div className="hdr-left">
                     <Link to={role === 'ADMIN' ? '/admin-dashboard' : '/dashboard'} className="hdr-brand">
@@ -132,14 +126,6 @@ function Header() {
 
                 {/* Right: Profile */}
                 <div className="hdr-right">
-                    <button
-                        className="theme-toggle"
-                        onClick={toggleTheme}
-                        aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
-                    >
-                        {theme === 'light' ? <FaMoon /> : <FaSun />}
-                    </button>
-
                     {/* Profile dropdown (desktop) */}
                     <div className="hdr-dropdown-wrapper" ref={dropdownRef}>
                         <button
