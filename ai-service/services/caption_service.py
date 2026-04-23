@@ -355,7 +355,7 @@ class CaptionService:
 
             print(f"  -> Generated {len(candidates)} candidates. Judging with CLIP...", flush=True)
             if self.clip_evaluator is not None and len(candidates) > 0:
-                best_caption, similarity_score, _ = self.clip_evaluator.select_best(pil_image, candidates)
+                best_caption, similarity_score = self.clip_evaluator.select_best(pil_image, candidates)
                 elapsed = time.time() - t_gen
                 print(f"  [OK] ViT caption generated in {elapsed:.2f}s  CLIP={similarity_score:.4f}", flush=True)
                 print(f"    \"{best_caption}\"", flush=True)
@@ -388,7 +388,7 @@ class CaptionService:
 
             print(f"  -> Generated {len(candidates)} candidates. Judging with CLIP...", flush=True)
             if self.clip_evaluator is not None and len(candidates) > 0:
-                best_caption, similarity_score, _ = self.clip_evaluator.select_best(pil_image, candidates)
+                best_caption, similarity_score = self.clip_evaluator.select_best(pil_image, candidates)
                 elapsed = time.time() - t_gen
                 print(f"  [OK] Caption (GPT-2) generated in {elapsed:.2f}s  CLIP={similarity_score:.4f}", flush=True)
                 print(f"    \"{best_caption}\"", flush=True)

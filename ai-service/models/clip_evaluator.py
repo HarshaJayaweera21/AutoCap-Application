@@ -69,22 +69,21 @@ class ClipEvaluator:
     def select_best(
         self,
         image: Image.Image,
-        captions: List[str],
-        threshold: float = 0.27
-    ) -> Tuple[str, float, bool]:
+        captions: List[str]
+    ) -> Tuple[str, float]:
         """
-        Select best caption based on similarity score.
+        Select best caption based on CLIP similarity score.
 
         Args:
             image: PIL Image
             captions: List of captions
-            threshold: Minimum acceptable raw cosine similarity score
 
         Returns:
-            (best_caption, normalized_score, is_flagged)
+            (best_caption, normalized_score)
+            Flagging is handled externally by FlagEngine using the normalized score.
         """
         if not captions:
-            return ("", 0.0, True)
+            return ("", 0.0)
 
         scores = self.score_captions(image, captions)
 
@@ -92,23 +91,52 @@ class ClipEvaluator:
         best_caption = captions[best_idx]
         best_raw_score = scores[best_idx]
 
-        # Debug logging (useful for development)
-        print("\n🔍 CLIP Evaluation Results:")
+        # Debug logging — formatted table
+        title = "CLIP Evaluation Results"
+        col_raw   = "Raw Score"
+        col_norm  = "Normalized"
+        col_cap   = "Caption"
+        col_best  = "Best"
+
+        rows = []
         for i, (cap, score) in enumerate(zip(captions, scores)):
             normalized = self.normalize_score(score)
-            marker = " <-- BEST" if i == best_idx else ""
-            print(f"[{i+1}] Raw: {score:.4f} | Normalized: {normalized:.4f} | {cap}{marker}")
+            best_marker = "★ Best" if i == best_idx else "-"
+            rows.append((score, normalized, cap, best_marker))
 
-        # Flag if raw score is below threshold
-        is_flagged = best_raw_score < threshold
+        # Column widths
+        w_raw  = max(len(col_raw),  max(len(f"{r[0]:.4f}") for r in rows))
+        w_norm = max(len(col_norm), max(len(f"{r[1]:.4f}") for r in rows))
+        w_cap  = max(len(col_cap),  max(len(r[2]) for r in rows))
+        w_best = max(len(col_best), max(len(r[3]) for r in rows))
+
+        # Borders
+        sep = f"+-{'-'*w_raw}-+-{'-'*w_norm}-+-{'-'*w_cap}-+-{'-'*w_best}-+"
+        header = (f"| {col_raw:<{w_raw}} | {col_norm:<{w_norm}}"
+                  f" | {col_cap:<{w_cap}} | {col_best:<{w_best}} |")
+        total_width = len(sep)
+        title_line  = f"| {title.center(total_width - 4)} |"
+        title_sep   = f"+-{'-'*(total_width - 4)}-+"
+
+        print()
+        print(title_sep)
+        print(title_line)
+        print(sep)
+        print(header)
+        print(sep)
+        for r in rows:
+            print(f"| {r[0]:.4f}{'':<{w_raw - 6}} | {r[1]:.4f}{'':<{w_norm - 6}} | {r[2]:<{w_cap}} | {r[3]:<{w_best}} |")
+        print(sep)
+        print()
 
         # Return normalized score for UI display
+        # Flagging is handled externally by FlagEngine
         normalized_best = self.normalize_score(best_raw_score)
 
-        return (best_caption, normalized_best, is_flagged)
+        return (best_caption, normalized_best)
 
     @staticmethod
-    def normalize_score(score: float, min_score: float = 0.10, max_score: float = 0.30) -> float:
+    def normalize_score(score: float, min_score: float = 0.10, max_score: float = 0.365) -> float:
         """
         Convert cosine similarity to a 0-1 scale stretched over the
         realistic CLIP score range for image-text pairs (0.10-0.30).
