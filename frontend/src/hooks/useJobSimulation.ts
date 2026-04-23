@@ -70,35 +70,16 @@ export const useJobSimulation = (
       return;
     }
 
-    // 1. If backend says COMPLETE but we are still in early stages, skip ahead to GENERATING
-    if (statusData?.status === 'COMPLETE' && STAGE_ORDER.indexOf(currentPhase) < 3) {
-      setCurrentPhase('GENERATING');
-      return;
-    }
-
-    // 2. Transition from GENERATING -> SCORING
-    if (currentPhase === 'GENERATING' && statusData?.status === 'COMPLETE') {
-      setCurrentPhase('SCORING');
-      return;
-    }
-
-    // 3. Handle the SCORING -> COMPLETE transition
-    if (currentPhase === 'SCORING') {
-      const t = setTimeout(() => {
-        setCurrentPhase('COMPLETE');
-        if (statusData?.totalCount) {
-          setSimulatedProcessedCount(statusData.totalCount);
-        }
-        if (onComplete) onComplete();
-      }, 1500); 
-      return () => clearTimeout(t);
-    }
-
-    // 4. Catch-all for jobs already complete (e.g. on refresh)
-    if (statusData?.status === 'COMPLETE' && currentPhase !== 'COMPLETE' && currentPhase !== 'SCORING') {
-      setCurrentPhase('COMPLETE');
-      if (statusData?.totalCount) {
-        setSimulatedProcessedCount(statusData.totalCount);
+    if (statusData?.status === 'COMPLETE') {
+      if (currentPhase !== 'SCORING' && currentPhase !== 'COMPLETE') {
+        setCurrentPhase('SCORING');
+      } else if (currentPhase === 'SCORING') {
+        const t = setTimeout(() => {
+          setCurrentPhase('COMPLETE');
+          setSimulatedProcessedCount(statusData.totalCount || 0);
+          if (onComplete) onComplete();
+        }, 1000);
+        return () => clearTimeout(t);
       }
     }
   }, [jobId, currentPhase, statusData, onComplete]);

@@ -187,7 +187,7 @@ class CaptionService:
 
     def _load_vit_model(self):
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        checkpoint_path = os.path.join(current_dir, '..', 'models', 'ViT_1_1_model.pt')
+        checkpoint_path = os.path.join(current_dir, '..', 'models', 'ViT_1_4_model.pt')
 
         if not os.path.exists(checkpoint_path):
             raise FileNotFoundError(f"ViT 1.1 checkpoint not found at {checkpoint_path}")

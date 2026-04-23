@@ -2,7 +2,7 @@
 ViT 1.1 Multi-Modal Captioning Model
 Architecture: CLIP ViT-B/16 (frozen) → Q-Former → LLaMA-3-8B (frozen, quantized)
 
-The checkpoint (ViT_1_1_model.pt) stores only the trainable weights:
+The checkpoint (ViT_1_4_model.pt) stores only the trainable weights:
   - qformer state_dict
   - projection layer state_dict
 """
@@ -377,7 +377,7 @@ def load_vit_model_for_inference(checkpoint_path: str, device: torch.device, cli
     and projection weights from the checkpoint.
 
     Args:
-        checkpoint_path: Path to ViT_1_1_model.pt
+        checkpoint_path: Path to ViT_1_4_model.pt
         device:          Target torch device
         clip_model:      Optional pre-loaded CLIPModel whose vision_model will be shared.
                          If None, the ViTEncoder will raise an error (CLIP must be provided).

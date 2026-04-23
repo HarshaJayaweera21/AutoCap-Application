@@ -82,7 +82,7 @@ public class DatasetService {
         try (ZipOutputStream zos = new ZipOutputStream(baos)) {
 
             StringBuilder captionsSb = new StringBuilder();
-            captionsSb.append("filename\tcaption\n");
+            captionsSb.append("image_name,caption\n");
 
             for (DatasetItem item : items) {
                 String originalName = item.getImage() != null && item.getImage().getOriginalName() != null
@@ -93,7 +93,8 @@ public class DatasetService {
                         ? item.getCaption().getCaptionText()
                         : "";
 
-                captionsSb.append(originalName).append("\t").append(captionText).append("\n");
+                String cleanCaption = captionText.replace("\"", "\"\"");
+                captionsSb.append("\"").append(originalName).append("\",\"").append(cleanCaption).append("\"\n");
 
                 // Fetch and add the image bytes to the ZIP
                 if (item.getImage() != null && item.getImage().getFilePath() != null) {
@@ -101,7 +102,7 @@ public class DatasetService {
                     byte[] imageBytes = fetchImageBytes(filePath, item.getId().getImageId());
                     if (imageBytes != null) {
                         try {
-                            ZipEntry imageEntry = new ZipEntry(originalName);
+                            ZipEntry imageEntry = new ZipEntry("images/" + originalName);
                             zos.putNextEntry(imageEntry);
                             zos.write(imageBytes);
                             zos.closeEntry();
@@ -113,7 +114,7 @@ public class DatasetService {
                 }
             }
 
-            ZipEntry captionsEntry = new ZipEntry("captions.txt");
+            ZipEntry captionsEntry = new ZipEntry("export.csv");
             zos.putNextEntry(captionsEntry);
             zos.write(captionsSb.toString().getBytes(StandardCharsets.UTF_8));
             zos.closeEntry();
