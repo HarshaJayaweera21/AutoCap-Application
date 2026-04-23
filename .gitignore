@@ -45,3 +45,4 @@ ai-service/models/ViT_1_1_model.ipynb
 ai-service/models/ViT_1_1_model.pt
 ai-service/models/ViT_1_1_model_before.ipynb
 ai-service/.env
+ai-service/models/ViT_1_4_model.pt

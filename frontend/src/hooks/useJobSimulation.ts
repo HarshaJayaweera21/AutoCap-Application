@@ -70,14 +70,17 @@ export const useJobSimulation = (
       return;
     }
 
-    if (currentPhase === 'GENERATING' && statusData?.status === 'COMPLETE') {
-      setCurrentPhase('SCORING');
-      const t = setTimeout(() => {
-        setCurrentPhase('COMPLETE');
-        setSimulatedProcessedCount(statusData.totalCount);
-        if (onComplete) onComplete();
-      }, 1000);
-      return () => clearTimeout(t);
+    if (statusData?.status === 'COMPLETE') {
+      if (currentPhase !== 'SCORING' && currentPhase !== 'COMPLETE') {
+        setCurrentPhase('SCORING');
+      } else if (currentPhase === 'SCORING') {
+        const t = setTimeout(() => {
+          setCurrentPhase('COMPLETE');
+          setSimulatedProcessedCount(statusData.totalCount || 0);
+          if (onComplete) onComplete();
+        }, 1000);
+        return () => clearTimeout(t);
+      }
     }
   }, [jobId, currentPhase, statusData, onComplete]);
 
